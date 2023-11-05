@@ -1,0 +1,100 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 160
+Solver.Mesh.Ny = 160
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1e-6
+Solver.Mesh.BoundaryCondition.x_up = 1
+Solver.Mesh.BoundaryCondition.x_down = 1
+Solver.Mesh.BoundaryCondition.y_up = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 150
+#Solver.Loop.end_step = 40000
+Solver.Loop.screen_output_step = 1
+Solver.Loop.vts_output_step = 1000
+Solver.Loop.data_output_step = 1000000
+
+Solver.PCT.TimeInterval.dt = 1
+
+Solver.Parallel.openmp_thread_counts = 5
+
+Solver.Phases = {[(matrix),()],[(inclusion),()]}
+Solver.Comps = ()
+
+###### models init
+ModelsManager.Phi.equation = 2
+Solver.Phi.is_normalize = true
+ModelsManager.Phi.Lij.const = 1e-13
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 0
+ModelsManager.Phi.InterfaceEnergy.int_potential = 1
+ModelsManager.Phi.InterfaceEnergy.int_width = 6e-6
+ModelsManager.Phi.xi_ab.const = 1.000000
+ModelsManager.Phi.xi_abc.const = 0.000000
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(matrix),()],[()],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,inclusion,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(80.0,80.0,0.0),(33.0,33.0,0.0),(0.0,0.0,0.0)]
+
+###### preprocess
+Preprocess.relax_interface = (1000,50,true)
+
+###### postprocess
+Postprocess.PCT.VTS.phi = true
+
+Postprocess.physical_fields = (true,false,false)
+
+# Postprocess.SolidMechanics.momentum_balance = 0 - None , 1 - Explicit , 2 - Implicit 
+Postprocess.SolidMechanics.momentum_balance = 2
+Postprocess.SolidMechanics.write_displacement_field = true
+Postprocess.SolidMechanics.max_iteration_steps = 100
+Postprocess.SolidMechanics.debug = true
+Postprocess.SolidMechanics.strain_accuracy = 1e-5
+Postprocess.SolidMechanics.solid_phases = (matrix,inclusion)
+Postprocess.SolidMechanics.Stiffness.matrix = [(mC11,mC12,mC12,0,0,0),(mC12,mC11,mC12,0,0,0),(mC12,mC12,mC11,0,0,0),(0,0,0,mG,0,0),(0,0,0,0,mG,0),(0,0,0,0,0,mG)]
+Postprocess.SolidMechanics.EigenStrain.matrix = (0,0,0,0,0,0)
+Postprocess.SolidMechanics.Stiffness.inclusion = [(iC11,iC12,iC12,0,0,0),(iC12,iC11,iC12,0,0,0),(iC12,iC12,iC11,0,0,0),(0,0,0,iG,0,0),(0,0,0,0,iG,0),(0,0,0,0,0,iG)]
+Postprocess.SolidMechanics.EigenStrain.inclusion = (0,0,0,0,0,0)
+
+Postprocess.SolidMechanics.plasticity = true
+Postprocess.SolidMechanics.Plasticity.max_iteration_steps = 1
+Postprocess.SolidMechanics.Plasticity.yield_stress = (m_yeild_stress,i_yeild_stress)
+Postprocess.SolidMechanics.Plasticity.hardening_modulus = (m_hardening,i_hardening)
+Postprocess.SolidMechanics.Plasticity.shear_modulus = (mG,iG)
+
+Postprocess.Statistics.file_name = data_statistics
+Postprocess.Statistics.is_phi_c_t = FALSE
+Postprocess.Statistics.is_mechanics = true
+Postprocess.SolidMechanics.fix_boundary.type = (1,0,0)
+Postprocess.SolidMechanics.fix_boundary.strain_x = 0.0000000
+# Postprocess.SolidMechanics.fix_boundary.strain_? = [(real_time_begin, real_time_end, dstrain_dt), ... ] 
+Postprocess.SolidMechanics.fix_boundary.strain_x.rate = [(0,30.5,0.0001),(30.5,90.5,-0.0001),(90.5,150.5,0.0001)]
+
+
+Define.Var = mE,2.1e11
+Define.Var = mv,0.288
+# 2G(1+v)=E
+Define.Var = mG,8.152e10
+Define.Var = m_yeild_stress,2.75e8
+Define.Var = m_hardening,1e5
+
+Define.Var = Az,1.0
+
+Define.Var = iE,1e10
+Define.Var = iv,0.288
+Define.Var = iG,3.882e9
+Define.Var = i_yeild_stress,2.75e11
+Define.Var = i_hardening,1e6
+
+Define.Func = mC12@{[mv*mG/(1-2*mv)]}@
+Define.Func = mC11@{[(2*mG/Az+mC12<0>)]}@
+
+Define.Func = iC12@{[iv*iG/(1-2*iv)]}@
+Define.Func = iC11@{[(2*iG/Az+iC12<0>)]}@

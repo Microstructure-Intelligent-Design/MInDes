@@ -1,0 +1,67 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Solver.Loop.begin_step = 0
+# Solver.Loop.end_step = 5000
+Solver.Loop.screen_loop_step = 10
+Solver.Loop.screen_output_step = 100
+Solver.Loop.vts_output_step = 100
+Solver.Loop.data_output_step = 1000000
+# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ADIABATIC
+Solver.Mesh.BoundaryCondition.y_up = 2
+Solver.Mesh.BoundaryCondition.y_down = 2
+Solver.Parallel.openmp_thread_counts = 2
+
+Solver.Phases = {[(Grain0),()]}
+# Solver.GrainsOrientations = {[(phi_index_0, phi_index_2, ... ),(rotation_angle_1, rotation_angle_2, rotation_angle_3)],  ... } 
+Solver.GrainsOrientations = {[(0),(0.0,0.0,0.0)]}
+# Solver.GrainsOrientations.rotation_gauge = 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
+#                                            6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
+Solver.GrainsOrientations.rotation_gauge = 1
+
+###### Microstructure
+Preprocess.Microstructure.is_datafile_init = true
+Preprocess.Microstructure.datafile_path = 2_single_grain_structure/data_end.dat
+
+# Postprocess.physical_fields = (mechanic, fluid dynamic, electric) 
+Postprocess.physical_fields = (true,false,false)
+# Postprocess.SolidMechanics.momentum_balance = 0 - None , 1 - Explicit , 2 - Implicit (Ingo Steinbach) , 3 - Implicit (Armen G. Khachaturyan) 
+Postprocess.SolidMechanics.momentum_balance = 3
+Postprocess.SolidMechanics.VisualStrain.L_ijkl = 0.0001
+Postprocess.SolidMechanics.write_displacement_field = FALSE
+Postprocess.SolidMechanics.max_iteration_steps = 1000
+Postprocess.SolidMechanics.debug = true
+Postprocess.SolidMechanics.strain_accuracy = 0.001
+Postprocess.SolidMechanics.solid_phases = (Grain0)
+Postprocess.SolidMechanics.Stiffness.Grain0 = [(C11,C12,C12,0,0,0),(C12,C11,C12,0,0,0),(C12,C12,C11,0,0,0),(0,0,0,Gm,0,0),(0,0,0,0,Gm,0),(0,0,0,0,0,Gm)]
+Postprocess.SolidMechanics.EigenStrain.Grain0 = (0,0,0,0,0,0)
+# Postprocess.SolidMechanics.fix_boundary.type = (BC_X, BC_Y, BC_Z) , 0 - Average , 1 - Strain , 2 - Stress 
+Postprocess.SolidMechanics.fix_boundary.type = (1,0,0)
+Postprocess.SolidMechanics.fix_boundary.strain_x = 0.02
+Postprocess.SolidMechanics.plasticity = FALSE
+
+# Postprocess.Crack.model = 1 - Single 
+Postprocess.Crack.model = 1
+Postprocess.Crack.index = 0
+Postprocess.Crack.Solver.frequency = 1
+Postprocess.Crack.Solver.max_iterate_steps = 1
+Postprocess.Crack.Solver.damage_threshold = 0.99
+Postprocess.Crack.Solver.crack_epsilon = 0.000001
+Postprocess.Crack.Solver.dt = 0.02
+Postprocess.Crack.Solver.dr = 1.0
+Postprocess.Crack.Solver.int_width = 1.000000
+Postprocess.Crack.VTS.debug = true
+# Postprocess.Crack.model = 1 - Single 
+Postprocess.Crack.resistance = (1.0)
+
+
+###### custom functions
+Define.Var = Gm,400
+Define.Var = v,0.3
+Define.Var = Az,1.0
+Define.Func = C12@{[v*Gm/(1-2*v)]}@
+Define.Func = C11@{[(2*Gm/Az+C12<0>)]}@

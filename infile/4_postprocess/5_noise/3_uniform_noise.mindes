@@ -1,0 +1,51 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Postprocess.PCT.VTS.phi_index = true
+Postprocess.PCT.VTS.phi = true
+Postprocess.PCT.VTS.phi_summary = true
+Solver.Parallel.openmp_thread_counts = 5
+Solver.PCT.TimeInterval.dt = 0.01
+Solver.Phi.is_normalize = true
+
+Solver.Loop.vts_output_step = 100
+Solver.Loop.data_output_step = 100
+
+Solver.Phases = {[(Grain0),()],[(Grain1),()]} 
+
+###### models 1 - standard allen-chan , 2 - pair-wise , 3 - cahn-hilliard
+ModelsManager.Phi.equation = 2
+ModelsManager.Phi.Lij.const = 1.000000
+ModelsManager.Phi.InterfaceEnergy.int_width = 6.0
+# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 2
+# ModelsManager.Phi.InterfaceEnergy.int_potential : 0 - Nestler_Well , 1 - Nestler_Obstacle , 2 - Steinbach_P2009
+ModelsManager.Phi.InterfaceEnergy.int_potential = 2
+ModelsManager.Phi.xi_ab.const = 1.000000
+ModelsManager.Phi.xi_abc.const = 0.000000
+# ModelsManager.Con.equation : 0 - Const, 1 - TotalConcentration, 2 - PhaseConcentration, 3 - GrandPotential
+ModelsManager.Con.equation = 3
+# ModelsManager.Con.valid_domain : 0 - Standard, 1 - Reverse
+ModelsManager.Con.valid_domain = 1
+# ModelsManager.Phi.BulkEnergy.const = [(phi_name, bulk_energy), ... ]
+ModelsManager.Phi.BulkEnergy.const = [(Grain0,0.0),(Grain1,-0.01)]
+# Postprocess.Phi.interface_noise = {[(applied_phi_index),(generate_phi_index_0, ... ),(generate_phi_name_0, ... )], ... } 
+Postprocess.Phi.uniform_noise = {[(2),(15,16),(Grain1,Grain1)],[(12),(15,16),(Grain1,Grain1)]}
+Postprocess.Phi.noise.is_start = true
+Postprocess.Phi.noise.driving_force_threshold = 0.000001
+Postprocess.Phi.noise.when_phi_absent = FALSE
+Postprocess.Phi.noise.frequency = 10000
+Postprocess.Phi.noise.amplitude = 0.100000
+Postprocess.Phi.noise.random = (0.0,1.0)
+
+###### Microstructure
+Preprocess.Microstructure.is_datafile_init = true
+Preprocess.Microstructure.datafile_path = 1_generage_structure\data_end.dat
+
+###### Pretreatment
+# Preprocess.relax_interface = (relax_steps, output_steps, fix_phi_after_relax) 
+Preprocess.relax_interface = (1000,100,false)

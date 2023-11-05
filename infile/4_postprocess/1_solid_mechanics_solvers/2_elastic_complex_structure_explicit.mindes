@@ -1,0 +1,91 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 200
+Solver.Mesh.Ny = 200
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Mesh.BoundaryCondition.x_up = 1
+Solver.Mesh.BoundaryCondition.x_down = 1
+Solver.Mesh.BoundaryCondition.y_up = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 0
+#Solver.Loop.end_step = 40000
+Solver.Loop.screen_output_step = 1000
+Solver.Loop.vts_output_step = 1000
+Solver.Loop.data_output_step = 1000000
+
+Solver.PCT.TimeInterval.dt = 1e-2
+
+Solver.Parallel.openmp_thread_counts = 5
+
+Solver.Phases = {[(Grain0),()],[(Grain1),()],[(Grain2),()]}
+Solver.Comps = ()
+
+###### models init
+ModelsManager.Phi.equation = 2
+Solver.Phi.is_normalize = true
+ModelsManager.Phi.Lij.const = 1.000000
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 0
+ModelsManager.Phi.InterfaceEnergy.int_potential = 1
+ModelsManager.Phi.InterfaceEnergy.int_width = 4.000000
+ModelsManager.Phi.xi_ab.const = 1.000000
+ModelsManager.Phi.xi_abc.const = 0.000000
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 6
+Preprocess.Microstructure.geometry_layer_0.property = (1,Grain1,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(85.0,85.0,0.0),(70.0,70.0,0.0),(0.0,0.0,0.0)]
+Preprocess.Microstructure.geometry_layer_1.property = (1,Grain1,1,1,false)
+Preprocess.Microstructure.geometry_layer_1.ellipsoid = [(135.0,135.0,0.0),(45.0,45.0,0.0),(0.0,0.0,0.0)]
+Preprocess.Microstructure.geometry_layer_2.property = (1,Grain1,1,1,false)
+Preprocess.Microstructure.geometry_layer_2.ellipsoid = [(50.0,150.0,0.0),(30.0,30.0,0.0),(0.0,0.0,0.0)]
+Preprocess.Microstructure.geometry_layer_3.property = (2,Grain2,1,1,false)
+Preprocess.Microstructure.geometry_layer_3.ellipsoid = [(85.0,85.0,0.0),(60.0,60.0,0.0),(0.0,0.0,0.0)]
+Preprocess.Microstructure.geometry_layer_4.property = (2,Grain2,1,1,false)
+Preprocess.Microstructure.geometry_layer_4.ellipsoid = [(135.0,135.0,0.0),(35.0,35.0,0.0),(0.0,0.0,0.0)]
+Preprocess.Microstructure.geometry_layer_5.property = (2,Grain2,1,1,false)
+Preprocess.Microstructure.geometry_layer_5.ellipsoid = [(50.0,150.0,0.0),(20.0,20.0,0.0),(0.0,0.0,0.0)]
+
+###### preprocess
+Preprocess.relax_interface = (1000,50,true)
+
+###### postprocess
+Postprocess.PCT.VTS.phi = true
+
+Postprocess.physical_fields = (true,false,false)
+
+# Postprocess.SolidMechanics.momentum_balance = 0 - None , 1 - Explicit , 2 - Implicit 
+Postprocess.SolidMechanics.momentum_balance = 1
+Postprocess.SolidMechanics.Explicit.mass_density = 2.000000
+Postprocess.SolidMechanics.Explicit.mechanical_dt = 1e-2
+Postprocess.SolidMechanics.write_displacement_field = true
+Postprocess.SolidMechanics.max_iteration_steps = 5000
+Postprocess.SolidMechanics.debug = true
+Postprocess.SolidMechanics.strain_accuracy = 1e-6
+Postprocess.SolidMechanics.solid_phases = (Grain1,Grain2)
+Postprocess.SolidMechanics.Stiffness.Grain1 = [(C11,C12,C12,0,0,0),(C12,C11,C12,0,0,0),(C12,C12,C11,0,0,0),(0,0,0,Gm,0,0),(0,0,0,0,Gm,0),(0,0,0,0,0,Gm)]
+Postprocess.SolidMechanics.EigenStrain.Grain1 = (0.01,0.01,0,0,0,0)
+Postprocess.SolidMechanics.Stiffness.Grain2 = [(C11,C12,C12,0,0,0),(C12,C11,C12,0,0,0),(C12,C12,C11,0,0,0),(0,0,0,Gm,0,0),(0,0,0,0,Gm,0),(0,0,0,0,0,Gm)]
+Postprocess.SolidMechanics.EigenStrain.Grain2 = (0,0,0,0,0,0)
+
+Postprocess.SolidMechanics.plasticity = FALSE
+
+Postprocess.Statistics.file_name = data_statistics
+Postprocess.Statistics.is_phi_c_t = FALSE
+Postprocess.Statistics.is_mechanics = true
+Postprocess.SolidMechanics.fix_boundary.type = (0,0,0)
+
+
+###### custom functions
+Define.Var = Gm,100
+Define.Var = v,0.3
+Define.Var = Az,3.0
+Define.Func = C12@{[v*Gm/(1-2*v)]}@
+Define.Func = C11@{[(2*Gm/Az+C12<0>)]}@

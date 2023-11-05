@@ -1,0 +1,83 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 200
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Mesh.BoundaryCondition.x_up = 1
+Solver.Mesh.BoundaryCondition.x_down = 1
+Solver.Mesh.BoundaryCondition.y_up = 2
+Solver.Mesh.BoundaryCondition.y_down = 2
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 0
+#Solver.Loop.end_step = 40000
+Solver.Loop.screen_output_step = 1000
+Solver.Loop.vts_output_step = 1000
+Solver.Loop.data_output_step = 1000000
+
+Solver.PCT.TimeInterval.dt = 1.0
+
+Solver.Parallel.openmp_thread_counts = 5
+
+Solver.Phases = {[(fluid),()],[(solid),()]}
+Solver.Comps = ()
+
+Postprocess.PCT.VTS.phi = true
+
+###### models init
+ModelsManager.Phi.equation = 2
+Solver.Phi.is_normalize = true
+# ModelsManager.Phi.Lij.const  = Lij_value 
+#                      .matrix = [(phi_i, phi_j, Lij_value), ... ] 
+ModelsManager.Phi.Lij.const = 0.010000
+# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 0
+# ModelsManager.Phi.InterfaceEnergy.int_potential : 0 - Nestler_Well , 1 - Nestler_Obstacle , 2 - Steinbach_P2009
+ModelsManager.Phi.InterfaceEnergy.int_potential = 1
+ModelsManager.Phi.InterfaceEnergy.int_width = 4.000000
+# ModelsManager.Phi.xi_ab.const  = xi_ab 
+#                        .matrix = [(phi_a, phi_b, xi_ab_value), ...] 
+ModelsManager.Phi.xi_ab.const = 1.000000
+# ModelsManager.Phi.xi_abc.const  = xi_ab 
+#                         .matrix = [(phi_a, phi_b, phi_c, xi_abc_value), ...] 
+ModelsManager.Phi.xi_abc.const = 0.000000
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(fluid),()],[()],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,solid,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(50,50,0),(10,10,0),(0,0,0)]
+
+###### Postprocess
+Preprocess.relax_interface = (1000,100,true)
+
+
+Postprocess.physical_fields = (false,true,false)
+###### fluid field
+Postprocess.FluidDynamics.solver = 2
+Postprocess.FluidDynamics.LatticeBoltzmann.liquid_viscosity = 0.050000
+Postprocess.FluidDynamics.LatticeBoltzmann.liquid_density = 5.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.max_iterate_steps = 10000
+Postprocess.FluidDynamics.LatticeBoltzmann.debug_solver = true
+Postprocess.FluidDynamics.LatticeBoltzmann.debug_output_step = 100
+# Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases = (phase_name, ... ) 
+Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases = (solid)
+Postprocess.FluidDynamics.LatticeBoltzmann.momentum_accuracy = 1e-6
+# .LatticeBoltzmann.boundary_condition = (down_x,up_x,down_y,up_y) 
+#                                        0 - Wall, 1 - Period, 2 - Free, 3 - Pressure, 4 - Normal_Flow 
+#                            .pressure = p0 , density0 = p0 / Cs^2 , Cs = 1 / sqrt(3) 
+Postprocess.FluidDynamics.LatticeBoltzmann.boundary_condition = (4,2,0,0)
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.normal_velocity = 0.010000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.pressure = 1.700000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_roughness = 1.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_speed = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_roughness = 1.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_speed = 0.000000
+
+
+

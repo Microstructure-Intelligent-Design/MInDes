@@ -1,0 +1,17 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 50
+Solver.Mesh.Ny = 50
+Solver.Mesh.Nz = 1
+Postprocess.PCT.VTS.phi_index = true
+Solver.Phases = {[(Grain0),()],[(Grain1),()]} 
+
+Solver.Loop.vts_output_step = 1000
+
+###### Microstructure
+Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,Grain1,2,1,false)
+Preprocess.Microstructure.geometry_layer_0.polyhedron =  {[(25,25,0)],[(25,45,0),(10,25,0),(10,25,1)],[(10,25,0),(25,5,0),(25,5,1)],[(25,5,0),(40,25,0),(40,25,1)],[(40,25,0),(25,45,0),(25,45,1)],[(0,30,0)]}

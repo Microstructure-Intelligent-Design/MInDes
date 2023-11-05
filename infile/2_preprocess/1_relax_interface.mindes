@@ -1,0 +1,38 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 50
+Solver.Mesh.Ny = 50
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Parallel.openmp_thread_counts = 5
+Solver.PCT.TimeInterval.dt = 1e-2
+Solver.Phi.is_normalize = false
+Postprocess.PCT.VTS.phi = true
+Solver.Phases = {[(Grain0),()],[(Grain1),()]} 
+
+Solver.Loop.vts_output_step = 1000
+
+###### models 1 - standard allen-chan , 2 - pair-wise , 3 - cahn-hilliard
+ModelsManager.Phi.equation = 2
+
+ModelsManager.Phi.Lij.const = 1.000000
+ModelsManager.Phi.InterfaceEnergy.int_width = 3.0
+# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 0
+# ModelsManager.Phi.InterfaceEnergy.int_potential : 0 - Nestler_Well , 1 - Nestler_Obstacle , 2 - Steinbach_P2009
+ModelsManager.Phi.InterfaceEnergy.int_potential = 1
+ModelsManager.Phi.xi_ab.const = 1.000000
+
+###### Microstructure
+Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+Preprocess.Microstructure.Matrix.phi = 1.0
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,Grain1,2,1,false)
+Preprocess.Microstructure.geometry_layer_0.polyhedron =  {[(25,25,0)],[(25,45,0),(10,25,0),(10,25,1)],[(10,25,0),(25,5,0),(25,5,1)],[(25,5,0),(40,25,0),(40,25,1)],[(40,25,0),(25,45,0),(25,45,1)],[(0,30,0)]}
+Preprocess.Microstructure.geometry_layer_0.phi = 1.0
+Preprocess.Microstructure.geometry_layer_0.is_normalized = TRUE
+
+###### Preprocess
+Preprocess.relax_interface = (1000,100,false)

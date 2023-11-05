@@ -1,0 +1,44 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Solver.Parallel.openmp_thread_counts = 5
+Solver.PCT.TimeInterval.dt = 1e-2
+Solver.Phi.is_normalize = true
+Postprocess.PCT.VTS.phi_index = true
+Postprocess.PCT.VTS.phi = true
+Solver.Phases = {[(Grain0),()]} 
+
+Solver.Loop.vts_output_step = 10000
+# Solver.Loop.data_output_step = 10000
+
+###### Microstructure
+Preprocess.Microstructure.is_datafile_init = true
+Preprocess.Microstructure.datafile_path = merge_phis_auto.dat
+# Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+# Preprocess.Microstructure.voronoi.property = [(1,20),(Grain0),(1)]
+# Preprocess.Microstructure.voronoi.box = [(0,0,0),(100,100,0)]
+# Preprocess.Microstructure.voronoi.rand_seed = 5
+# Preprocess.Microstructure.voronoi.point_distance = 20
+
+###### models 1 - standard allen-chan , 2 - pair-wise , 3 - cahn-hilliard
+ModelsManager.Phi.equation = 2
+
+ModelsManager.Phi.Lij.const = 1.000000
+ModelsManager.Phi.InterfaceEnergy.int_width = 4.0
+# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 2
+# ModelsManager.Phi.InterfaceEnergy.int_potential : 0 - Nestler_Well , 1 - Nestler_Obstacle , 2 - Steinbach_P2009
+ModelsManager.Phi.InterfaceEnergy.int_potential = 2
+ModelsManager.Phi.xi_ab.const = 1.000000
+
+###### Pretreatment
+Preprocess.auto_merge_phis = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+Preprocess.remove_inexistent_phis = true
+Preprocess.re_ordering_phis_indexs_from = 0
+
+###### Preprocess
+# Preprocess.relax_interface = (1000,100,true)

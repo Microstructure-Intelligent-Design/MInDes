@@ -1,0 +1,28 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 64
+Solver.Mesh.Ny = 64
+Solver.Mesh.Nz = 1
+Postprocess.PCT.VTS.phi_index = true
+Postprocess.PCT.VTS.phi_name = true
+Postprocess.PCT.VTS.con = true
+Postprocess.PCT.VTS.phase_con = true
+Postprocess.PCT.VTS.temperature = true
+Solver.Comps = (con)
+Solver.Phases = {[(Grain0),(con)],[(Grain1),(con)]}
+
+Solver.Loop.vts_output_step = 1000
+
+###### Microstructure
+Preprocess.Microstructure.matrix = {[(0),(Grain0),(0.0)],[(0.0)],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,Grain1,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(32.0,32.0,0.0),(10.0,20.0,0.0),(0.0,30.0,0.0)]
+Preprocess.Microstructure.geometry_layer_0.x = [(con,0.0)]
+Preprocess.Microstructure.geometry_layer_0.T = 0.0
+
+###### Treatment
+# Preprocess.fill_phis = {[(phi_index_0, phi_index_1, ... ), (phi_con_1, phi_con_2, ... ), (total_con_1, total_con_2, ... ), (temperature)], .... } 
+Preprocess.fill_phis = {[(0),(1.0),(0.5),(0.2)]}

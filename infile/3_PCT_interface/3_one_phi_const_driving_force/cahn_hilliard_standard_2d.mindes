@@ -1,0 +1,48 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+
+Solver.Mesh.BoundaryCondition.x_up = 1
+Solver.Mesh.BoundaryCondition.x_down = 1
+Solver.Mesh.BoundaryCondition.y_up = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.PCT.TimeInterval.dt = 1e-2
+
+Solver.Phases = {[(Grain0),()]} 
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 1000
+Solver.Loop.screen_output_step = 20
+Solver.Loop.vts_output_step = 20
+Solver.Loop.data_output_step = 10000
+
+Postprocess.PCT.VTS.phi = true
+ModelsManager.Phi.InterfaceEnergy.vts_output = (0)
+ModelsManager.Phi.BulkEnergy.vts_output = (0)
+
+###### models
+###### models 1 - standard allen-chan , 2 - pair-wise , 3 - cahn-hilliard
+ModelsManager.Phi.equation = 3
+
+ModelsManager.Phi.Mij.const = 1.000000
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 3
+ModelsManager.Phi.xi_a.const = 2.500000
+ModelsManager.Phi.BulkEnergy.type = 0
+ModelsManager.Phi.BulkEnergy.DoubleWell.A = 1.000000
+ModelsManager.Phi.BulkEnergy.DoubleWell.B = 1.000000
+ModelsManager.Phi.BulkEnergy.const = [(Grain0,-0.1)]
+
+###### Microstructure
+Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (0,Grain0,1,1,true)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(50,50,0),(30,10,0),(0,20,0)]
+Preprocess.Microstructure.geometry_layer_0.phi = 0.000000

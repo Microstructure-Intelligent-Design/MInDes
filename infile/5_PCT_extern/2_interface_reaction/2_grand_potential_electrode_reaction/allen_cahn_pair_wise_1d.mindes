@@ -1,0 +1,66 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 1
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Mesh.BoundaryCondition.x_up = 2
+Solver.Mesh.BoundaryCondition.x_down = 2
+Solver.Mesh.BoundaryCondition.y_up = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 2000
+Solver.PCT.TimeInterval.dt = 1e-2
+Solver.Loop.screen_output_step = 100
+Solver.Loop.vts_output_step = 100
+Solver.Loop.data_output_step = 10000
+
+Solver.Phi.is_normalize = true
+Postprocess.PCT.VTS.phi = true
+Postprocess.PCT.VTS.con = true
+Postprocess.PCT.VTS.phase_con = true
+Postprocess.PCT.VTS.potential = true
+Postprocess.PCT.VTS.phase_potential = true
+
+Solver.Phases = {[(solid),(c0)],[(liquid),(c0)]} 
+Solver.Comps = (c0)
+
+###### modules init
+ModelsManager.Phi.equation = 2
+ModelsManager.Phi.Lij.const = 1.000000
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 0
+ModelsManager.Phi.InterfaceEnergy.int_potential = 1
+ModelsManager.Phi.InterfaceEnergy.int_width = 10.000000
+ModelsManager.Phi.xi_ab.const = 1.000000
+ModelsManager.Con.equation = 3
+ModelsManager.Con.ValidDomain.phase_indexes = (0)
+ModelsManager.Con.ValidDomain.threshold = 0.100000
+ModelsManager.Con.Dij.const = 2.0
+ModelsManager.Con.ElectrodeReaction.electrolyte_index = 1
+ModelsManager.Con.ElectrodeReaction.active_con = c0
+ModelsManager.Con.ElectrodeReaction.k_BV = 1e-3
+ModelsManager.Con.ElectrodeReaction.reference_voltage = 2.000000
+ModelsManager.Con.ElectrodeReaction.temperature = 300.000000
+#ModelsManager.Con.ElectrodeReaction.applied_voltage = 0.000000
+ModelsManager.Con.ElectrodeReaction.AppliedVoltage.cut_off_low = 0.000000
+ModelsManager.Con.ElectrodeReaction.AppliedVoltage.cut_off_high = 2.000000
+ModelsManager.Con.ElectrodeReaction.Crate = 1.000000
+ModelsManager.Con.ElectrodeReaction.X_full = 1.000000
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(solid),(0.5)],[(0.5)],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,liquid,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,0,0),(50,50,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.x = [(c0,0.0)]
+
+####### Preprocess
+# Preprocess.relax_interface = (relax_steps, output_steps, fix_phi_after_relax) 
+Preprocess.relax_interface = (2000,100,false)
+# Preprocess.fill_phis = {[(phi_index_0, phi_index_1, ... ), (phi_name), (phi_con_1, phi_con_2, ... ), (total_con_1, total_con_2, ... ), (potential_1, potential_2, ... ), (temperature)], .... } 
+Preprocess.fill_phis = {[(0),(solid),(0.5),(0.5),(0.0),(0.0)]}

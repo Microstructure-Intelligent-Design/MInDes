@@ -1,0 +1,31 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Postprocess.PCT.VTS.phi_index = true
+
+Solver.Loop.vts_output_step = 1000
+
+Solver.Phases = {[(Grain0),()]} 
+
+###### Microstructure
+Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+
+Preprocess.Microstructure.voronoi.property = [(1,20),(Grain0),(1)]
+Preprocess.Microstructure.voronoi.box = [(0,0,0),(100,100,0)]
+Preprocess.Microstructure.voronoi.rand_seed = 5
+
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (0,Grain0,1,1,true)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(50.0,50.0,0.0),(40.0,30.0,0.0),(0.0,0.0,0.0)]
+
+###### Pretreatment
+Preprocess.remove_inexistent_phis = true
+
+
+
+
+

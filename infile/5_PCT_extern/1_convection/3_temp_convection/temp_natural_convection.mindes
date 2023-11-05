@@ -1,0 +1,77 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Mesh.BoundaryCondition.x_up = 2
+Solver.Mesh.BoundaryCondition.x_down = 2
+Solver.Mesh.BoundaryCondition.y_up = 2
+Solver.Mesh.BoundaryCondition.y_down = 2
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 2000
+Solver.Loop.screen_output_step = 100
+Solver.Loop.vts_output_step = 100
+Solver.Loop.data_output_step = 1000000
+
+Solver.PCT.TimeInterval.dt = 1.0
+Postprocess.PCT.VTS.temperature = true
+
+Solver.Parallel.openmp_thread_counts = 5
+
+Solver.Phases = {[(fluid),()]}
+Solver.Comps = ()
+
+###### PCT init
+ModelsManager.Temp.equation = 1
+# ModelsManager.Temp.Dtemp = ( phase_0_D , phase_1_D , ... ) 
+ModelsManager.Temp.Dtemp = (0.03)
+ModelsManager.Temp.convection = true
+# .boundary = [(boundary, temperature), ... ] 
+#              boundary : 0 - x_down , 1 - x_up , 2 - y_down , 3 - y_up , 4 - z_down , 5 - z_up 
+Solver.Mesh.BoundaryCondition.Temperature.Fix.boundary = [(0,0.1),(1,-0.1)]
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(fluid),()],[()],[(0.0)]}
+
+Postprocess.physical_fields = (false,true,false)
+###### fluid field
+Postprocess.FluidDynamics.solver = 2
+# tau = viscosity / fluid_dt / Cs2 + 0.5 
+Postprocess.FluidDynamics.LatticeBoltzmann.liquid_viscosity = 0.1
+Postprocess.FluidDynamics.LatticeBoltzmann.liquid_density = 1.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.max_iterate_steps = 1
+Postprocess.FluidDynamics.LatticeBoltzmann.debug_solver = true
+Postprocess.FluidDynamics.LatticeBoltzmann.debug_output_step = 10
+# Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases = (phase_name, ... ) 
+Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases = ()
+Postprocess.FluidDynamics.LatticeBoltzmann.momentum_accuracy = 1e-5
+# Postprocess.FluidDynamics.LatticeBoltzmann.source = () 
+#             0 - Forces 
+Postprocess.FluidDynamics.LatticeBoltzmann.source = (0)
+Postprocess.FluidDynamics.LatticeBoltzmann.Force.gravity_direction = 2
+# Postprocess.FluidDynamics.LatticeBoltzmann.force_model : 0 - NONE, 1 - LGA, 2 - GZS 
+Postprocess.FluidDynamics.LatticeBoltzmann.force_model = 1
+# Postprocess.FluidDynamics.LatticeBoltzmann.force = () 
+#             0 - ThermalExpansion, 1 - Gravity, 2 - H_Liang_SurfaceTension 
+Postprocess.FluidDynamics.LatticeBoltzmann.force = (0)
+Postprocess.FluidDynamics.LatticeBoltzmann.ThermalExpansionForce.reference_temperature = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.ThermalExpansionForce.thermal_expansion_parameter = 0.002000
+# .LatticeBoltzmann.boundary_condition = (down_x,up_x,down_y,up_y) 
+#                                        0 - Wall, 1 - Period, 2 - Free, 3 - Pressure, 4 - Normal_Flow 
+#                            .pressure = p0 , density0 = p0 / Cs^2 , Cs = 1 / sqrt(3) 
+Postprocess.FluidDynamics.LatticeBoltzmann.boundary_condition = (0,0,0,0)
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.wall_roughness = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.wall_speed = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.wall_roughness = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.wall_speed = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_roughness = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_speed = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_roughness = 0.000000
+Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_speed = 0.000000
+

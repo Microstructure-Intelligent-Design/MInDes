@@ -1,0 +1,23 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+Postprocess.PCT.VTS.phi_index = true
+Solver.Phases = {[(Grain0),()]} 
+
+Solver.Loop.vts_output_step = 1000
+
+###### Microstructure
+Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+Preprocess.Microstructure.voronoi.property = [(0,19),(Grain0),(1)]
+Preprocess.Microstructure.voronoi.box = [(0,0,0),(100,100,0)]
+Preprocess.Microstructure.voronoi.rand_seed = 10
+Preprocess.merge_phis = {[(0,2,4,6,8,10,12,14,16,18),(false)],[(1,3,5,7,9,11,13,15,17,19),(false)]}
+
+
+
+
+

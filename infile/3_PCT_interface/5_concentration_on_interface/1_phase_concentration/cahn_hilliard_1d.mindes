@@ -1,0 +1,48 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 1
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Mesh.BoundaryCondition.x_up = 2
+Solver.Mesh.BoundaryCondition.x_down = 2
+Solver.Mesh.BoundaryCondition.y_up = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 2000
+Solver.PCT.TimeInterval.dt = 1e-2
+Solver.Loop.screen_output_step = 10
+Solver.Loop.vts_output_step = 10
+Solver.Loop.data_output_step = 10000
+
+Solver.Phi.is_normalize = true
+Postprocess.PCT.VTS.phi = true
+Postprocess.PCT.VTS.con = true
+Postprocess.PCT.VTS.phase_con = true
+
+Solver.Phases = {[(VIRTUAL),(c0)]} 
+Solver.Comps = (c0)
+
+###### modules init
+ModelsManager.Phi.equation = 3
+ModelsManager.Con.equation = 2
+ModelsManager.Phi.Mij.const = 0.100000
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 3
+ModelsManager.Phi.xi_a.const = 10.000000
+ModelsManager.Phi.BulkEnergy.type = 0
+ModelsManager.Phi.BulkEnergy.DoubleWell.A = 1.000000
+ModelsManager.Phi.BulkEnergy.DoubleWell.B = 1.000000
+ModelsManager.Con.Dij.const = (4.0)
+
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(VIRTUAL),(0.1)],[(0.1)],[(0.0)]}
+Preprocess.Microstructure.geometry_layer_number = 1
+Preprocess.Microstructure.geometry_layer_0.property = (1,VIRTUAL,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,0,0),(50,50,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.x = [(c0,0.5)]

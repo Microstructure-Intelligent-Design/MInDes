@@ -1,0 +1,53 @@
+###### whether to test this input file
+InputFile.debug = true
+
+###### solver init
+Solver.Mesh.Nx = 50
+Solver.Mesh.Ny = 50
+Solver.Mesh.Nz = 1
+Solver.Mesh.dr = 1.000000
+Solver.Mesh.BoundaryCondition.x_up = 2
+Solver.Mesh.BoundaryCondition.x_down = 2
+Solver.Mesh.BoundaryCondition.y_up = 2
+Solver.Mesh.BoundaryCondition.y_down = 2
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 0
+#Solver.Loop.end_step = 40000
+Solver.Loop.screen_output_step = 1000
+Solver.Loop.vts_output_step = 1000
+Solver.Loop.data_output_step = 1000000
+
+Solver.PCT.TimeInterval.dt = 1.0
+
+Solver.Parallel.openmp_thread_counts = 5
+
+Solver.Phases = {[(fluid),()]}
+Solver.Comps = ()
+
+###### microstructure init
+Preprocess.Microstructure.matrix = {[(0),(fluid),()],[()],[(0.0)]}
+
+Postprocess.physical_fields = (false,true,false)
+###### fluid field
+Postprocess.FluidDynamics.solver = 1
+Postprocess.FluidDynamics.PressureCorrection.viscosity = 0.1
+Postprocess.FluidDynamics.PressureCorrection.density = 1.000000
+Postprocess.FluidDynamics.PressureCorrection.fluid_dt = 1.000000
+Postprocess.FluidDynamics.PressureCorrection.debug_solver = true
+Postprocess.FluidDynamics.PressureCorrection.debug_output_step = 50
+Postprocess.FluidDynamics.PressureCorrection.Pressure.max_iterate_steps = 10000
+Postprocess.FluidDynamics.PressureCorrection.Pressure.accuracy = 1e-8
+Postprocess.FluidDynamics.PressureCorrection.Velocity.max_iterate_steps = 10000
+Postprocess.FluidDynamics.PressureCorrection.Velocity.correct_steps = 1
+Postprocess.FluidDynamics.PressureCorrection.solid_phases = ()
+Postprocess.FluidDynamics.PressureCorrection.BC_Down_X.fix_velocity = (0,0,0)
+#Postprocess.FluidDynamics.PressureCorrection.BC_Down_X.pressure = 0.000000
+Postprocess.FluidDynamics.PressureCorrection.BC_Up_X.fix_velocity = (0,0,0)
+#Postprocess.FluidDynamics.PressureCorrection.BC_Up_X.pressure = 0.000000
+Postprocess.FluidDynamics.PressureCorrection.BC_Down_Y.fix_velocity = (0,0,0)
+#Postprocess.FluidDynamics.PressureCorrection.BC_Down_Y.pressure = 0.000000
+Postprocess.FluidDynamics.PressureCorrection.BC_Up_Y.fix_velocity = (0.1,0,0)
+#Postprocess.FluidDynamics.PressureCorrection.BC_Up_Y.pressure = 0.000000
