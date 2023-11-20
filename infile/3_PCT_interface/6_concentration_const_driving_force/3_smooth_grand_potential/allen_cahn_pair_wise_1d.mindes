@@ -44,8 +44,7 @@ ModelsManager.Phi.xi_abc.const = 0.000000
 ModelsManager.Con.ValidDomain.phase_indexes = (0)
 ModelsManager.Con.ValidDomain.threshold = 0.0100
 ModelsManager.Con.grand_potential_component = c0
-#ModelsManager.Con.Dij.const = 1.000000
-ModelsManager.Con.Dij.matrix = [(10.0)]
+ModelsManager.Con.Mii = [(10.0)]
 ModelsManager.Phi.BulkEnergy.const = [(Grain1,-0.05)]
 
 ###### Microstructure

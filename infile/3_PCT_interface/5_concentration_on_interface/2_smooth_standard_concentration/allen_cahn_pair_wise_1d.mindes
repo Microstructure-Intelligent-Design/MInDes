@@ -45,7 +45,9 @@ ModelsManager.Phi.BulkEnergy.type = 0
 ModelsManager.Phi.BulkEnergy.const = [(Grain0,0.0)]
 ModelsManager.Con.ValidDomain.phase_indexes = (0)
 ModelsManager.Con.ValidDomain.threshold = 0.5000
-ModelsManager.Con.Dij.const = 1.000000
+# ModelsManager.Con.Mii = ( M_00, M_11, ... ) 
+#                  .Mij = [(M_00, M_01, ...), (M_10, M_11, ...), ... ]
+ModelsManager.Con.Mii = (1.0)
 
 ###### Microstructure
 Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[(0.5)],[(0.0)]}

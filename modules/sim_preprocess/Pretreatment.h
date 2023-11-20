@@ -32,9 +32,7 @@ namespace pf {
 		static int out_step = 100;
 		static bool is_fix_phi_in_loop = false;
 		// for merge phases
-		static bool is_merge_phis = false;
-		vector<bool> is_phi_con_merge;
-		vector<vector<int>> phis_need_merged;
+		
 		// for remove nonexistent phases
 		static bool is_remove_inexistent_phis = false;
 		// for phi indexs re-ordering
@@ -51,8 +49,7 @@ namespace pf {
 		static vector<vector<int>> recons_phi;
 		static vector<int> recons_property;
 		// auto_merge_phis
-		static bool is_auto_merge = false;
-		vector<int> auto_merged_phis;
+		
 		// optimization memory
 		static MemoryOptimization memory_optimization = MemoryOptimization::MO_NONE;
 		vector<int> fixed_phis;
@@ -563,74 +560,6 @@ namespace pf {
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen(log3.str(), LOG_FILE_NAME);
 		}
 
-		static void merge_phis(FieldStorage_forPhaseNode& phaseMesh) {
-			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> Do phis merging:\n", LOG_FILE_NAME);
-			for (int merge_index = 0; merge_index < phis_need_merged.size(); merge_index++) {
-				bool check_phis_exist = true; vector<int> unexist_phis;
-				for (int merge_phi_index = 0; merge_phi_index < phis_need_merged[merge_index].size(); merge_phi_index++) {
-					if(merge_phi_index == 0)
-						Solvers::get_instance()->writer.add_string_to_txt_and_screen("> " + to_string(merge_index) + " merging : target phi is " + to_string(phis_need_merged[merge_index][merge_phi_index])
-							+ " , merge phis are ", LOG_FILE_NAME);
-					else
-						Solvers::get_instance()->writer.add_string_to_txt_and_screen(to_string(phis_need_merged[merge_index][merge_phi_index]) + ", ", LOG_FILE_NAME);
-					bool check_phi_exist = false;
-					for (auto phase = phaseMesh(0, 0, 0).begin(); phase < phaseMesh(0, 0, 0).end(); phase++)
-						if (phase->index == phis_need_merged[merge_index][merge_phi_index])
-							check_phi_exist = true;
-					if (!check_phi_exist) {
-						check_phis_exist = false;
-						unexist_phis.push_back(phis_need_merged[merge_index][merge_phi_index]);
-					}
-				}
-				Solvers::get_instance()->writer.add_string_to_txt_and_screen("\n", LOG_FILE_NAME);
-				if (!check_phis_exist) {
-					Solvers::get_instance()->writer.add_string_to_txt_and_screen("> Failed !!! The following phis does not exist: ", LOG_FILE_NAME);
-					for (int inexist_phi_index = 0; inexist_phi_index < unexist_phis.size(); inexist_phi_index++)
-						Solvers::get_instance()->writer.add_string_to_txt_and_screen(to_string(unexist_phis[inexist_phi_index]) + ", ", LOG_FILE_NAME);
-					Solvers::get_instance()->writer.add_string_to_txt_and_screen("\n", LOG_FILE_NAME);
-				}
-				else {
-					int target_phi = phis_need_merged[merge_index][0];
-#pragma omp parallel for
-					for (int x = 0; x < phaseMesh.limit_x; x++)
-						for (int y = 0; y < phaseMesh.limit_y; y++)
-							for (int z = 0; z < phaseMesh.limit_z; z++) {
-								PhaseNode& node = phaseMesh(x, y, z);
-								for (int merge_phi_index = 1; merge_phi_index < phis_need_merged[merge_index].size(); merge_phi_index++) {
-									int merge_phi = phis_need_merged[merge_index][merge_phi_index];
-									if (is_phi_con_merge[merge_index]) {
-										double sum_con = 0.0;
-										for (auto t_con = node[target_phi].x.begin(); t_con < node[target_phi].x.end(); t_con++) {
-											for (auto m_con = node[merge_phi].x.begin(); m_con < node[merge_phi].x.end(); m_con++)
-												if (t_con->index == m_con->index)
-													t_con->value = (node[target_phi].phi * t_con->value + node[merge_phi].phi * m_con->value) / (node[target_phi].phi + node[merge_phi].phi);
-											sum_con += t_con->value;
-										}
-										if (sum_con > SYS_EPSILON) {
-											for (auto t_con = node[target_phi].x.begin(); t_con < node[target_phi].x.end(); t_con++)
-												t_con->value /= sum_con;
-										}
-										else {
-											for (auto t_con = node[target_phi].x.begin(); t_con < node[target_phi].x.end(); t_con++)
-												t_con->value = 0.0;
-										}
-									}
-									node[target_phi].phi += node[merge_phi].phi;
-									node[merge_phi].phi = 0.0;
-								}
-							}
-#pragma omp parallel for
-					for (int x = 0; x < phaseMesh.limit_x; x++)
-						for (int y = 0; y < phaseMesh.limit_y; y++)
-							for (int z = 0; z < phaseMesh.limit_z; z++) {
-								PhaseNode& node = phaseMesh(x, y, z);
-								for (int merge_phi_index = 1; merge_phi_index < phis_need_merged[merge_index].size(); merge_phi_index++)
-									node.erase(node[phis_need_merged[merge_index][merge_phi_index]]);
-							}
-				}
-			}
-		}
-
 		static void remove_inexistent_phis(FieldStorage_forPhaseNode& phaseMesh) {
 			bool_box phis_need_erase;
 			for (auto phase = phaseMesh(0, 0, 0).begin(); phase < phaseMesh(0, 0, 0).end(); phase++)
@@ -720,78 +649,6 @@ namespace pf {
 						for (auto phase = node.begin(); phase < node.end(); phase++, rreindex++)
 							phase->index = rreindex;
 					}
-		}
-
-		static void auto_merge_uncontacted_phis(FieldStorage_forPhaseNode& phaseMesh) {
-			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> Do phis auto-merging:\n", LOG_FILE_NAME);
-			tensor2_int phases_contects;
-			int_box phases_need_merged;
-			for (auto phase = phaseMesh(0, 0, 0).begin(); phase < phaseMesh(0, 0, 0).end(); phase++) {
-				phases_need_merged.add_int(phase->index, 0);
-				for (auto phase2 = phaseMesh(0, 0, 0).begin(); phase2 < phaseMesh(0, 0, 0).end(); phase2++) {
-					phases_contects.add_int(phase->index, phase2->index, 0);
-				}
-			}
-			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> check domain...\n", LOG_FILE_NAME);
-#pragma omp parallel for
-			for (int x = 0; x < phaseMesh.limit_x; x++)
-				for (int y = 0; y < phaseMesh.limit_y; y++)
-					for (int z = 0; z < phaseMesh.limit_z; z++) {
-						PhaseNode& node = phaseMesh(x, y, z);
-						for (auto phase = node.begin(); phase < node.end(); phase++)
-							if (phase->phi > Phi_Num_Cut_Off) {
-								phases_need_merged[phase->index] = 1;
-								// -
-								for (auto phase2 = node.begin(); phase2 < node.end(); phase2++)
-									if(phase2->phi > Phi_Num_Cut_Off)
-										phases_contects(phase->index, phase2->index) = 1;
-							}
-					}
-			for (auto phi_merge = phases_need_merged.begin(); phi_merge < phases_need_merged.end(); phi_merge++) {
-				bool is_set = false;
-				for (auto auto_merge_phi = auto_merged_phis.begin(); auto_merge_phi < auto_merged_phis.end(); auto_merge_phi++)
-					if (phi_merge->index == *auto_merge_phi)
-						is_set = true;
-				if (!is_set)
-					phi_merge->value = 0;
-			}
-			for (auto phi_map = phases_need_merged.begin(); phi_map < phases_need_merged.end() - 1; phi_map++) {
-				if (phi_map->value == 0)
-					continue;
-				vector<int> merge_phases_buff;
-				merge_phases_buff.push_back(phi_map->index);
-				string out = "> merging : " + to_string(phi_map->index) + " <-- ";
-				for (auto phi_merge = phi_map + 1; phi_merge < phases_need_merged.end(); phi_merge++) {
-					if (phi_merge->value == 0)
-						continue;
-					// check contact
-					bool is_contact = false;
-					for (int index = 0; index < merge_phases_buff.size(); index++)
-						if (phases_contects(phi_merge->index, merge_phases_buff[index]) == 1)
-							is_contact = true;
-					if (!is_contact) {
-						merge_phases_buff.push_back(phi_merge->index);
-						phi_merge->value = 0;
-						out += to_string(phi_merge->index) + ", ";
-					}
-				}
-				out += "\n";
-				Solvers::get_instance()->writer.add_string_to_txt_and_screen(out, LOG_FILE_NAME);
-				if (merge_phases_buff.size() > 1) {
-#pragma omp parallel for
-					for (int x = 0; x < phaseMesh.limit_x; x++)
-						for (int y = 0; y < phaseMesh.limit_y; y++)
-							for (int z = 0; z < phaseMesh.limit_z; z++) {
-								PhaseNode& node = phaseMesh(x, y, z);
-								PhaseEntry& map_phase = node[merge_phases_buff[0]];
-								for (auto index = merge_phases_buff.begin() + 1; index < merge_phases_buff.end(); index++) {
-									map_phase.phi += node[*index].phi;
-									node[*index].phi = 0.0;
-								}
-							}
-				}
-			}
-			phases_contects.clear();
 		}
 
 		static void optimization_memory_pair_wise_grand_potential(FieldStorage_forPhaseNode& phaseMesh) {
@@ -897,40 +754,6 @@ namespace pf {
 						phiss.push_back(phi_indexx->int_value);
 					recons_phi.push_back(phiss);
 					recons_property.push_back(Solvers::get_instance()->parameters.Phases[reconstruct_phis_value[index][1][0].string_value].phi_property);
-				}
-			}
-
-			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.merge_phis = {[(phi0,phi1,phi2, ... ), is_phi_c_merge], .... } \n", InputFileReader::get_instance()->debug_file);
-			string merge_phis_key = "Preprocess.merge_phis", merge_phis_input = "{[()]}";
-			if (InputFileReader::get_instance()->read_string_value(merge_phis_key, merge_phis_input, infile_debug)) {
-				is_merge_phis = true;
-				vector<InputValueType> merge_phis_structure; merge_phis_structure.push_back(InputValueType::IVType_INT); merge_phis_structure.push_back(InputValueType::IVType_BOOL);
-				vector<vector<vector<input_value>>> merge_phis_value = InputFileReader::get_instance()->trans_matrix_3d_const_array_const_to_input_value(merge_phis_structure, merge_phis_key, merge_phis_input, infile_debug);
-				for (int i = 0; i < merge_phis_value.size(); i++) {
-					vector<int> one_merge_process;
-					for (int j = 0; j < merge_phis_value[i][0].size(); j++)
-						one_merge_process.push_back(merge_phis_value[i][0][j].int_value);
-					phis_need_merged.push_back(one_merge_process);
-					is_phi_con_merge.push_back(merge_phis_value[i][1][0].bool_value);
-				}
-			}
-
-			// -
-			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.auto_merge_phis = (phis_index_0, phis_index_1, ... ) \n", InputFileReader::get_instance()->debug_file);
-			string auto_merge_key = "Preprocess.auto_merge_phis", auto_merge_input = "()";
-			if (InputFileReader::get_instance()->read_string_value(auto_merge_key, auto_merge_input, infile_debug)) {
-				is_auto_merge = true;
-				auto_merged_phis.clear();
-				vector<input_value> auto_merge_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, auto_merge_key, auto_merge_input, infile_debug);
-				for (int index = 0; index < auto_merge_value.size(); index++) {
-					bool is_already_set = false;
-					for (int index2 = 0; index2 < auto_merged_phis.size(); index2++)
-						if (auto_merge_value[index].int_value == auto_merged_phis[index2])
-							is_already_set = true;
-					if (!is_already_set)
-						auto_merged_phis.push_back(auto_merge_value[index].int_value);
 				}
 			}
 
@@ -1064,12 +887,6 @@ namespace pf {
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
 			if (is_reconstruct) {
 				reconstruct_phis(phaseMesh);
-			}
-			if (is_merge_phis) {
-				merge_phis(phaseMesh);
-			}
-			if (is_auto_merge) {
-				auto_merge_uncontacted_phis(phaseMesh);
 			}
 			if (is_relax_interface_on) {
 				relaxation_interface(phaseMesh);

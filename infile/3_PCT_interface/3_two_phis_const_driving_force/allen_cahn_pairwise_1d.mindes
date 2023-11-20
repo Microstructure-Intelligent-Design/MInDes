@@ -7,6 +7,8 @@ Solver.Mesh.Ny = 1
 Solver.Mesh.Nz = 1
 Solver.Mesh.dr = 1.000000
 
+Solver.Phi.is_normalize = true
+
 Solver.Mesh.BoundaryCondition.x_up = 2
 Solver.Mesh.BoundaryCondition.x_down = 2
 Solver.Mesh.BoundaryCondition.y_up = 1

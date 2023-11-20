@@ -43,8 +43,9 @@ ModelsManager.Phi.BulkEnergy.DoubleWell.A = 1.000000
 ModelsManager.Phi.BulkEnergy.DoubleWell.B = 1.000000
 ModelsManager.Con.ValidDomain.phase_indexes = (0)
 ModelsManager.Con.ValidDomain.threshold = 0.5000
-#ModelsManager.Con.Dij.const = 1.000000
-ModelsManager.Con.Dij.matrix = [(10.0)]
+# ModelsManager.Con.Mii = ( M_00, M_11, ... ) 
+#                  .Mij = [(M_00, M_01, ...), (M_10, M_11, ...), ... ]
+ModelsManager.Con.Mii = (10.0)
 ModelsManager.Phi.BulkEnergy.const = [(Grain1,-0.05)]
 
 ###### Microstructure

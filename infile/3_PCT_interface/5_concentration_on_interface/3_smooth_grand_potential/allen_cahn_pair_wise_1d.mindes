@@ -17,7 +17,7 @@ Solver.Mesh.BoundaryCondition.z_dowm = 1
 Solver.PCT.TimeInterval.dt = 1e-3
 
 Solver.Comps = (c0)
-Solver.Phases = {[(Grain0),()]}
+Solver.Phases = {[(Grain0),(c0)]}
 
 Solver.Loop.begin_step = 0
 Solver.Loop.end_step = 20000
@@ -46,10 +46,10 @@ ModelsManager.Phi.BulkEnergy.const = [(Grain0,0.0)]
 ModelsManager.Con.ValidDomain.phase_indexes = (0)
 ModelsManager.Con.ValidDomain.threshold = 0.5000
 ModelsManager.Con.grand_potential_component = c0
-ModelsManager.Con.Dij.const = 1.000000
+ModelsManager.Con.Mii = [(1.0)]
 
 ###### Microstructure
-Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[(0.5)],[(0.0)]}
+Preprocess.Microstructure.matrix = {[(0),(Grain0),(0.5)],[(0.5)],[(0.0)]}
 Preprocess.Microstructure.geometry_layer_number = 1
 Preprocess.Microstructure.geometry_layer_0.property = (1,Grain0,2,1,false)
 Preprocess.Microstructure.geometry_layer_0.polyhedron =  {[(75,0,0)],[(50,0,0),(50,1,0),(50,0,1)],[(100,0,0),(100,1,0),(100,0,1)],[(0,0,0)]}

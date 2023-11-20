@@ -36,8 +36,9 @@ ModelsManager.Phi.InterfaceEnergy.int_gradient = 0
 ModelsManager.Phi.InterfaceEnergy.int_potential = 1
 ModelsManager.Phi.InterfaceEnergy.int_width = 5.000000
 ModelsManager.Phi.xi_ab.const = 1.000000
-#ModelsManager.Con.Dij.const = (2.0,2.0)
-ModelsManager.Con.Dij.matrix = {[(10.0)],[(10.0)]}
+# ModelsManager.Con.Mii = [(phase_0_M_00 , phase_0_M_11, ...) , ... ]
+#                  .Mij = {[(phase_0_M_00, phase_0_M_01, ...), (phase_0_M_10, phase_0_M_11, ...), ... ], ... }
+ModelsManager.Con.Mii = [(10.0),(10.0)]
 ModelsManager.Phi.BulkEnergy.const = [(Grain0,-0.05)]
 
 ###### microstructure init

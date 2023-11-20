@@ -2,41 +2,86 @@
 InputFile.debug = true
 
 ###### Init Solver
-Solver.Mesh.Nx = 100
-Solver.Mesh.Ny = 1
+Solver.Mesh.Nx = 200
+Solver.Mesh.Ny = 100
 Solver.Mesh.Nz = 1
+Solver.Loop.screen_loop_step = 1
+Solver.Loop.screen_output_step = 1000000
+Solver.Loop.vts_output_step = 1000000
+Solver.Loop.data_output_step = 1000000
+# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ADIABATIC
+Solver.Mesh.BoundaryCondition.x_up = 2
+Solver.Mesh.BoundaryCondition.x_down = 2
+Solver.Mesh.BoundaryCondition.y_up = 2
+Solver.Mesh.BoundaryCondition.y_down = 2
+Solver.Parallel.openmp_thread_counts = 10
+Solver.Phi.is_normalize = true
+Solver.PCT.TimeInterval.dt = 0.01
 
-Solver.Loop.vts_output_step = 100
+Postprocess.PCT.VTS.phi_index = true
+Postprocess.PCT.VTS.phi_name = true
 
-Solver.Phases = {[(Grain0),()]} 
+Solver.Phases = {[(Grain0),()],[(Grain1),()]} 
+
+# ModelsManager.Phi.equation : 0 - Const, 1 - AllenCahn Standard, 2 - AllenCahn Pairwise, 3 - CahnHilliard Standard
+ModelsManager.Phi.equation = 2
+# ModelsManager.Phi.Lij.const  = Lij_value 
+#                      .matrix = [(phi_i, phi_j, Lij_value), ... ] 
+#                      .block = [(phi_begin, phi_end, Lij_value), ... ] 
+ModelsManager.Phi.Lij.const = 1.000000
+# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 2
+# ModelsManager.Phi.InterfaceEnergy.int_potential : 0 - Nestler_Well , 1 - Nestler_Obstacle , 2 - Steinbach_P2009
+ModelsManager.Phi.InterfaceEnergy.int_potential = 2
+ModelsManager.Phi.InterfaceEnergy.int_width = 5.000000
+# ModelsManager.Phi.xi_ab.const  = xi_ab 
+#                        .matrix = [(phi_a, phi_b, xi_ab_value), ...] 
+ModelsManager.Phi.xi_ab.const = 1.000000
+# ModelsManager.Phi.xi_abc.const  = xi_ab 
+#                         .matrix = [(phi_a, phi_b, phi_c, xi_abc_value), ...] 
+ModelsManager.Phi.xi_abc.const = 0.000000
 
 ###### Microstructure
 Preprocess.Microstructure.matrix = {[(0),(Grain0),()],[()],[(0.0)]}
+# .property = [(phi_index_begin, phi_index_end), (phi_name, ... ),(phi_weight, ...)] 
+Preprocess.Microstructure.voronoi.property = [(1,20),(Grain0,Grain1),(0.5,0.5)]
+# .box = [(box_origin_point),(box_end_point)] 
+Preprocess.Microstructure.voronoi.box = [(0,0,0),(200,100,0)]
+Preprocess.Microstructure.voronoi.rand_seed = 4
+Preprocess.Microstructure.voronoi.point_distance = 29
 
 Preprocess.Microstructure.geometry_layer_number = 1
-# .property = (phi_index, phi_name, geometry_type, rotation_gauge, reverse_region) 
+# .property = (phi_index, phi_name, geometry_type, rotation_gauge, reverse_region)
 #              geometry_type  : 0 - None, 1 - Ellipsoid, 2 - Polyhedron 
 #              rotation_gauge : 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
 #                               6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
 Preprocess.Microstructure.geometry_layer_0.property = (0,Grain0,1,1,false)
-# .ellipsoid = [(core_x,core_y,core_z),(radius_x,radius_y,radius_z),(rotation_radian_1,rotation_radian_2,rotation_radian_3)] 
-Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(49.5,0,0),(0.6,0.6,0),(0,0,0)]
-Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
-Preprocess.Microstructure.geometry_layer_0.is_normalized = TRUE
-# .custom_double = [(custom_0_index, custom_0_value),(custom_1_index, custom_1_value), ...] 
+# .ellipsoid = [(core_x,core_y,core_z),(radius_x,radius_y,radius_z),(rotation_radian_1,rotation_radian_2,rotation_radian_3)]
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,49,0),(20.0,0.6,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.phi = 0
+Preprocess.Microstructure.geometry_layer_0.is_normalized = false
+# .custom_double = [(custom_0_index, custom_0_value),(custom_1_index, custom_1_value), ...]
 Preprocess.Microstructure.geometry_layer_0.custom_double = [(0,1.0)]
+# Preprocess.Microstructure.geometry_layer_1.property = (1,Grain1,2,1,false)
+# .polyhedron = {[inside_point],[surf_point,surf_point,surf_point], .... ,[(rotation_angle_1,rotation_angle_2,rotation_angle_3)]} 
+#                point = (position_x,position_y,position_z) 
+# Preprocess.Microstructure.geometry_layer_1.polyhedron = {[(100,50,0)],[(0,75,0),(100,25,0),(100,25,1)],[(0,0,0)]}
+# Preprocess.Microstructure.geometry_layer_1.phi = 1.000000
+# Preprocess.Microstructure.geometry_layer_1.is_normalized = TRUE
 
 # Postprocess.physical_fields = (mechanic, fluid dynamic, electric) 
 Postprocess.physical_fields = (true,false,false)
 # Postprocess.SolidMechanics.momentum_balance = 0 - None , 1 - Explicit , 2 - Implicit 
-Postprocess.SolidMechanics.momentum_balance = 1
+Postprocess.SolidMechanics.momentum_balance = 2
 Postprocess.SolidMechanics.write_displacement_field = FALSE
 Postprocess.SolidMechanics.max_iteration_steps = 0
 Postprocess.SolidMechanics.debug = FALSE
-Postprocess.SolidMechanics.strain_accuracy = 0.001000
-Postprocess.SolidMechanics.solid_phases = (Grain0)
+Postprocess.SolidMechanics.strain_accuracy = 0.001
+Postprocess.SolidMechanics.solid_phases = (Grain0,Grain1)
 Postprocess.SolidMechanics.Stiffness.Grain0 = [(C11,C12,C12,0,0,0),(C12,C11,C12,0,0,0),(C12,C12,C11,0,0,0),(0,0,0,Gm,0,0),(0,0,0,0,Gm,0),(0,0,0,0,0,Gm)]
 Postprocess.SolidMechanics.EigenStrain.Grain0 = (0,0,0,0,0,0)
+Postprocess.SolidMechanics.Stiffness.Grain1 = [(C11,C12,C12,0,0,0),(C12,C11,C12,0,0,0),(C12,C12,C11,0,0,0),(0,0,0,Gm,0,0),(0,0,0,0,Gm,0),(0,0,0,0,0,Gm)]
+Postprocess.SolidMechanics.EigenStrain.Grain1 = (0,0,0,0,0,0)
 Postprocess.SolidMechanics.plasticity = FALSE
 
 # Postprocess.Crack.model = 1 - Single 
@@ -44,17 +89,22 @@ Postprocess.Crack.model = 1
 Postprocess.Crack.index = 0
 Postprocess.Crack.Solver.frequency = 1
 Postprocess.Crack.Solver.max_iterate_steps = 1000
-Postprocess.Crack.Solver.damage_threshold = 0.900000
-Postprocess.Crack.Solver.crack_epsilon = 0.000100
+Postprocess.Crack.Solver.damage_threshold = 0.99
+Postprocess.Crack.Solver.crack_epsilon = 0.0001
 Postprocess.Crack.Solver.dt = 0.01
-Postprocess.Crack.Solver.int_width = 3.000000
+Postprocess.Crack.Solver.dr = 1.0
+Postprocess.Crack.Solver.int_width = 1.0
 # Postprocess.Crack.model = 1 - Single 
-Postprocess.Crack.resistance = (1.0)
+Postprocess.Crack.resistance = (1.0,2.0)
+
+
+# Preprocess.relax_interface = (relax_steps, output_steps, fix_phi_after_relax) 
+Preprocess.relax_interface = (1000,100,false)
 
 
 ###### custom functions
-Define.Var = Gm,100
+Define.Var = Gm,1
 Define.Var = v,0.3
-Define.Var = Az,3.0
+Define.Var = Az,1.0
 Define.Func = C12@{[v*Gm/(1-2*v)]}@
 Define.Func = C11@{[(2*Gm/Az+C12<0>)]}@
