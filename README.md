@@ -1,13 +1,3 @@
-
-# Content
-- [MInDes](#mindes)
-  - [about](#mindes)
-  - [developers](#developers)
-  - [framework](#framework)
-- [Applications](#applications)
-  - [battery system](#battery-system)
-    - [half-cell simulation](#half-cell-simulation)
-
 # MInDes
 \- **M**icrostructure **In**telligent **Des**ign Core
 
