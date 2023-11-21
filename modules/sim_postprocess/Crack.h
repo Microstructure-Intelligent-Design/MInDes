@@ -45,9 +45,6 @@ namespace pf {
 		static vector<double> crack_noise_range;
 		static bool is_noise_on_crack = true;
 		static bool is_dfcrack_dphi_output = false;
-		//- initial
-		static bool is_crack_init_from_datafile = false;
-		static string crack_init_datafile = "";
 
 		static CrackPropagationModel crack_propagation_model() {
 			return crack_model;
@@ -78,12 +75,6 @@ namespace pf {
 
 		static void init_crack_field_default(FieldStorage_forPhaseNode& phaseMesh) {
 			bool is_crack_init_by_datafile = false;
-			if (micro_structure_init::is_init_by_datefile()) {
-				pf::Data_report data_report = micro_structure_init::get_datafile_info();
-				for (auto custom_var = data_report.custom_vars.begin(); custom_var < data_report.custom_vars.end(); custom_var++)
-					if (custom_var->index == ExternalFieldsPlus::EFP_Crack)
-						is_crack_init_by_datafile = true;
-			}
 			if (is_crack_init_by_datafile) {
 				if (crack_model == CrackPropagationModel::CPM_Single_Order_Parameter) {
 #pragma omp parallel for
@@ -129,40 +120,6 @@ namespace pf {
 								}
 							}
 				}
-			}
-		}
-
-		static void init_crack_field_from_datafile(FieldStorage_forPhaseNode& phaseMesh) {
-			string report = "> Init crack with datafile: " + crack_init_datafile + "\n";
-			Solvers::get_instance()->writer.add_string_to_txt_and_screen(report, LOG_FILE_NAME);
-			string datafile_path = Solvers::get_instance()->Infile_Folder_Path + dirSeparator + crack_init_datafile;
-			Data_report buff_report;
-			FieldStorage_forPhaseNode buff_mesh;
-			buff_mesh.init(phaseMesh.limit_x, phaseMesh.limit_y, phaseMesh.limit_z, phaseMesh.dr, phaseMesh._bc_x_up, phaseMesh._bc_y_up, phaseMesh._bc_z_up, phaseMesh._bc_x_down, phaseMesh._bc_y_down, phaseMesh._bc_z_down);
-			micro_structure_init::init_mesh_with_datafile(buff_mesh, buff_report, datafile_path, false);
-			if (crack_model == CrackPropagationModel::CPM_Single_Order_Parameter) {
-#pragma omp parallel for
-				for (int x = 0; x < phaseMesh.limit_x; x++)
-					for (int y = 0; y < phaseMesh.limit_y; y++)
-						for (int z = 0; z < phaseMesh.limit_z; z++) {
-							PhaseNode& node = phaseMesh(x, y, z);
-							PhaseNode& buff_node = buff_mesh(x, y, z);
-							node.customValues.add_double(ExternalFieldsPlus::EFP_Crack, buff_node.customValues[ExternalFieldsPlus::EFP_Crack]);
-							node.customValues.add_double(ExternalFieldsPlus::EFP_Crack_Incre, 0.0);
-						}
-			}
-			else if (crack_model == CrackPropagationModel::CPM_Multiple_Order_Parameter) {
-#pragma omp parallel for
-				for (int x = 0; x < phaseMesh.limit_x; x++)
-					for (int y = 0; y < phaseMesh.limit_y; y++)
-						for (int z = 0; z < phaseMesh.limit_z; z++) {
-							PhaseNode& node = phaseMesh(x, y, z);
-							PhaseNode& buff_node = buff_mesh(x, y, z);
-							for (auto phase = node.begin(); phase < node.end(); phase++) {
-								node.customValues.add_double(ExternalFieldsPlus::EFP_Crack + phase->index, buff_node.customValues[ExternalFieldsPlus::EFP_Crack + phase->index]);
-								node.customValues.add_double(ExternalFieldsPlus::EFP_Crack_Incre + phase->index, 0.0);
-							}
-						}
 			}
 		}
 
@@ -302,17 +259,6 @@ namespace pf {
 						dfmech_dcrack = crack_propagation_models::dfmech_dcrack_single;
 					else
 						dfmech_dcrack = crack_propagation_models::dfelas_dcrack_single;
-
-					if (InputFileReader::get_instance()->read_string_value("Postprocess.Crack.Init.datafile_path", crack_init_datafile, infile_debug)) {
-						is_crack_init_from_datafile = true;
-						init_crack_field_from_datafile(phaseMesh);
-					}
-					else {
-						is_crack_init_from_datafile = false;
-						init_crack_field_default(phaseMesh);
-					}
-
-					Solvers::get_instance()->data_writer.register_custom_value(ExternalFieldsPlus::EFP_Crack, Data_Custom_Flag::DCW_Value);
 
 					InputFileReader::get_instance()->read_int_value("Postprocess.Crack.Solver.frequency", solve_crack_steps, infile_debug);
 

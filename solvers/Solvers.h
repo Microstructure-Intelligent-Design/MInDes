@@ -175,9 +175,7 @@ namespace pf {
 			Infile_Folder_Path = pf::GetFolderOfPath(input_file_path);
 			Working_Folder_Path = Infile_Folder_Path + dirSeparator + working_folder_name;
 			writer.init(Working_Folder_Path);
-			data_writer.set_path(Working_Folder_Path);
 			writer.init_txt_file(LOG_FILE_NAME);
-			data_writer.set_mainName(DATA_FILE_NAME);
 		}
 		void run() {
 			// timer
@@ -215,8 +213,6 @@ namespace pf {
 				output_to_screen("");
 			if (parameters.vts_output_step > 0)
 				output_to_vts(WriteVTSType::WVTSType_INIT);
-			if (parameters.data_output_step > 0)
-				data_writer.write_dataFile(phaseMesh, "_init");
 			timer::time_interval_precision_secs_end(output_times);
 			Solvers_Timer.t_interval_output += output_times;
 
@@ -264,10 +260,7 @@ namespace pf {
 			timer::time_interval_precision_secs_begin(output_times);
 
 			if (parameters.data_output_step > 0) {
-				if (data_writer.write_dataFile(phaseMesh, "_end"))
-					writer.add_string_to_txt_and_screen("> An data file has been saved at the end of Program! \n", LOG_FILE_NAME);
-				else
-					writer.add_string_to_txt_and_screen("> Error, write data file failed at the end of Program! \n", LOG_FILE_NAME);
+				writer.add_string_to_txt_and_screen("> Error, write data file failed at the end of Program! \n", LOG_FILE_NAME);
 			}
 			if (parameters.vts_output_step > 0)
 				output_to_vts(WriteVTSType::WVTSType_END);
@@ -314,7 +307,6 @@ namespace pf {
 		string Working_Folder_Path;
 		string Infile_Folder_Path;
 		WriteToFile writer;
-		DataFile data_writer;
 		int current_istep;
 		double real_time;
 		// parameters adjusted elsewhere

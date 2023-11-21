@@ -24,19 +24,6 @@ using namespace std;
 namespace pf {
 	namespace micro_structure_init {
 		NucleationBox nucleation_box;
-		static double voronoi_point_distance = -1.0;
-		bool is_voronoi_rand = true;
-		static int rand_seed = 0;
-		static bool is_datafile_init = false;
-		static pf::Data_report datafile_report;
-		//-
-		static bool is_init_by_datefile() {
-			return is_datafile_init;
-		}
-		static pf::Data_report get_datafile_info() {
-			return datafile_report;
-		}
-		//-
 
 		static bool add_new_phi_by_index(int phi_index, int phi_property, double phi_value = 0.0) {
 			//int componentFluxDrivingForce = information->settings.details_settings.flux_model;
@@ -541,123 +528,11 @@ namespace pf {
 			}
 		}
 
-		static void init_mesh_with_datafile(FieldStorage_forPhaseNode& phaseMesh, Data_report& report, string datafile_path, bool infile_debug) {
-			if (!Solvers::get_instance()->data_writer.read_dataFile(phaseMesh, datafile_path, datafile_report)) {
-				string _report = "> Error : datafile_path can't be opened ! \n";
-				if (infile_debug)
-					InputFileReader::get_instance()->debug_writer->add_string_to_txt(_report, InputFileReader::get_instance()->debug_file);
-				Solvers::get_instance()->writer.add_string_to_txt_and_screen(_report, LOG_FILE_NAME);
-				std::exit(0);
-			}
-			else {
-				// check datafile with this input file
-				vector<string> bc_type; bc_type.push_back("FIXED"); bc_type.push_back("PERIODIC"); bc_type.push_back("ADIABATIC");
-				vector<string> bool_type; bool_type.push_back("IN-VALID"); bool_type.push_back("VALID");
-				vector<string> custom_type; custom_type.push_back("DOUBLE"); custom_type.push_back("INT"); custom_type.push_back("VEC3");
-				stringstream _report;
-				_report << "> " << endl;
-				bool line_valid = true, all_valid = true;
-				_report << "> | init microstructure with datafile :                    (check in this simulation)" << endl;
-				if (datafile_report.Nx == phaseMesh.limit_x && datafile_report.Ny == phaseMesh.limit_y && datafile_report.Nz == phaseMesh.limit_z && datafile_report.dr == phaseMesh.dr)
-					line_valid = true;
-				else {
-					line_valid = false;
-					all_valid = false;
-				}
-				_report << "> | mesh size               : Nx - " << datafile_report.Nx << ", Ny - " << datafile_report.Ny << ", Nz - " << datafile_report.Nz << ", dr - " << datafile_report.dr << " (" << bool_type[line_valid] << ")" << endl;
-				if (datafile_report.x_down_bc == phaseMesh._bc_x_down && datafile_report.x_up_bc == phaseMesh._bc_x_up)
-					line_valid = true;
-				else {
-					line_valid = false;
-				}
-				_report << "> | mesh boundary           : x_down - " << bc_type[datafile_report.x_down_bc] << ", x_up - " << bc_type[datafile_report.x_up_bc] << " (" << bool_type[line_valid] << ")" << endl;
-				if (datafile_report.y_down_bc == phaseMesh._bc_y_down && datafile_report.y_up_bc == phaseMesh._bc_y_up)
-					line_valid = true;
-				else {
-					line_valid = false;
-				}
-				_report << "> |                           y_down - " << bc_type[datafile_report.y_down_bc] << ", y_up - " << bc_type[datafile_report.y_up_bc] << " (" << bool_type[line_valid] << ")" << endl;
-				if (datafile_report.z_down_bc == phaseMesh._bc_z_down && datafile_report.z_up_bc == phaseMesh._bc_z_up)
-					line_valid = true;
-				else {
-					line_valid = false;
-				}
-				_report << "> |                           z_down - " << bc_type[datafile_report.z_down_bc] << ", z_up - " << bc_type[datafile_report.z_up_bc] << " (" << bool_type[line_valid] << ")" << endl;
-				for (auto phi = datafile_report.phi_property.begin(); phi < datafile_report.phi_property.end(); phi++) {
-					string _name = "";
-					for (auto p = Solvers::get_instance()->parameters.Phases.begin(); p < Solvers::get_instance()->parameters.Phases.end(); p++)
-						if (p->phi_property == phi->value) {
-							line_valid = true;
-							_name = p->phi_name;
-						}
-					if (_name.size() == 0) {
-						line_valid = false;
-						all_valid = false;
-					}
-					if (line_valid)
-						_report << "> | phi_" << phi->index << "                   : property - " << phi->value << " (" << _name << ")" << endl;
-					else
-						_report << "> | phi_" << phi->index << "                   : property - " << phi->value << " (" << " " << ")" << endl;
-					_report << "> |                           con - ";
-					for (auto phi_x = datafile_report.phi_comps[phi->index].begin(); phi_x < datafile_report.phi_comps[phi->index].end(); phi_x++)
-						_report << phi_x->index << ", ";
-					_report << endl;
-				}
-				if (datafile_report.comps.size() != 0) {
-					string _name = "";
-					for (auto c = Solvers::get_instance()->parameters.Components.begin(); c < Solvers::get_instance()->parameters.Components.end(); c++)
-						if (c->index == *datafile_report.comps.begin()) {
-							line_valid = true;
-							_name = c->name;
-						}
-					if (_name.size() == 0) {
-						line_valid = false;
-						all_valid = false;
-					}
-					if (line_valid)
-						_report << "> | components in domain        : con - " << *datafile_report.comps.begin() << " (" << _name << ")" << endl;
-					else
-						_report << "> | components in domain        : con - " << *datafile_report.comps.begin() << " (" << " " << ")" << endl;
-					for (auto comp = datafile_report.comps.begin() + 1; comp < datafile_report.comps.end(); comp++) {
-						string _name = "";
-						for (auto c = Solvers::get_instance()->parameters.Components.begin(); c < Solvers::get_instance()->parameters.Components.end(); c++)
-							if (c->index == *comp) {
-								line_valid = true;
-								_name = c->name;
-							}
-						if (_name.size() == 0) {
-							line_valid = false;
-							all_valid = false;
-						}
-						if (line_valid)
-							_report << "> |                             : con - " << *comp << " (" << _name << ")" << endl;
-						else
-							_report << "> |                             : con - " << *comp << " (" << " " << ")" << endl;
-					}
-				}
-				if (datafile_report.custom_vars.size() != 0) {
-					_report << "> | custom value                : index - " << datafile_report.custom_vars.begin()->index << ", type - " << custom_type[datafile_report.custom_vars.begin()->value] << endl;
-					for (auto vars = datafile_report.custom_vars.begin() + 1; vars < datafile_report.custom_vars.end(); vars++)
-						_report << "> |                             : index - " << vars->index << ", type - " << custom_type[vars->value] << endl;
-				}
-				_report << ">" << endl;
-				Solvers::get_instance()->writer.add_string_to_txt_and_screen(_report.str(), LOG_FILE_NAME);
-				if (all_valid == false) {
-					string error_report = "> Error : mesh data structure from datafile and inputfile mismatch ! \n";
-					if (infile_debug)
-						InputFileReader::get_instance()->debug_writer->add_string_to_txt(error_report, InputFileReader::get_instance()->debug_file);
-					Solvers::get_instance()->writer.add_string_to_txt_and_screen(error_report, LOG_FILE_NAME);
-					std::exit(0);
-				}
-			}
-		}
-
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
 			bool infile_debug = false;
 			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
 
-			InputFileReader::get_instance()->read_bool_value("Preprocess.Microstructure.is_datafile_init", is_datafile_init, infile_debug);
-			if (!is_datafile_init) {
+			if (true) {
 				vector<input_value> init_comps;
 				for (auto comp = Solvers::get_instance()->parameters.Components.begin(); comp < Solvers::get_instance()->parameters.Components.end(); comp++) {
 					input_value init_comp;
@@ -686,48 +561,6 @@ namespace pf {
 				
 				// read bmp24
 
-			}
-			else {
-				bool is_read_datafile_by_path = false;
-				string datafile_path = "DATA.dat";
-				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.Microstructure.datafile_path : relative path from infile folder.\n", InputFileReader::get_instance()->debug_file);
-				if (InputFileReader::get_instance()->read_string_value("Preprocess.Microstructure.datafile_path", datafile_path, infile_debug))
-					is_read_datafile_by_path = true;
-				datafile_path = Solvers::get_instance()->Infile_Folder_Path + dirSeparator + datafile_path;
-#ifdef _WIN32
-				if (!is_read_datafile_by_path) {
-					Solvers::get_instance()->writer.add_string_to_txt_and_screen("> Please select a datafile (in .dat format) to initialize the simulation mesh...", LOG_FILE_NAME);
-					SelectFilePath(datafile_path);
-				}
-#else
-				if (!is_read_datafile_by_path) {
-					InputFileReader::get_instance()->debug_writer->add_string_to_txt("> Error : Preprocess.Microstructure.datafile_path should be set here ! \n", InputFileReader::get_instance()->debug_file);
-					std::exit(0);
-				}
-#endif
-				string out = "> Open datafile: " + datafile_path + "\n";
-				Solvers::get_instance()->writer.add_string_to_txt_and_screen(out, LOG_FILE_NAME);
-				init_mesh_with_datafile(phaseMesh, datafile_report, datafile_path, infile_debug);
-				
-#pragma omp parallel for
-				for (int x = 0; x < phaseMesh.limit_x; x++)
-					for (int y = 0; y < phaseMesh.limit_y; y++)
-						for (int z = 0; z < phaseMesh.limit_z; z++) {
-							PhaseNode& node = phaseMesh(x, y, z);
-							for (auto phase = node.begin(); phase < node.end(); phase++) {
-								for (auto c = phase->x.begin(); c < phase->x.end(); c++) {
-									phase->potential.add_con(c->index);
-									phaseMesh.info_node[phase->index].potential.add_con(c->index);
-								}
-								for (auto comp1 = phase->x.begin(); comp1 < phase->x.end(); comp1++)
-									for (auto comp2 = phase->x.begin(); comp2 < phase->x.end(); comp2++)
-										phase->kinetics_coeff.set(comp1->index, comp2->index, 0.0);
-							}
-							for (auto comp1 = node.x.begin(); comp1 < node.x.end(); comp1++)
-								for (auto comp2 = node.x.begin(); comp2 < node.x.end(); comp2++)
-									node.kinetics_coeff.set(comp1->index, comp2->index, 0.0);
-						}
 			}
 
 			nucleation_box.nucleation_property = NucleationProperty::DefiniteNucleation;

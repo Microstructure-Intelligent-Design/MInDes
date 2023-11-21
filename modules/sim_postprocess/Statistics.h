@@ -31,12 +31,10 @@ namespace pf {
 		static bool is_phi_c_t_statistics = false;
 		static bool is_mechanical_statistics = false;
 		static bool is_electirc_statistics = false;
-		static bool is_datafiles_statistics = false;
 		static ConEquationType _con_type = ConEquationType::CEType_Const;
 		static ConEquationDomain _domain = ConEquationDomain::CEDomain_Standard;
 		static string file_name = "data_statistics";
 		static string statistics_separator = "     ";
-		static vector<string> datafile_paths;
 		static void init(FieldStorage_forPhaseNode& phaseMesh, bool is_mechanicas) {
 			bool infile_debug = false;
 			is_mechanical_field_on = is_mechanicas;
@@ -48,13 +46,6 @@ namespace pf {
 			InputFileReader::get_instance()->read_bool_value("Postprocess.Statistics.is_electricity", is_electirc_statistics, infile_debug);
 
 			InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.Statistics.datafiles = (datafile1, ... ) \n", InputFileReader::get_instance()->debug_file);
-			string datafiles_key = "Postprocess.Statistics.datafiles", datafiles_input = "()";
-			if (InputFileReader::get_instance()->read_string_value(datafiles_key, datafiles_input, infile_debug)) {
-				is_datafiles_statistics = true;
-				vector<input_value> datafiles_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, datafiles_key, datafiles_input, infile_debug);
-				for (int index = 0; index < datafiles_value.size(); index++)
-					datafile_paths.push_back(datafiles_value[index].string_value);
-			}
 
 			_con_type = Solvers::get_instance()->parameters.ConEType;
 			_domain = Solvers::get_instance()->parameters.ConEDomain;
@@ -222,73 +213,6 @@ namespace pf {
 			info_values << endl;
 			Solvers::get_instance()->writer.add_string_to_txt(info_values.str(), file_name);
 
-			if (is_datafiles_statistics) {
-				Solvers::get_instance()->writer.add_string_to_txt(">>> Statistics datafiles begin:\n", file_name);
-				Solvers::get_instance()->writer.add_string_to_txt_and_screen(">>> Statistics datafiles begin:\n", LOG_FILE_NAME);
-				for (int index = 0; index < datafile_paths.size(); index++) {
-					string report = "> step " + to_string(index) + " , input file : " + datafile_paths[index] + "\n";
-					Solvers::get_instance()->writer.add_string_to_txt_and_screen(report, LOG_FILE_NAME);
-
-					string datafile_path = Solvers::get_instance()->Infile_Folder_Path + dirSeparator + datafile_paths[index];
-					Data_report buff_report;
-					micro_structure_init::init_mesh_with_datafile(phaseMesh, buff_report, datafile_path, false);
-					if (is_mechanical_field_on) {
-						plastic_solver::init_plastic_field(phaseMesh);
-						mechanical_field::exec_pre(phaseMesh);
-					}
-					PhaseNode& info_node = Solvers::get_instance()->statistics_information_in_phaseMesh();
-					active_phi = 0.0;
-					int_sum_phi = 0.0;
-					int_potential = 0.0;
-					ave_stress.set_to_zero();
-					ave_strain.set_to_zero();
-					ave_plas_strain = 0.0;
-					statistics_info(phaseMesh, ave_stress, ave_strain, ave_plas_strain, int_potential, int_sum_phi, active_phi);
-					info_values.str("");
-					info_values << datafile_paths[index];
-					if (is_phi_c_t_statistics) {
-						for (auto phi = info_node.begin(); phi < info_node.end(); phi++)
-							info_values << statistics_separator << phi->phi; // for each phi
-						for (auto con = info_node.x.begin(); con < info_node.x.end(); con++)
-							info_values << statistics_separator << con->value; // for each con
-						for (auto pot = info_node.potential.begin(); pot < info_node.potential.end(); pot++)
-							info_values << statistics_separator << pot->value; // for each potential
-						if (_con_type == ConEquationType::CEType_GrandP || _con_type == ConEquationType::CEType_TotalX)
-							info_values << statistics_separator << active_phi / phaseMesh.limit_x / phaseMesh.limit_y / phaseMesh.limit_z;
-					}
-					if (is_mechanical_statistics) {
-						ave_stress /= phaseMesh.limit_x * phaseMesh.limit_y * phaseMesh.limit_z;
-						ave_strain /= phaseMesh.limit_x * phaseMesh.limit_y * phaseMesh.limit_z;
-						ave_plas_strain /= phaseMesh.limit_x * phaseMesh.limit_y * phaseMesh.limit_z;
-						vStrain app_strain = elastic_solver::get_applied_strain();
-						vStress app_stress = elastic_solver::get_applied_stress();
-						info_values << statistics_separator << app_strain[0];
-						info_values << statistics_separator << app_strain[1];
-						info_values << statistics_separator << app_strain[2];
-						info_values << statistics_separator << app_stress[0];
-						info_values << statistics_separator << app_stress[1];
-						info_values << statistics_separator << app_stress[2];
-						info_values << statistics_separator << ave_strain[0];
-						info_values << statistics_separator << ave_strain[1];
-						info_values << statistics_separator << ave_strain[2];
-						info_values << statistics_separator << ave_stress[0];
-						info_values << statistics_separator << ave_stress[1];
-						info_values << statistics_separator << ave_stress[2];
-						info_values << statistics_separator << ave_plas_strain;
-					}
-					if (is_electirc_statistics) {
-						if (int_sum_phi > SYS_EPSILON) {
-							int_potential /= int_sum_phi;
-						}
-						else {
-							int_potential = 0.0;
-						}
-						info_values << statistics_separator << int_potential;
-					}
-					info_values << endl;
-					Solvers::get_instance()->writer.add_string_to_txt(info_values.str(), file_name);
-				}
-			}
 		}
 
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {

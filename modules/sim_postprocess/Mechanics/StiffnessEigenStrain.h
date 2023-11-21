@@ -276,7 +276,7 @@ namespace pf {
 				eigenstrain_list.push_back(cal_eigenstrain_phi_dependent);
 
 			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.SolidMechanics.StiffnessEigenStrain.model = (model_1, model_2, ...)   0 - Normal, 1 - PhaseDependent_MolarVolume , 2 - RegionDependent \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.SolidMechanics.StiffnessEigenStrain.model = (model_1, model_2, ...)   0 - Normal, 1 - PhaseDependent_MolarVolume \n", InputFileReader::get_instance()->debug_file);
 			string stiffness_eigenstrain_key = "Postprocess.SolidMechanics.StiffnessEigenStrain.model", stiffness_eigenstrain_input = "(0)";
 			InputFileReader::get_instance()->read_string_value(stiffness_eigenstrain_key, stiffness_eigenstrain_input, infile_debug);
 			vector<input_value> stiffness_eigenstrain_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, stiffness_eigenstrain_key, stiffness_eigenstrain_input, infile_debug);
@@ -290,70 +290,6 @@ namespace pf {
 						molar_volume::phase_molar_volume.add_double(solid_phases[index], Vm);
 					}
 					InputFileReader::get_instance()->read_double_value("Postprocess.SolidMechanics.EigenStrain.MolarVolume.reference", molar_volume::ref_molar_volume, infile_debug);
-				}
-				else if (stiffness_eigenstrain_value[index].int_value == StiffnessEigenStrainType::ESType_GrainDependent && molar_volume::SESType == StiffnessEigenStrainType::ESType_None) {
-					molar_volume::SESType = StiffnessEigenStrainType::ESType_GrainDependent;
-					eigenstrain_list.push_back(molar_volume::eigenstrain_region_dependent_molarvolume);
-					//stiffness = molar_volume::stiffness_region_dependent;
-					for (int index = 0; index < solid_phases.size(); index++) {
-						double Vm = 1e-5;
-						InputFileReader::get_instance()->read_double_value("Postprocess.SolidMechanics.EigenStrain.MolarVolume." + Solvers::get_instance()->parameters.Phases[solid_phases[index]].phi_name, Vm, infile_debug);
-						molar_volume::phase_molar_volume.add_double(solid_phases[index], Vm);
-					}
-					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.SolidMechanics.EigenStrain.MolarVolume.regions = [(region_1),(region_2), ... ], (region) = (phi_index, ... ) \n", InputFileReader::get_instance()->debug_file);
-					string eigenstrain_region_key = "Postprocess.SolidMechanics.EigenStrain.MolarVolume.regions", eigenstrain_region_input = "[()]";
-					if (InputFileReader::get_instance()->read_string_value(eigenstrain_region_key, eigenstrain_region_input, infile_debug)) {
-						vector<vector<input_value>> eigenstrain_region_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_INT, eigenstrain_region_key, eigenstrain_region_input, infile_debug);
-						molar_volume::region_num = int(eigenstrain_region_value.size());
-						for (int region_index = 0; region_index < molar_volume::region_num; region_index++) {
-							vector<int> def_region;
-							for (int phi_index = 0; phi_index < eigenstrain_region_value[region_index].size(); phi_index++)
-								def_region.push_back(eigenstrain_region_value[region_index][phi_index].int_value);
-							molar_volume::region_phi_index.push_back(def_region);
-						}
-					}
-					bool is_read_datafile_by_path = false;
-					string region_datafile_path = "DATA.dat", reference_datafile_path = "DATA.dat";
-					if (infile_debug)
-						InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.SolidMechanics.EigenStrain.MolarVolume.RegionsInit.datafile_path : relative path from infile folder.\n", InputFileReader::get_instance()->debug_file);
-					if (InputFileReader::get_instance()->read_string_value("Postprocess.SolidMechanics.EigenStrain.MolarVolume.RegionsInit.datafile_path", region_datafile_path, infile_debug))
-						is_read_datafile_by_path = true;
-					region_datafile_path = Solvers::get_instance()->Infile_Folder_Path + dirSeparator + region_datafile_path;
-					if (is_read_datafile_by_path) {
-						if (infile_debug)
-							InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.SolidMechanics.EigenStrain.MolarVolume.Reference.datafile_path : relative path from infile folder.\n", InputFileReader::get_instance()->debug_file);
-						InputFileReader::get_instance()->read_string_value("Postprocess.SolidMechanics.EigenStrain.MolarVolume.Reference.datafile_path", reference_datafile_path, infile_debug);
-						reference_datafile_path = Solvers::get_instance()->Infile_Folder_Path + dirSeparator + reference_datafile_path;
-						InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.SolidMechanics.EigenStrain.MolarVolume.regions_init = [(region_1),(region_2), ... ], (region) = (phi_index, ... ) \n", InputFileReader::get_instance()->debug_file);
-						string eigenstrain_region_init_key = "Postprocess.SolidMechanics.EigenStrain.MolarVolume.regions_init", eigenstrain_region_init_input = "[()]";
-						if (InputFileReader::get_instance()->read_string_value(eigenstrain_region_init_key, eigenstrain_region_init_input, infile_debug)) {
-							vector<vector<input_value>> eigenstrain_region_init_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_INT, eigenstrain_region_init_key, eigenstrain_region_init_input, infile_debug);
-							for (int region_index = 0; region_index < eigenstrain_region_init_value.size(); region_index++) {
-								vector<int> def_region;
-								for (int phi_index = 0; phi_index < eigenstrain_region_init_value[region_index].size(); phi_index++)
-									def_region.push_back(eigenstrain_region_init_value[region_index][phi_index].int_value);
-								molar_volume::region_phi_index_init.push_back(def_region);
-							}
-						}
-						molar_volume::check_eigenstrain_regions(phaseMesh.info_node);
-						FieldStorage_forPhaseNode buff_mesh;
-						buff_mesh.init(phaseMesh.limit_x, phaseMesh.limit_y, phaseMesh.limit_z, phaseMesh.dr, phaseMesh._bc_x_up, phaseMesh._bc_y_up, phaseMesh._bc_z_up,
-							phaseMesh._bc_x_down, phaseMesh._bc_y_down, phaseMesh._bc_z_down);
-						Data_report buff_report;
-						Solvers::get_instance()->writer.add_string_to_txt_and_screen("> Stiffness & EigenStrain RegionDependent init Regions: \n", LOG_FILE_NAME);
-						micro_structure_init::init_mesh_with_datafile(buff_mesh, buff_report, region_datafile_path, infile_debug);
-						molar_volume::init_regions(phaseMesh, buff_mesh);
-						Solvers::get_instance()->writer.add_string_to_txt_and_screen("> Stiffness & EigenStrain RegionDependent init reference state: \n", LOG_FILE_NAME);
-						micro_structure_init::init_mesh_with_datafile(buff_mesh, buff_report, reference_datafile_path, infile_debug);
-						molar_volume::init_reference_region_molar_volume(phaseMesh, buff_mesh);
-						buff_mesh.free();
-					}
-					else {
-						molar_volume::region_phi_index_init = molar_volume::region_phi_index;
-						molar_volume::check_eigenstrain_regions(phaseMesh.info_node);
-						molar_volume::init_regions(phaseMesh, phaseMesh);
-						molar_volume::init_reference_region_molar_volume(phaseMesh, phaseMesh);
-					}
 				}
 			}
 

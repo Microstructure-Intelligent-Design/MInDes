@@ -275,10 +275,7 @@ namespace pf {
 	}
 	void Solvers::write_data_file() {
 		if (current_istep % parameters.data_output_step == 0) {
-			if (data_writer.write_dataFile(phaseMesh, "_step" + to_string(current_istep)))
-				writer.add_string_to_txt_and_screen("> An data file has been saved ! \n", LOG_FILE_NAME);
-			else
-				writer.add_string_to_txt_and_screen("> Error, write data file failed ! \n", LOG_FILE_NAME);
+			writer.add_string_to_txt_and_screen("> Error, write data file failed ! \n", LOG_FILE_NAME);
 		}
 	}
 	PhaseNode& Solvers::statistics_information_in_phaseMesh() {
