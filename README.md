@@ -9,7 +9,7 @@
     - [half-cell simulation](#half-cell-simulation)
 
 # MInDes
-\- **M**icrostructure **In**telligent **Des**ign Software
+\- **M**icrostructure **In**telligent **Des**ign Core
 
 Copyright (c) 2019-2023 **Science center for phase diagram, phase transition, material intelligent design and manufacture, Central South University, China**
 
@@ -35,28 +35,3 @@ Dr. Qi Huang  - qihuang0908@163.com
 <div align=center>
 <img src="https://github.com/hq5088028/MInDes/blob/main/guide/MInDes%20framework.png" width="1000px">
 </div>
-
-# Applications
-## Battery system
-### Half-cell simulation
-1. **Huang, Qi**, et al. "Phase-field simulation for voltage profile of LixSn nanoparticle during lithiation/delithiation." *Computational Materials Science* 220 (2023): 112047.
-
-<div align=center>
-<img src="https://github.com/hq5088028/MInDes/blob/main/guide/Publications/figures/nanoparticle.jpg" width="300px">
-</div>
-<div align=center>
-fig. 1.1 Modeling of multiphase transition processes in nanoparticle
-</div>
-<div align=center>
-<img src="https://github.com/hq5088028/MInDes/blob/main/guide/Publications/figures/cycling.jpg" width="800px">
-</div>
-<div align=center>
-fig. 1.2 Charge/discharge cycle of nanoparticle
-</div>
-<div align=center>
-<img src="https://github.com/hq5088028/MInDes/blob/main/guide/Publications/figures/data_distribution.jpg" width="700px">
-</div>
-<div align=center>
-fig. 1.3 The stress, energy density, diffusion potential distribution over the radius of the nanoparticle during lithiation and delithiation process
-</div>
-
