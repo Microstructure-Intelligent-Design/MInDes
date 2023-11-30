@@ -22,7 +22,6 @@ This program is free software: you can redistribute it and/or modify it under th
 #include "sim_preprocess/BoundaryCondition.h"
 #include "sim_preprocess/MicroStructureInit.h"
 #include "sim_preprocess/Pretreatment.h"
-#include "sim_preprocess/ChemEnergyCurve.h"
 #include "sim_preprocess/ConcentrationInit.h"
 
 namespace pf {
@@ -31,33 +30,28 @@ namespace pf {
 			pf::boundary_condition::init(phaseMesh);
 			pf::micro_structure_init::init(phaseMesh);
 			pf::pretreatment::init(phaseMesh);
-			pf::chemical_energy_curve::init(phaseMesh);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
 			// treatment for phi
 			pf::micro_structure_init::exec_pre(phaseMesh);
 			pf::pretreatment::exec_pre(phaseMesh);
-			// test for models
-			pf::chemical_energy_curve::exec_pre(phaseMesh);
 			// treatment for con
 			pf::concentration_init::exec_pre(phaseMesh);
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			string report = "";
-			report += pf::chemical_energy_curve::exec_loop(phaseMesh);
 			return report;
 		}
 		static void deinit(FieldStorage_forPhaseNode& phaseMesh) {
 			pf::boundary_condition::deinit(phaseMesh);
 			pf::micro_structure_init::deinit(phaseMesh);
 			pf::pretreatment::deinit(phaseMesh);
-			pf::chemical_energy_curve::deinit(phaseMesh);
 		}
 		static void write_scalar(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
-			pf::chemical_energy_curve::write_scalar(fout, phaseMesh);
+
 		}
 		static void write_vec3(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
-			pf::chemical_energy_curve::write_vec3(fout, phaseMesh);
+
 		}
 		static void load_module() {
 			Solvers::get_instance()->create_a_new_module(init, exec_pre, exec_loop, deinit, write_scalar, write_vec3);

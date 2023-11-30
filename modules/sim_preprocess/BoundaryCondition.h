@@ -27,7 +27,7 @@ namespace pf {
 		static int_box phi_source_boundary;
 		static tensor2_double con_source_boundary;
 		static tensor3_double phase_con_source_boundary;
-		static double_box grand_potential_source_boundary;
+		static tensor2_double grand_potential_source_boundary;
 
 		static int Nx = 1;
 		static int Ny = 1;
@@ -133,74 +133,50 @@ namespace pf {
 					{
 					case 0:  // down_x
 						if (node._x == 0) {
-							node.x[comp_index].value = 0.0;
-							for (auto phase = node.begin(); phase < node.end(); phase++)
-								for (auto comp = phase->x.begin(); comp < phase->x.end(); comp++)
-									if (comp->index == comp_index) {
-										comp->value = bc->value;
-										node.x[comp_index].value += comp->value * phase->phi;
-									}
-							node.potential[comp_index].value = df_dx(node, comp_index);
+							for (auto bc_x = bc->begin(); bc_x < bc->end(); bc_x++)
+								for (auto comp = node.potential.begin(); comp < node.potential.end(); comp++)
+									if (bc_x->index == comp->index)
+										comp->value = bc_x->val;
 						}
 						break;
 					case 1:  // up_x
 						if (node._x == Nx - 1) {
-							node.x[comp_index].value = 0.0;
-							for (auto phase = node.begin(); phase < node.end(); phase++)
-								for (auto comp = phase->x.begin(); comp < phase->x.end(); comp++)
-									if (comp->index == comp_index) {
-										comp->value = bc->value;
-										node.x[comp_index].value += comp->value * phase->phi;
-									}
-							node.potential[comp_index].value = df_dx(node, comp_index);
+							for (auto bc_x = bc->begin(); bc_x < bc->end(); bc_x++)
+								for (auto comp = node.potential.begin(); comp < node.potential.end(); comp++)
+									if (bc_x->index == comp->index)
+										comp->value = bc_x->val;
 						}
 						break;
 					case 2:  // down_y
 						if (node._y == 0) {
-							node.x[comp_index].value = 0.0;
-							for (auto phase = node.begin(); phase < node.end(); phase++)
-								for (auto comp = phase->x.begin(); comp < phase->x.end(); comp++)
-									if (comp->index == comp_index) {
-										comp->value = bc->value;
-										node.x[comp_index].value += comp->value * phase->phi;
-									}
-							node.potential[comp_index].value = df_dx(node, comp_index);
+							for (auto bc_y = bc->begin(); bc_y < bc->end(); bc_y++)
+								for (auto comp = node.potential.begin(); comp < node.potential.end(); comp++)
+									if (bc_y->index == comp->index)
+										comp->value = bc_y->val;
 						}
 						break;
 					case 3:  // up_y
 						if (node._y == Ny - 1) {
-							node.x[comp_index].value = 0.0;
-							for (auto phase = node.begin(); phase < node.end(); phase++)
-								for (auto comp = phase->x.begin(); comp < phase->x.end(); comp++)
-									if (comp->index == comp_index) {
-										comp->value = bc->value;
-										node.x[comp_index].value += comp->value * phase->phi;
-									}
-							node.potential[comp_index].value = df_dx(node, comp_index);
+							for (auto bc_y = bc->begin(); bc_y < bc->end(); bc_y++)
+								for (auto comp = node.potential.begin(); comp < node.potential.end(); comp++)
+									if (bc_y->index == comp->index)
+										comp->value = bc_y->val;
 						}
 						break;
 					case 4:  // down_z
 						if (node._z == 0) {
-							node.x[comp_index].value = 0.0;
-							for (auto phase = node.begin(); phase < node.end(); phase++)
-								for (auto comp = phase->x.begin(); comp < phase->x.end(); comp++)
-									if (comp->index == comp_index) {
-										comp->value = bc->value;
-										node.x[comp_index].value += comp->value * phase->phi;
-									}
-							node.potential[comp_index].value = df_dx(node, comp_index);
+							for (auto bc_z = bc->begin(); bc_z < bc->end(); bc_z++)
+								for (auto comp = node.potential.begin(); comp < node.potential.end(); comp++)
+									if (bc_z->index == comp->index)
+										comp->value = bc_z->val;
 						}
 						break;
 					case 5:  // up_z
 						if (node._z == Nz - 1) {
-							node.x[comp_index].value = 0.0;
-							for (auto phase = node.begin(); phase < node.end(); phase++)
-								for (auto comp = phase->x.begin(); comp < phase->x.end(); comp++)
-									if (comp->index == comp_index) {
-										comp->value = bc->value;
-										node.x[comp_index].value += comp->value * phase->phi;
-									}
-							node.potential[comp_index].value = df_dx(node, comp_index);
+							for (auto bc_z = bc->begin(); bc_z < bc->end(); bc_z++)
+								for (auto comp = node.potential.begin(); comp < node.potential.end(); comp++)
+									if (bc_z->index == comp->index)
+										comp->value = bc_z->val;
 						}
 						break;
 					default:
@@ -388,15 +364,16 @@ namespace pf {
 			else if (Solvers::get_instance()->parameters.ConEType == ConEquationType::CEType_GrandP) {
 				df_dx = Solvers::get_instance()->C_Solver.df_dx;
 				if (infile_debug)
-					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# .boundary = [(boundary, value), ... ] \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# .boundary = [(boundary, con_name, value), ... ] \n", InputFileReader::get_instance()->debug_file);
 				if (infile_debug)
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("#              boundary : 0 - x_down , 1 - x_up , 2 - y_down , 3 - y_up , 4 - z_down , 5 - z_up \n", InputFileReader::get_instance()->debug_file);
 				string potential_boundary_key = "Solver.Mesh.BoundaryCondition.Potential.Fix.boundary", potential_boundary_input = "[()]";
 				if (InputFileReader::get_instance()->read_string_value(potential_boundary_key, potential_boundary_input, infile_debug)) {
-					vector<InputValueType> potential_boundary_structure; potential_boundary_structure.push_back(InputValueType::IVType_INT); potential_boundary_structure.push_back(InputValueType::IVType_DOUBLE);
+					vector<InputValueType> potential_boundary_structure; potential_boundary_structure.push_back(InputValueType::IVType_INT); 
+					potential_boundary_structure.push_back(InputValueType::IVType_STRING); potential_boundary_structure.push_back(InputValueType::IVType_DOUBLE);
 					vector<vector<input_value>> potential_boundary_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(potential_boundary_structure, potential_boundary_key, potential_boundary_input, infile_debug);
 					for (auto potential_boundary = potential_boundary_value.begin(); potential_boundary < potential_boundary_value.end(); potential_boundary++) {
-						grand_potential_source_boundary.add_double((*potential_boundary)[0].int_value, (*potential_boundary)[1].double_value);
+						grand_potential_source_boundary.add_double((*potential_boundary)[0].int_value, Solvers::get_instance()->parameters.Components[(*potential_boundary)[1].string_value].index, (*potential_boundary)[2].double_value);
 					}
 				}
 			}

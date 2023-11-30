@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 	if (!fin) {
 		is_init_by_last = false;
 		fin.close();
-		pf::printf_color_on_control("> Some information/funtions of MInDes (I/i), or normal initialization?");
+		pf::printf_color_on_control("> Some information/funtions of MInDes (I/i), or normal initialization (N/n)?");
 		cout << endl;
 		char c = getchar(); char enter = getchar(); //get enter
 		if (c == 'i' || c == 'I') {
