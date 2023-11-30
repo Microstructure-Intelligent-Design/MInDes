@@ -23,5 +23,5 @@ Dr. Qi Huang  - qihuang0908@163.com
 ## Framework
 
 <div align=center>
-<img src="https://github.com/hq5088028/MInDes/blob/main/guide/MInDes%20framework.png" width="1000px">
+<img src="https://github.com/Microstructure-Intelligent-Design/Documents/blob/main/BrainMaps/MInDes%20framework.png" width="1000px">
 </div>
