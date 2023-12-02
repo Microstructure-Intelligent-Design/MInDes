@@ -30,7 +30,7 @@ namespace pf {
 	using namespace std;
 
 	enum NucleationProperty { DefiniteNucleation, ConditionalNucleation, UserDefined_Nucleated};
-	enum Geometry{ Geo_None, Geo_Ellipsoid, Geo_Polyhedron};
+	enum Geometry { Geo_None, Geo_Ellipsoid, Geo_Polyhedron, Geo_Cylindricity };
 	enum NucleationPosition { NP_Anywhere, NP_Bulk, NP_Interface };
 	enum NucleationConcentration { NC_Default, NC_Defined};
 
@@ -200,6 +200,80 @@ namespace pf {
 		RotationGauge rotationGauge;
 	};
 
+	struct Cylindricity {
+		//> (x - core.x) * (x - core.x) / radius_x / radius_x + (y - core.y) * (y - core.y) / radius_y / radius_y + (z - core.z) * (z - core.z) / radius_z / radius_z = 1.0
+		Cylindricity() {
+			radius_x = 0.0;
+			radius_z = 0.0;
+			half_height = 0.0;
+			radian_x = 0.0;
+			radian_y = 0.0;
+			radian_z = 0.0;
+			rotationGauge = RotationGauge::RG_XYX;
+		}
+		void set_core(double x, double y, double z) {
+			core.x = x;
+			core.y = y;
+			core.z = z;
+		}
+		void set_radius(double x_radius, double z_radius) {
+			radius_x = abs(x_radius) + SYS_EPSILON;
+			radius_z = abs(z_radius) + SYS_EPSILON;
+		}
+		void set_half_height(double _half_height) {
+			half_height = abs(_half_height) + SYS_EPSILON;
+		}
+		void set_rotation_radian_and_rotation_gauge(double _radian[3], RotationGauge _rotationGauge) {
+			radian_x = -_radian[0];
+			radian_y = -_radian[1];
+			radian_z = -_radian[2];
+			rotationGauge = _rotationGauge;
+		}
+		bool check_point_inside_cylindricity(double x, double y, double z) {
+			double test = (x - core.x) * (x - core.x) / radius_x / radius_x + (z - core.z) * (z - core.z) / radius_z / radius_z;
+			if (test <= 1.0) {
+				if (abs(y - core.y) <= half_height)
+					return true;
+				else
+					return false;
+			}
+			else {
+				return false;
+			}
+		}
+		bool check_point_inside_cylindricity(Point p) {
+			double test = (p.x - core.x) * (p.x - core.x) / radius_x / radius_x + (p.z - core.z) * (p.z - core.z) / radius_z / radius_z;
+			if (test <= 1.0) {
+				if (abs(p.y - core.y) <= half_height)
+					return true;
+				else
+					return false;
+			}
+			else {
+				return false;
+			}
+		}
+		Cylindricity& operator=(const Cylindricity& n) {
+			this->core = n.core;
+			this->radius_x = n.radius_x;
+			this->radius_z = n.radius_z;
+			this->half_height = n.half_height;
+			this->radian_x = n.radian_x;
+			this->radian_y = n.radian_y;
+			this->radian_z = n.radian_z;
+			rotationGauge = n.rotationGauge;
+			return *this;
+		}
+		Point core;
+		double radius_x;
+		double radius_z;
+		double half_height;
+		double radian_x;
+		double radian_y;
+		double radian_z;
+		RotationGauge rotationGauge;
+	};
+
 	struct Polyhedron {
 		Polyhedron(int inside_x = 0, int inside_y = 0, int inside_z = 0) {
 			point_inside_polyhedron.set(inside_x, inside_y, inside_z);
@@ -270,6 +344,7 @@ namespace pf {
 		Geometry geometryProperty;
 		Ellipsoid ellipSolid;
 		Polyhedron polyhedron;
+		Cylindricity cylindricity;
 		int generate_step; 
 		int phaseProperty;  
 		int phaseIndex;   
@@ -305,6 +380,7 @@ namespace pf {
 			this->phaseIndex = n.phaseIndex;
 			this->ellipSolid = n.ellipSolid;
 			this->polyhedron = n.polyhedron;
+			this->cylindricity = n.cylindricity;
 			this->x = n.x;
 			this->phi = n.phi;
 			this->customValues = n.customValues;

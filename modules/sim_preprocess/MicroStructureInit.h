@@ -452,6 +452,119 @@ namespace pf {
 									<< geo->polyhedron.point_inside_polyhedron.x << ", " << geo->polyhedron.point_inside_polyhedron.y << ", " << geo->polyhedron.point_inside_polyhedron.z << " )." << std::endl;
 								Solvers::get_instance()->writer.add_string_to_txt_and_screen(report.str(), LOG_FILE_NAME);
 					}
+					else if (geo->geometryProperty == Geometry::Geo_Cylindricity) {
+						for (int z = 0; z < phaseMesh.limit_z; z++)
+							for (int y = 0; y < phaseMesh.limit_y; y++)
+								for (int x = 0; x < phaseMesh.limit_x; x++) {
+									PhaseNode& node = phaseMesh(x, y, z);
+									// Vector3 p(x, y, z);
+									Vector3 p(x - geo->cylindricity.core.x, y - geo->cylindricity.core.y, z - geo->cylindricity.core.z);
+									p.do_rotate(RotationMatrix::rotationMatrix(Vector3(geo->cylindricity.radian_x, geo->cylindricity.radian_y, geo->cylindricity.radian_z),
+										geo->cylindricity.rotationGauge));
+									p[0] += geo->cylindricity.core.x;
+									p[1] += geo->cylindricity.core.y;
+									p[2] += geo->cylindricity.core.z;
+									Point po(p[0], p[1], p[2]);
+									bool check0 = geo->cylindricity.check_point_inside_cylindricity(po);
+									if (!geo->isReverseRegion && check0) {
+										if (geo->isNormalized) {
+											double sum_phis = 0.0;
+											for (auto p = node.begin(); p < node.end(); p++)
+												if (p->phi > SYS_EPSILON && p->index != geo->phaseIndex)
+													sum_phis += p->phi;
+											if (sum_phis > SYS_EPSILON) {
+												for (auto p = node.begin(); p < node.end(); p++) {
+													if (p->phi > SYS_EPSILON && p->index != geo->phaseIndex)
+														p->phi *= (1.0 - geo->phi) / sum_phis;
+													if (p->phi < Phi_Num_Cut_Off) {
+														for (auto comp = p->x.begin(); comp < p->x.end(); comp++)
+															comp->value = 0.0;
+													}
+												}
+											}
+											else {
+												for (auto p = node.begin(); p < node.end(); p++) {
+													for (auto comp = p->x.begin(); comp < p->x.end(); comp++)
+														comp->value = 0.0;
+												}
+											}
+										}
+										node[geo->phaseIndex].phi = geo->phi;
+										if (node[geo->phaseIndex].phi > Phi_Num_Cut_Off) {
+											for (auto cc = node[geo->phaseIndex].x.begin(); cc < node[geo->phaseIndex].x.end(); cc++)
+												cc->value = geo->x[cc->index].value;
+										}
+										else {
+											for (auto cc = node[geo->phaseIndex].x.begin(); cc < node[geo->phaseIndex].x.end(); cc++)
+												cc->value = 0.0;
+										}
+										for (auto cc = node.x.begin(); cc < node.x.end(); cc++)
+											for (auto xx = geo->x.begin(); xx < geo->x.end(); xx++)
+												if (cc->index == xx->index)
+													cc->value = xx->value;
+										for (auto value = geo->customValues.begin(); value < geo->customValues.end(); value++)
+											node.customValues.add_double(value->index, value->value);
+										for (auto flag = geo->customFlags.begin(); flag < geo->customFlags.end(); flag++)
+											node.customFlags.add_int(flag->index, flag->value);
+										for (auto vec = geo->customVec3s.begin(); vec < geo->customVec3s.end(); vec++)
+											node.customVec3s.add_vec(vec->index, vec->vec);
+										for (auto vec = geo->customVec6s.begin(); vec < geo->customVec6s.end(); vec++)
+											node.customVec6s.add_vec(vec->index, vec->vec);
+										node.temperature.T = geo->temperature;
+									}
+									else if (geo->isReverseRegion && !check0) {
+										if (geo->isNormalized) {
+											double sum_phis = 0.0;
+											for (auto p = node.begin(); p < node.end(); p++)
+												if (p->phi > SYS_EPSILON && p->index != geo->phaseIndex)
+													sum_phis += p->phi;
+											if (sum_phis > SYS_EPSILON) {
+												for (auto p = node.begin(); p < node.end(); p++) {
+													if (p->phi > SYS_EPSILON && p->index != geo->phaseIndex)
+														p->phi *= (1.0 - geo->phi) / sum_phis;
+													if (p->phi < Phi_Num_Cut_Off) {
+														for (auto comp = p->x.begin(); comp < p->x.end(); comp++)
+															comp->value = 0.0;
+													}
+												}
+											}
+											else {
+												for (auto p = node.begin(); p < node.end(); p++) {
+													for (auto comp = p->x.begin(); comp < p->x.end(); comp++)
+														comp->value = 0.0;
+												}
+											}
+										}
+										node[geo->phaseIndex].phi = geo->phi;
+										if (node[geo->phaseIndex].phi > Phi_Num_Cut_Off) {
+											for (auto cc = node[geo->phaseIndex].x.begin(); cc < node[geo->phaseIndex].x.end(); cc++)
+												cc->value = geo->x[cc->index].value;
+										}
+										else {
+											for (auto cc = node[geo->phaseIndex].x.begin(); cc < node[geo->phaseIndex].x.end(); cc++)
+												cc->value = 0.0;
+										}
+										for (auto cc = node.x.begin(); cc < node.x.end(); cc++)
+											for (auto xx = geo->x.begin(); xx < geo->x.end(); xx++)
+												if (cc->index == xx->index)
+													cc->value = xx->value;
+										for (auto value = geo->customValues.begin(); value < geo->customValues.end(); value++)
+											node.customValues.add_double(value->index, value->value);
+										for (auto flag = geo->customFlags.begin(); flag < geo->customFlags.end(); flag++)
+											node.customFlags.add_int(flag->index, flag->value);
+										for (auto vec = geo->customVec3s.begin(); vec < geo->customVec3s.end(); vec++)
+											node.customVec3s.add_vec(vec->index, vec->vec);
+										for (auto vec = geo->customVec6s.begin(); vec < geo->customVec6s.end(); vec++)
+											node.customVec6s.add_vec(vec->index, vec->vec);
+										node.temperature.T = geo->temperature;
+									}
+								}
+						stringstream report;
+						report << "> A new Cylindricity for grain : " << to_string(geo->phaseIndex) << " phase: " << Solvers::get_instance()->parameters.Phases[geo->phaseProperty].phi_name << " has been initialized at position ( "
+							<< geo->cylindricity.core.x << ", " << geo->cylindricity.core.y << ", " << geo->cylindricity.core.z << " )." << std::endl;
+						Solvers::get_instance()->writer.add_string_to_txt_and_screen(report.str(), LOG_FILE_NAME);
+
+						}
 					geo = nucleation_box.geometry_box.erase(geo);
 				}
 				else {
@@ -615,6 +728,19 @@ namespace pf {
 						int rIndex = int(layer_input_polyhedron_value.size() - 1);
 						double radian[] = { AngleToRadians(layer_input_polyhedron_value[rIndex][0][0].double_value), AngleToRadians(layer_input_polyhedron_value[rIndex][0][1].double_value), AngleToRadians(layer_input_polyhedron_value[rIndex][0][2].double_value) };
 						geo.polyhedron.set_rotation_radian_and_rotation_gauge(radian, rotation_gauge);
+					}
+					if (geo.geometryProperty == pf::Geometry::Geo_Cylindricity) {
+						if (infile_debug)
+							InputFileReader::get_instance()->debug_writer->add_string_to_txt("# .cylindricity = [(core_x,core_y,core_z),(radius_x,radius_z,half_height),(rotation_angle_1,rotation_angle_2,rotation_angle_3)] \n", InputFileReader::get_instance()->debug_file);
+						string layer_cylindricity_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".cylindricity";
+						string layer_input_cylindricity = "[(0,0,0),(0,0,0),(0,0,0)]";
+						InputFileReader::get_instance()->read_string_value(layer_cylindricity_key, layer_input_cylindricity, infile_debug);
+						vector<vector<input_value>> layer_input_cylindricity_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_DOUBLE, layer_cylindricity_key, layer_input_cylindricity, infile_debug);
+						geo.cylindricity.set_core(layer_input_cylindricity_value[0][0].double_value, layer_input_cylindricity_value[0][1].double_value, layer_input_cylindricity_value[0][2].double_value);
+						geo.cylindricity.set_radius(layer_input_cylindricity_value[1][0].double_value, layer_input_cylindricity_value[1][1].double_value);
+						geo.cylindricity.set_half_height(layer_input_cylindricity_value[1][2].double_value);
+						double radian[] = { AngleToRadians(layer_input_cylindricity_value[2][0].double_value), AngleToRadians(layer_input_cylindricity_value[2][1].double_value), AngleToRadians(layer_input_cylindricity_value[2][2].double_value) };
+						geo.cylindricity.set_rotation_radian_and_rotation_gauge(radian, rotation_gauge);
 					}
 					string layer_temp_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".T";
 					InputFileReader::get_instance()->read_double_value(layer_temp_key, geo.temperature, infile_debug);
