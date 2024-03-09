@@ -26,6 +26,11 @@ namespace pf {
 		static double reaction_a_none(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			return 0.0;
 		}
+		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			//- electrode reaction
+
+			return 0.0; //-result
+		}
 		static double (*reaction_a)(pf::PhaseNode& node, pf::PhaseEntry& phase);  // main function
 
 		// Concentration
@@ -37,6 +42,11 @@ namespace pf {
 		static double reaction_i_none(pf::PhaseNode& node, int con_i) {
 			return 0.0;
 		}
+		static double reaction_i_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			//- electrode reaction
+			// node.cal_customValues_gradient
+			return 0.0; //-result
+		}
 		static double (*reaction_i)(pf::PhaseNode& node, int con_i);   // main function
 
 		// Temperature
@@ -47,6 +57,7 @@ namespace pf {
 
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
 			reaction_a = reaction_a_none;
+
 			reaction_A = reaction_A_none;
 			reaction_i = reaction_i_none;
 			reaction_T = reaction_T_none;

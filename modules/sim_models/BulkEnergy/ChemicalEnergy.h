@@ -31,6 +31,7 @@ namespace pf {
 		dfdcon_N_CRACK_WELL,
 		dfdcon_N_CRACK_OBSTACLE,
 		dfdphi_HighOrder,
+		dfdphi_CHEN
 	};
 	enum dfdconType { // phi , total con , temperature
 		dfdcon_Const,
