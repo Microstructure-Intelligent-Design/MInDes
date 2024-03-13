@@ -69,7 +69,8 @@ const std::string dirSeparator = "/";                                       //< 
 #define ElementaryChargeQuantity double(1.6021892e-19)   // C
 #define AvogadroConstant double(6.02214076e23)  // mol -1
 #define NA double(6.02214076e23)  // mol -1
-#define FaradayConstant 96485.333  // C/mol
+//#define FaradayConstant 96485.333  // C/mol
+constexpr double FaradayConstant{ 96485.333 }; // C/mol
 #define VacuumPermeability_Magnetismus (PI*4e-7) // 
 #define AngleToRadians(angle) double(angle/180.0*PI)
 #define NaN double(-1e99)
