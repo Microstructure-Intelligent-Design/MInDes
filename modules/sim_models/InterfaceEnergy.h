@@ -287,7 +287,7 @@ namespace pf {
 				exit(0);
 			}
 		};
-		static void cal_interface_inrement_ac_pair_wise_normal(pf::PhaseNode& node, bool adjust_phi_0_1) {
+		static void cal_interface_increment_ac_pair_wise_normal(pf::PhaseNode& node, bool adjust_phi_0_1) {
 			//double first_term, second_term;
 			auto mobility = Solvers::get_instance()->Phi_Solver_AC.Lij;
 			///< simplified version, to avoid issues
@@ -336,7 +336,7 @@ namespace pf {
 						}
 			}
 		}
-		static void cal_interface_inrement_ac_pair_wise_accelarate(pf::PhaseNode& node, bool adjust_phi_0_1) {
+		static void cal_interface_increment_ac_pair_wise_accelarate(pf::PhaseNode& node, bool adjust_phi_0_1) {
 			//double first_term, second_term;
 			auto mobility = Solvers::get_instance()->Phi_Solver_AC.Lij;
 			///< simplified version, to avoid issues
@@ -384,7 +384,7 @@ namespace pf {
 			}
 
 		}
-		static void cal_interface_inrement_ac_standard(pf::PhaseNode& node, bool adjust_phi_0_1) {
+		static void cal_interface_increment_ac_standard(pf::PhaseNode& node, bool adjust_phi_0_1) {
 			auto mobility = Solvers::get_instance()->Phi_Solver_AC.Lij;
 			for (auto alpha = node.begin(); alpha < node.end(); alpha++) {
 				alpha->int_increment = 0.0;
@@ -395,7 +395,7 @@ namespace pf {
 				}
 			}
 		}
-		static double cal_interface_inrement_ch_standard(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+		static double cal_interface_increment_ch_standard(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			return dfint_dphi_grad_standard(node, phase);
 		}
 
@@ -411,7 +411,7 @@ namespace pf {
 
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.InterfaceEnergy.int_width", interface_width, infile_debug);
 
-				Solvers::get_instance()->Phi_Solver_AC.dfint_dphi = cal_interface_inrement_ac_pair_wise_normal;
+				Solvers::get_instance()->Phi_Solver_AC.dfint_dphi = cal_interface_increment_ac_pair_wise_normal;
 
 				if (Solvers::get_instance()->parameters.PhiEType == ConEquationType::CEType_PhaseX) {
 					Solvers::get_instance()->C_Solver.abs_grad_phi_AB = _abs_grad_phi_pairwise;
@@ -459,7 +459,7 @@ namespace pf {
 				interface_gradient = 3;
 				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.int_gradient", interface_gradient, infile_debug);
 
-				Solvers::get_instance()->Phi_Solver_AC.dfint_dphi = cal_interface_inrement_ac_standard;
+				Solvers::get_instance()->Phi_Solver_AC.dfint_dphi = cal_interface_increment_ac_standard;
 
 				if (infile_debug) {
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.xi_a.const  = xi_a \n", InputFileReader::get_instance()->debug_file);
@@ -483,7 +483,7 @@ namespace pf {
 				interface_gradient = 3;
 				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.int_gradient", interface_gradient, infile_debug);
 
-				Solvers::get_instance()->Phi_Solver_CH.dfint_dphi = cal_interface_inrement_ch_standard;
+				Solvers::get_instance()->Phi_Solver_CH.dfint_dphi = cal_interface_increment_ch_standard;
 
 				if (infile_debug) {
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.xi_a.const  = xi_a \n", InputFileReader::get_instance()->debug_file);

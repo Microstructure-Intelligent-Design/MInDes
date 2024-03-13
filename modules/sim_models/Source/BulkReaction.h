@@ -19,6 +19,7 @@ This program is free software: you can redistribute it and/or modify it under th
 
 #pragma once
 #include "../../Base.h"
+#include "../../sim_postprocess/ElectricField.h"
 
 namespace pf {
 	namespace bulk_reaction {
@@ -26,11 +27,40 @@ namespace pf {
 		static double reaction_a_none(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			return 0.0;
 		}
-		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
-			//- electrode reaction
 
-			return 0.0; //-result
+		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+
+			int liquid_index{};
+			InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.Liquid_Phase_Index", liquid_index, false);
+			double liquid_phi{ node[liquid_index].phi };
+
+			if (phase.index == liquid_index) return 0.0;
+			else if (phase.phi > 0.0 + SYS_EPSILON and phase.phi < 1.0 - SYS_EPSILON and liquid_phi>0.0 + SYS_EPSILON and liquid_phi < 1.0 - SYS_EPSILON) { // 0<phi<1 and 0<liq.phi<1
+				double charge_trans_coeff = 0.5, & alpha = charge_trans_coeff;
+				double reaction_constant{}, & L_eta = reaction_constant;
+				double& xi = phase.phi;
+
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, false);
+
+				auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_ = interpolate_func;
+
+				double electron_num{}, & n = electron_num;
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, false);
+
+				double E_std{};
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, false);
+
+				double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };//phi_electrode
+				double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };//phi_solution
+				auto eta_a = [&phi_electrode, &phi_solution, &E_std]()->double { return phi_electrode - phi_solution - E_std; };
+
+				auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a() / (GAS_CONSTANT * ROOM_TEMP)); };
+
+				return -L_eta * h_() * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
+			}
+			else return 0.0; //-result
 		}
+
 		static double (*reaction_a)(pf::PhaseNode& node, pf::PhaseEntry& phase);  // main function
 
 		// Concentration

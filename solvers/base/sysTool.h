@@ -84,6 +84,8 @@ const std::string dirSeparator = "/";                                       //< 
 
 static double phi_numerical_threshold = 1e-3;
 #define Phi_Num_Cut_Off phi_numerical_threshold
+constexpr auto GAS_CONSTANT{ 8.3145 }; //J/(mol K)
+constexpr auto ROOM_TEMP{ 298.15 }; // K
 
 static void change_phi_numerical_threshold(double numerical_thresold = 1e-3) {
 	phi_numerical_threshold = numerical_thresold;

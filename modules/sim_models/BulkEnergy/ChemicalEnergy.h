@@ -31,7 +31,7 @@ namespace pf {
 		dfdcon_N_CRACK_WELL,
 		dfdcon_N_CRACK_OBSTACLE,
 		dfdphi_HighOrder,
-		dfdphi_CHEN
+		dfdphi_DOUBLE_WELL_SIMPLE
 	};
 	enum dfdconType { // phi , total con , temperature
 		dfdcon_Const,
@@ -131,7 +131,7 @@ namespace pf {
 			if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Standard || Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_CH_Standard) {
 				int model_type = 0;
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 7 - HighOrder\n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 7 - HighOrder, 8 - SimpleDoubleWell\n", InputFileReader::get_instance()->debug_file);
 				InputFileReader::get_instance()->read_int_value("ModelsManager.PhiCon.BulkEnergy.type", model_type, infile_debug);
 				switch (model_type)
 				{
@@ -150,6 +150,9 @@ namespace pf {
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# No models for HighOrder with standard AC and CH equations\n", InputFileReader::get_instance()->debug_file);
 					std::exit(0);
 					break;
+				case pf::dfdphi_DOUBLE_WELL_SIMPLE:
+					dfchem_dphi = dfchem_dphi_double_well;
+					InputFileReader::get_instance()->read_double_value("ModelsManager.PhiCon.BulkEnergy.SimpleDoubleWell.A", DOUBLE_WELL_A, infile_debug);
 				default:
 					break;
 				}
