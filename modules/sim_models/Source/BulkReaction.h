@@ -28,6 +28,7 @@ namespace pf {
 			return 0.0;
 		}
 
+		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055
 		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 
 			int liquid_index{};
@@ -36,15 +37,15 @@ namespace pf {
 
 			if (phase.index == liquid_index) return 0.0;
 			else if (phase.phi > 0.0 + SYS_EPSILON and phase.phi < 1.0 - SYS_EPSILON and liquid_phi>0.0 + SYS_EPSILON and liquid_phi < 1.0 - SYS_EPSILON) { // 0<phi<1 and 0<liq.phi<1
-				double charge_trans_coeff = 0.5, & alpha = charge_trans_coeff;
-				double reaction_constant{}, & L_eta = reaction_constant;
-				double& xi = phase.phi;
+				double charge_trans_coeff { 0.5 }, & alpha{charge_trans_coeff};
+				double reaction_constant{}, & L_eta{ reaction_constant };
+				double& xi{ phase.phi };
 
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, false);
 
-				auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_ = interpolate_func;
+				auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
 
-				double electron_num{}, & n = electron_num;
+				double electron_num{}, & n{ electron_num };
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, false);
 
 				double E_std{};
@@ -73,8 +74,22 @@ namespace pf {
 			return 0.0;
 		}
 		static double reaction_i_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
-			//- electrode reaction
-			// node.cal_customValues_gradient
+
+			double diff_coef_ele{}, diff_coef_sol{}, & D_e{ diff_coef_ele }, & D_s{ diff_coef_sol };
+
+			double& xi = phase.phi;
+			auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
+
+			double D_eff{ D_e * h_() + D_s * (1 - h_()) };
+
+			double electron_num{}, & n{ electron_num };
+			InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, false);
+
+			double result{n*FaradayConstant/(GAS_CONSTANT*ROOM_TEMP)};
+
+			double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };//phi_solution
+			Vector3 grad_phi = node.cal_customValues_gradient(ElectricFieldIndex::ElectricalPotential);
+
 			return 0.0; //-result
 		}
 		static double (*reaction_i)(pf::PhaseNode& node, int con_i);   // main function
