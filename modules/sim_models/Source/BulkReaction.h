@@ -23,12 +23,12 @@ This program is free software: you can redistribute it and/or modify it under th
 
 namespace pf {
 	namespace bulk_reaction {
-		int liquid_index{};
-		double reaction_constant{};
-		double electron_num{};
-		double E_std{};
-		double diff_coef_ele{}, diff_coef_sol{};
-		double c_s{}, c_0{};
+		static vector<int> electrode_index{};
+		static double reaction_constant{};
+		static double electron_num{};
+		static double E_std{};
+		static double diff_coef_ele{}, diff_coef_sol{};
+		static double c_s{}, c_0{};
 		//------phi source-----//
 
 		static double (*reaction_a)(pf::PhaseNode& node, pf::PhaseEntry& phase);  // main function
@@ -37,15 +37,15 @@ namespace pf {
 			return 0.0;
 		}
 
+		static inline double interpolate_func(double xi) {
+			return 30.0 * xi * xi * (1 - xi) * (1 - xi);
+		}
 		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055
 		// Li dendrite growth, Butler Volmer type source
 		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
-
-			double liquid_phi{ node[liquid_index].phi };
-
-			if (phase.index == liquid_index) return 0.0;
-			else if (phase.phi > 0.0 + SYS_EPSILON and phase.phi < 1.0 - SYS_EPSILON and liquid_phi>0.0 + SYS_EPSILON and liquid_phi < 1.0 - SYS_EPSILON) { // 0<phi<1 and 0<liq.phi<1
-
+			if (phase.index == electrolyte_index) return 0.0;
+			double liquid_phi{ node[electrolyte_index].phi };
+			if (phase.phi > 0.0 + SYS_EPSILON and phase.phi < 1.0 - SYS_EPSILON and liquid_phi>0.0 + SYS_EPSILON and liquid_phi < 1.0 - SYS_EPSILON) { // 0<phi<1 and 0<liq.phi<1
 				double charge_trans_coeff { 0.5 }, & alpha{charge_trans_coeff};
 				double & L_eta{ reaction_constant },& xi{ phase.phi }, & n{ electron_num };
 
@@ -76,27 +76,27 @@ namespace pf {
 			return 0.0;
 		}
 
-		static double reaction_i_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+		static double reaction_i_electrode_reaction(pf::PhaseNode& node, int con_i) {
+			PhaseEntry& electrolyte = node[electrolyte_index];
 
 			double  & D_e{ diff_coef_ele }, & D_s{ diff_coef_sol };
 
-			double& xi = phase.phi;
-			auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
-
-			double D_eff{ D_e * h_() + D_s * (1 - h_()) };
+			double D_eff{ D_e * (1 - interpolate_func(electrolyte.phi)) + D_s * interpolate_func(electrolyte.phi) };
 
 			double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
 			Vector3 grad_phi{ node.cal_customValues_gradient(ElectricFieldIndex::ElectricalPotential) };
-			Vector3 grad_con{node.potential[liquid_index].gradient};
+			Vector3 grad_con{node.potential[electrolyte_index].gradient};
 			Vector3 grad_D_eff{/**/};
-			double con{node.potential[liquid_index].value};
+			double con{node.potential[electrolyte_index].value};
 			double lap_phi{ node.cal_customValues_laplace(ElectricFieldIndex::ElectricalPotential) };
+
+			node.kinetics_coeff.get_gradientVec3(index, index);
 
 			double& n{ electron_num };
 			double temp_const{ n * FaradayConstant / (GAS_CONSTANT * ROOM_TEMP) };
 			auto source_potential = [&]()->double {return temp_const*( D_eff*(grad_con*grad_phi) + con*(grad_phi*grad_D_eff)) + con * D_eff * lap_phi; };
 
-			double dxi_dt{ (phase.phi - phase.old_phi) / Solvers::get_instance()->parameters.dt };
+			double dxi_dt{ -(electrolyte.phi - electrolyte.old_phi) / Solvers::get_instance()->parameters.dt };
 			auto source_xi = [&dxi_dt]()->double {return -c_s / c_0 * dxi_dt; };
 			return source_potential() + source_xi();
 		}
@@ -109,21 +109,30 @@ namespace pf {
 		static double (*reaction_T)(pf::PhaseNode& node);   // main function
 
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
-
-			InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.Liquid_Phase_Index", liquid_index, false);
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, false);
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, false);
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, false);
-
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Electrode", diff_coef_ele, false);
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Solution", diff_coef_sol, false);
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, false);
-			InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, false);
+			bool infile_debug = false;
+			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
 
 			reaction_a = reaction_a_none;
 			reaction_A = reaction_A_none;
 			reaction_i = reaction_i_none;
 			reaction_T = reaction_T_none;
+
+			string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
+			if (InputFileReader::get_instance()->read_string_value(electrode_key, electrode_input, infile_debug)) {
+				vector<pf::input_value> electrode_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, electrode_key, electrode_input, infile_debug);
+				for (int index = 0; index < electrode_value.size(); index++)
+					electrode_index.push_back(electrode_value[index].int_value);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Electrode", diff_coef_ele, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Solution", diff_coef_sol, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, infile_debug);
+				reaction_a = reaction_a_electrode_reaction;
+				reaction_i = reaction_i_electrode_reaction;
+			}
+
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : Bulk Reaction !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
