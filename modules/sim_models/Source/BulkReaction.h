@@ -40,26 +40,22 @@ namespace pf {
 		static inline double interpolate_func(double xi) {
 			return 30.0 * xi * xi * (1 - xi) * (1 - xi);
 		}
+		auto& h_ = interpolate_func;
 		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055
 		// Li dendrite growth, Butler Volmer type source
 		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
-			if (phase.index == electrolyte_index) return 0.0;
-			double liquid_phi{ node[electrolyte_index].phi };
-			if (phase.phi > 0.0 + SYS_EPSILON and phase.phi < 1.0 - SYS_EPSILON and liquid_phi>0.0 + SYS_EPSILON and liquid_phi < 1.0 - SYS_EPSILON) { // 0<phi<1 and 0<liq.phi<1
-				double charge_trans_coeff { 0.5 }, & alpha{charge_trans_coeff};
-				double & L_eta{ reaction_constant },& xi{ phase.phi }, & n{ electron_num };
+			double charge_trans_coeff{ 0.5 }, & alpha{ charge_trans_coeff };
+			double& L_eta{ reaction_constant }, & xi{ phase.phi }, & n{ electron_num };
 
-				auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
+			auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
 
-				double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };
-				double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
-				auto eta_a = [&phi_electrode, &phi_solution]()->double { return phi_electrode - phi_solution - E_std; };
+			double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };
+			double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
+			auto eta_a = [&phi_electrode, &phi_solution]()->double { return phi_electrode - phi_solution - E_std; };
 
-				auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a() / (GAS_CONSTANT * ROOM_TEMP)); };
+			auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a() / (GAS_CONSTANT * ROOM_TEMP)); };
 
-				return -L_eta * h_() * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
-			}
-			else return 0.0; //-result
+			return -L_eta * h_() * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
 		}
 
 		//------concentration source-----//
@@ -79,28 +75,29 @@ namespace pf {
 		static double reaction_i_electrode_reaction(pf::PhaseNode& node, int con_i) {
 			PhaseEntry& electrolyte = node[electrolyte_index];
 
-			double  & D_e{ diff_coef_ele }, & D_s{ diff_coef_sol };
+			double& D_e{ diff_coef_ele }, & D_s{ diff_coef_sol };
 
 			double D_eff{ D_e * (1 - interpolate_func(electrolyte.phi)) + D_s * interpolate_func(electrolyte.phi) };
 
 			double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
 			Vector3 grad_phi{ node.cal_customValues_gradient(ElectricFieldIndex::ElectricalPotential) };
-			Vector3 grad_con{node.potential[electrolyte_index].gradient};
-			Vector3 grad_D_eff{/**/};
-			double con{node.potential[electrolyte_index].value};
+			Vector3 grad_con{ node.potential[electrolyte_index].gradient };
+			Vector3 grad_D_eff{/**/ };
+			double con{ node.potential[electrolyte_index].value };
 			double lap_phi{ node.cal_customValues_laplace(ElectricFieldIndex::ElectricalPotential) };
 
+			int index{};
 			node.kinetics_coeff.get_gradientVec3(index, index);
 
 			double& n{ electron_num };
 			double temp_const{ n * FaradayConstant / (GAS_CONSTANT * ROOM_TEMP) };
-			auto source_potential = [&]()->double {return temp_const*( D_eff*(grad_con*grad_phi) + con*(grad_phi*grad_D_eff)) + con * D_eff * lap_phi; };
+			auto source_potential = [&]()->double {return temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff)) + con * D_eff * lap_phi; };
 
 			double dxi_dt{ -(electrolyte.phi - electrolyte.old_phi) / Solvers::get_instance()->parameters.dt };
 			auto source_xi = [&dxi_dt]()->double {return -c_s / c_0 * dxi_dt; };
 			return source_potential() + source_xi();
 		}
-		
+
 		//------Temperature source-----//
 
 		static double reaction_T_none(pf::PhaseNode& node) {
@@ -136,7 +133,7 @@ namespace pf {
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : Bulk Reaction !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-			
+
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			string report = "";
