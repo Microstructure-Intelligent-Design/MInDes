@@ -23,7 +23,12 @@ This program is free software: you can redistribute it and/or modify it under th
 
 namespace pf {
 	namespace bulk_reaction {
+		// - 
 		static vector<int> electrode_index{};
+		static int active_component_index = 0;
+		// - 
+		static double time_interval = 0.0;
+		// - 
 		static double reaction_constant{};
 		static double electron_num{};
 		static double E_std{};
@@ -44,18 +49,26 @@ namespace pf {
 		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055
 		// Li dendrite growth, Butler Volmer type source
 		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
-			double charge_trans_coeff{ 0.5 }, & alpha{ charge_trans_coeff };
-			double& L_eta{ reaction_constant }, & xi{ phase.phi }, & n{ electron_num };
+			bool is_cal = false;
+			for (auto index = electrode_index.begin(); index < electrode_index.end(); index++)
+				if (*index == phase.index)
+					is_cal = true;  // phase is the solid phase
+			double result = 0.0;
+			if (is_cal) {
+				double charge_trans_coeff{ 0.5 }, & alpha{ charge_trans_coeff };
+				double& L_eta{ reaction_constant }, & xi{ phase.phi }, & n{ electron_num };
 
-			auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
+				auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
 
-			double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };
-			double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
-			auto eta_a = [&phi_electrode, &phi_solution]()->double { return phi_electrode - phi_solution - E_std; };
+				double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };
+				double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
+				auto eta_a = [&phi_electrode, &phi_solution]()->double { return phi_electrode - phi_solution - E_std; };
 
-			auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a() / (GAS_CONSTANT * ROOM_TEMP)); };
+				auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a() / (GAS_CONSTANT * ROOM_TEMP)); };
 
-			return -L_eta * h_() * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
+				result = -L_eta * h_() * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
+			}
+			return result;
 		}
 
 		//------concentration source-----//
@@ -73,27 +86,33 @@ namespace pf {
 		}
 
 		static double reaction_i_electrode_reaction(pf::PhaseNode& node, int con_i) {
-			PhaseEntry& electrolyte = node[electrolyte_index];
+			double result = 0.0;
+			// iterate through every components, pick up needed elements (cation)
+			if (con_i != active_component_index)
+				return result;
+			// iterate through every phases, pick up solid phases
+			double dxi_dt{};
+			for(auto phase = node.begin(); phase < node.end(); phase++)
+				for(auto index = electrode_index.begin(); index < electrode_index.end(); index++)
+					if (*index == phase->index) {
+						dxi_dt += (phase->phi - phase->old_phi) / time_interval;
+					}
 
-			double& D_e{ diff_coef_ele }, & D_s{ diff_coef_sol };
-
-			double D_eff{ D_e * (1 - interpolate_func(electrolyte.phi)) + D_s * interpolate_func(electrolyte.phi) };
-
-			double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
 			Vector3 grad_phi{ node.cal_customValues_gradient(ElectricFieldIndex::ElectricalPotential) };
-			Vector3 grad_con{ node.potential[electrolyte_index].gradient };
-			Vector3 grad_D_eff{/**/ };
-			double con{ node.potential[electrolyte_index].value };
 			double lap_phi{ node.cal_customValues_laplace(ElectricFieldIndex::ElectricalPotential) };
 
-			int index{};
-			node.kinetics_coeff.get_gradientVec3(index, index);
+			double con{ node.potential[con_i].value };
+			Vector3 grad_con{ node.potential[con_i].gradient };
+
+			double D_eff{node.kinetics_coeff(con_i,con_i).value};
+			Vector3 grad_D_eff{ node.kinetics_coeff.get_gradientVec3(con_i, con_i) };
+
+			//go kinetics.h initialise De and Ds in that module
 
 			double& n{ electron_num };
 			double temp_const{ n * FaradayConstant / (GAS_CONSTANT * ROOM_TEMP) };
 			auto source_potential = [&]()->double {return temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff)) + con * D_eff * lap_phi; };
 
-			double dxi_dt{ -(electrolyte.phi - electrolyte.old_phi) / Solvers::get_instance()->parameters.dt };
 			auto source_xi = [&dxi_dt]()->double {return -c_s / c_0 * dxi_dt; };
 			return source_potential() + source_xi();
 		}
@@ -114,11 +133,18 @@ namespace pf {
 			reaction_i = reaction_i_none;
 			reaction_T = reaction_T_none;
 
-			string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
-			if (InputFileReader::get_instance()->read_string_value(electrode_key, electrode_input, infile_debug)) {
+			time_interval = Solvers::get_instance()->parameters.dt;
+			// active_component_index
+			string active_comp_name = "";
+			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component_index", active_comp_name, infile_debug)) {
+				active_component_index = Solvers::get_instance()->parameters.Components[active_comp_name].index;
+				
+				string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
+				InputFileReader::get_instance()->read_string_value(electrode_key, electrode_input, infile_debug);
 				vector<pf::input_value> electrode_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, electrode_key, electrode_input, infile_debug);
 				for (int index = 0; index < electrode_value.size(); index++)
 					electrode_index.push_back(electrode_value[index].int_value);
+
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, infile_debug);
@@ -133,7 +159,7 @@ namespace pf {
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : Bulk Reaction !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-
+			
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			string report = "";
