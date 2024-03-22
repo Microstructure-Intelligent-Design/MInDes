@@ -92,8 +92,8 @@ namespace pf {
 				return result;
 			// iterate through every phases, pick up solid phases
 			double dxi_dt{};
-			for(auto phase = node.begin(); phase < node.end(); phase++)
-				for(auto index = electrode_index.begin(); index < electrode_index.end(); index++)
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				for (auto index = electrode_index.begin(); index < electrode_index.end(); index++)
 					if (*index == phase->index) {
 						dxi_dt += (phase->phi - phase->old_phi) / time_interval;
 					}
@@ -104,15 +104,13 @@ namespace pf {
 			double con{ node.potential[con_i].value };
 			Vector3 grad_con{ node.potential[con_i].gradient };
 
-			double D_eff{node.kinetics_coeff(con_i,con_i).value};
+			double D_eff{ node.kinetics_coeff(con_i,con_i).value };
 			Vector3 grad_D_eff{ node.kinetics_coeff.get_gradientVec3(con_i, con_i) };
-
-			//go kinetics.h initialise De and Ds in that module
 
 			double& n{ electron_num };
 			double temp_const{ n * FaradayConstant / (GAS_CONSTANT * ROOM_TEMP) };
-			auto source_potential = [&]()->double {return temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff)) + con * D_eff * lap_phi; };
 
+			auto source_potential = [&]()->double {return temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff)) + con * D_eff * lap_phi; };
 			auto source_xi = [&dxi_dt]()->double {return -c_s / c_0 * dxi_dt; };
 			return source_potential() + source_xi();
 		}
@@ -124,6 +122,8 @@ namespace pf {
 		}
 		static double (*reaction_T)(pf::PhaseNode& node);   // main function
 
+
+		//------ INTERFACE -----//
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
 			bool infile_debug = false;
 			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
@@ -134,11 +134,10 @@ namespace pf {
 			reaction_T = reaction_T_none;
 
 			time_interval = Solvers::get_instance()->parameters.dt;
-			// active_component_index
 			string active_comp_name = "";
 			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component_index", active_comp_name, infile_debug)) {
 				active_component_index = Solvers::get_instance()->parameters.Components[active_comp_name].index;
-				
+
 				string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
 				InputFileReader::get_instance()->read_string_value(electrode_key, electrode_input, infile_debug);
 				vector<pf::input_value> electrode_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, electrode_key, electrode_input, infile_debug);
@@ -148,6 +147,7 @@ namespace pf {
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, infile_debug);
+
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Electrode", diff_coef_ele, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Solution", diff_coef_sol, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
@@ -159,7 +159,7 @@ namespace pf {
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : Bulk Reaction !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-			
+
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			string report = "";
