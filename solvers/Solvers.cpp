@@ -273,11 +273,6 @@ namespace pf {
 			writer.close_vts_file(fout2, phaseMesh);
 		}
 	}
-	void Solvers::write_data_file() {
-		if (current_istep % parameters.data_output_step == 0) {
-			writer.add_string_to_txt_and_screen("> Error, write data file failed ! \n", LOG_FILE_NAME);
-		}
-	}
 	PhaseNode& Solvers::statistics_information_in_phaseMesh() {
 		if (current_istep == statistics_step && current_istep != parameters.begin_step)
 			return info_node;

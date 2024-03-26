@@ -34,11 +34,13 @@ namespace pf {
 		}
 	}
 	namespace electric_field {
+		// - 
 		static PoissonEquationSolver electric_field_solver;
 		static vector<bool> fix_domain_boundary;
 		static vector<double> fix_domain_boundary_value;
 		static tensor1_double fix_domain_phi_value;
 		static tensor1_double conductivity_phi;
+		static double conductivity_background = 0.0;
 		static double solver_accuracy = 1e-3;
 		static int solver_max_iterate_times = 100;
 		static bool solver_debug = false;
@@ -54,10 +56,12 @@ namespace pf {
 			node.customValues[rhs_index] = 0.0;
 		}
 		static void conductivity(pf::PhaseNode& node, int lhs_index) {
-			double conductivity = 0.0;
-			for (auto phase = node.begin(); phase < node.end(); phase++)
+			double conductivity = 0.0, phi = 0.0;
+			for (auto phase = node.begin(); phase < node.end(); phase++) {
 				conductivity += phase->phi * conductivity_phi(phase->property);
-			node.customValues[lhs_index] = conductivity;
+				phi += phase->phi;
+			}
+			node.customValues[lhs_index] = conductivity + (1.0 - phi) * conductivity_background;
 		}
 		static void boundary(pf::PhaseNode& node, int r_index) {
 			// node.customValues[r_index] = custom;
@@ -144,12 +148,19 @@ namespace pf {
 			InputFileReader::get_instance()->read_string_value(conductivity_phi_key, conductivity_phi_input, infile_debug);
 			vector<input_value> conductivity_phi_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, conductivity_phi_key, conductivity_phi_input, infile_debug);
 			int index = 0;
+			if (conductivity_phi_value.size() != Solvers::get_instance()->parameters.Phases.size()) {
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of Modules.ElectricField.conductivity isn't equal to the number of phases \n", InputFileReader::get_instance()->debug_file);
+				exit(0);
+			}
 			for(auto phi = Solvers::get_instance()->parameters.Phases.begin(); phi < Solvers::get_instance()->parameters.Phases.end(); phi++){
 				conductivity_phi.add_double(phi->phi_property, conductivity_phi_value[index].double_value);
 				index++;
 			}
+
+			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.BackGround.conductivity", conductivity_background, infile_debug);
+
 			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Modules.ElectricField.fix_phi = [(phi,name, elec_potential), ... ] \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Modules.ElectricField.fix_phi = [(phi_name, elec_potential), ... ] \n", InputFileReader::get_instance()->debug_file);
 			string fix_phi_key = "Modules.ElectricField.fix_phi", fix_phi_input = "[()]";
 			if (InputFileReader::get_instance()->read_string_value(fix_phi_key, fix_phi_input, infile_debug)) {
 				vector<InputValueType> fix_phi_structure; fix_phi_structure.push_back(InputValueType::IVType_STRING); fix_phi_structure.push_back(InputValueType::IVType_DOUBLE);

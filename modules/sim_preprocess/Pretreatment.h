@@ -179,15 +179,64 @@ namespace pf {
 					for (int y = 0; y < phaseMesh.limit_y; y++)
 						for (int z = 0; z < phaseMesh.limit_z; z++) {
 							PhaseNode& node = phaseMesh(x, y, z);
-							for (auto phase = node.Goast_Phase.begin(); phase < node.Goast_Phase.end(); phase++)
-								(*phase) = nullptr;
-							node.Goast_Phase.clear();
-							for (auto phase = node.begin(); phase < node.end(); phase++) {
-								//intphase and near intphase
-								if (phase->_flag) {
+							if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
+								for (auto phase = node.Goast_Phase.begin(); phase < node.Goast_Phase.end(); phase++)
+									(*phase) = nullptr;
+								node.Goast_Phase.clear();
+								for (auto phase = node.begin(); phase < node.end(); phase++) {
+									//intphase and near intphase
+									if (phase->_flag) {
+										phase->bulk_increment = 0.0;
+										phase->int_increment = 0.0;
+										node.Goast_Phase.push_back(&(*phase));
+										phase->phi_grad[0] = (node.get_neighbor_node(Direction::x_up)[phase->index].phi -
+											node.get_neighbor_node(Direction::x_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
+										phase->phi_grad[1] = (node.get_neighbor_node(Direction::y_up)[phase->index].phi -
+											node.get_neighbor_node(Direction::y_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
+										phase->phi_grad[2] = (node.get_neighbor_node(Direction::z_up)[phase->index].phi -
+											node.get_neighbor_node(Direction::z_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
+										if (diff_method == DifferenceMethod::FIVE_POINT) {
+											phase->laplacian = (node.get_neighbor_node(Direction::x_down)[phase->index].phi
+												+ node.get_neighbor_node(Direction::x_up)[phase->index].phi
+												+ node.get_neighbor_node(Direction::y_down)[phase->index].phi
+												+ node.get_neighbor_node(Direction::y_up)[phase->index].phi
+												+ node.get_neighbor_node(Direction::z_down)[phase->index].phi
+												+ node.get_neighbor_node(Direction::z_up)[phase->index].phi - 6 * phase->phi) / phaseMesh.dr / phaseMesh.dr;
+										}
+										else if (diff_method == DifferenceMethod::NINE_POINT) {
+											phase->laplacian = (4.0 * node.get_neighbor_node(Direction::x_down)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::x_up)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::y_down)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::y_up)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::z_down)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::z_up)[phase->index].phi
+												+ node.get_long_range_node(-1, -1, 0)[phase->index].phi
+												+ node.get_long_range_node(-1, 1, 0)[phase->index].phi
+												+ node.get_long_range_node(1, -1, 0)[phase->index].phi
+												+ node.get_long_range_node(1, 1, 0)[phase->index].phi
+												+ node.get_long_range_node(-1, 0, -1)[phase->index].phi
+												+ node.get_long_range_node(-1, 0, 1)[phase->index].phi
+												+ node.get_long_range_node(1, 0, -1)[phase->index].phi
+												+ node.get_long_range_node(1, 0, 1)[phase->index].phi
+												+ node.get_long_range_node(0, -1, -1)[phase->index].phi
+												+ node.get_long_range_node(0, -1, 1)[phase->index].phi
+												+ node.get_long_range_node(0, 1, -1)[phase->index].phi
+												+ node.get_long_range_node(0, 1, 1)[phase->index].phi - 36 * phase->phi) / 6.0 / phaseMesh.dr / phaseMesh.dr;
+										}
+									}
+									else {
+										phase->phi_grad[0] = 0.0;
+										phase->phi_grad[1] = 0.0;
+										phase->phi_grad[2] = 0.0;
+										phase->laplacian = 0.0;
+									}
+								}
+							}
+							else if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Standard || Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_CH_Standard) {
+								for (auto phase = node.begin(); phase < node.end(); phase++) {
+									//intphase and near intphase
 									phase->bulk_increment = 0.0;
 									phase->int_increment = 0.0;
-									node.Goast_Phase.push_back(&(*phase));
 									phase->phi_grad[0] = (node.get_neighbor_node(Direction::x_up)[phase->index].phi -
 										node.get_neighbor_node(Direction::x_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
 									phase->phi_grad[1] = (node.get_neighbor_node(Direction::y_up)[phase->index].phi -
@@ -222,12 +271,6 @@ namespace pf {
 											+ node.get_long_range_node(0, 1, -1)[phase->index].phi
 											+ node.get_long_range_node(0, 1, 1)[phase->index].phi - 36 * phase->phi) / 6.0 / phaseMesh.dr / phaseMesh.dr;
 									}
-								}
-								else {
-									phase->phi_grad[0] = 0.0;
-									phase->phi_grad[1] = 0.0;
-									phase->phi_grad[2] = 0.0;
-									phase->laplacian = 0.0;
 								}
 							}
 						}
@@ -287,11 +330,12 @@ namespace pf {
 								solver.dfint_dphi(node, Solvers::get_instance()->parameters.is_Normalize_Phi);
 								// equation //
 								for (auto alpha = node.begin(); alpha < node.end(); alpha++) {
-									alpha->bulk_increment = solver.Source_i(node, *alpha);
+									alpha->bulk_increment = 0.0;
 									if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON)
 										for (auto beta = node.begin(); beta < node.end(); beta++)
-											if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON)
+											if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON) {
 												alpha->bulk_increment += -solver.Lij(node, *alpha, *beta) * solver.dfbulk_dphi(node, *beta);
+											}
 									//< fix phi change begin
 									if (node.customFlags[ExternalFields::RELAX_interface_buff + alpha->index] == 0) {
 										alpha->int_increment = 0.0;

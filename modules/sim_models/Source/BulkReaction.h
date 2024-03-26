@@ -42,10 +42,6 @@ namespace pf {
 			return 0.0;
 		}
 
-		static inline double interpolate_func(double xi) {
-			return 30.0 * xi * xi * (1 - xi) * (1 - xi);
-		}
-		auto& h_ = interpolate_func;
 		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055
 		// Li dendrite growth, Butler Volmer type source
 		static double reaction_a_electrode_reaction(pf::PhaseNode& node, pf::PhaseEntry& phase) {
@@ -58,15 +54,18 @@ namespace pf {
 				double charge_trans_coeff{ 0.5 }, & alpha{ charge_trans_coeff };
 				double& L_eta{ reaction_constant }, & xi{ phase.phi }, & n{ electron_num };
 
-				auto interpolate_func = [&xi]()->double {return 30.0 * xi * xi * (1 - xi) * (1 - xi); }, & h_{ interpolate_func };
+				auto h_ = 30.0 * xi * xi * (1 - xi) * (1 - xi); 
 
 				double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };
 				double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
-				auto eta_a = [&phi_electrode, &phi_solution]()->double { return phi_electrode - phi_solution - E_std; };
+				//auto eta_a = [&phi_electrode, &phi_solution]()->double { return phi_electrode - phi_solution - E_std; };
+				auto eta_a = phi_electrode - phi_solution - E_std;
+				//auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)); };
 
-				auto BV_exp = [&eta_a, &n](double _alpha) -> double {return std::exp(_alpha * n * FaradayConstant * eta_a() / (GAS_CONSTANT * ROOM_TEMP)); };
+				auto result = -L_eta*(30.0 * xi * xi * (1 - xi) * (1 - xi))*(std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
+					node.x[phase.index].value * std::exp(-0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)));
 
-				result = -L_eta * h_() * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
+				//result = -L_eta * h_ * (BV_exp(1 - alpha) - node.x[phase.index].value * BV_exp(-alpha));
 			}
 			return result;
 		}
@@ -101,7 +100,7 @@ namespace pf {
 			Vector3 grad_phi{ node.cal_customValues_gradient(ElectricFieldIndex::ElectricalPotential) };
 			double lap_phi{ node.cal_customValues_laplace(ElectricFieldIndex::ElectricalPotential) };
 
-			double con{ node.potential[con_i].value };
+			double con{ node.x[con_i].value };
 			Vector3 grad_con{ node.potential[con_i].gradient };
 
 			double D_eff{ node.kinetics_coeff(con_i,con_i).value };
@@ -134,8 +133,10 @@ namespace pf {
 			reaction_T = reaction_T_none;
 
 			time_interval = Solvers::get_instance()->parameters.dt;
+			bool is_electric_field_on = false;
+			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, false);
 			string active_comp_name = "";
-			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component_index", active_comp_name, infile_debug)) {
+			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, infile_debug) && is_electric_field_on) {
 				active_component_index = Solvers::get_instance()->parameters.Components[active_comp_name].index;
 
 				string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
@@ -159,7 +160,19 @@ namespace pf {
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : Bulk Reaction !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-
+			for (auto phase = phaseMesh.info_node.begin(); phase < phaseMesh.info_node.end(); phase++)
+				for (auto index = electrode_index.begin(); index < electrode_index.end(); index++)
+					if (*index == phase->index) {
+						bool is_defined = false;
+						for (auto elecpotential = electric_field::fix_domain_phi_value.begin();
+							elecpotential < electric_field::fix_domain_phi_value.end(); elecpotential++)
+							if (elecpotential->index == phase->property)
+								is_defined = true;
+						if (!is_defined) {
+							Solvers::get_instance()->writer.add_string_to_txt_and_screen("# ERROR : The electrode electric potential hasn't been defined in Modules.ElectricField.fix_phi ! \n", LOG_FILE_NAME);
+							exit(0);
+						}
+					}
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			string report = "";

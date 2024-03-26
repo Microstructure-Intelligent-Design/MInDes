@@ -35,12 +35,12 @@ namespace pf {
 
 	}
 	namespace kinetics {
-		// total x
-		static tensor1_double Mii;
-		static tensor2_double Mij;
 		// phase x
 		static tensor2_double phase_Mii;
 		static tensor3_double phase_Mij;
+		// for electrodeposition
+		static int active_comp_index = 0;
+		static double Mii_elec = 0.0;
 		// temp
 		static tensor1_double phase_Dtemp;
 
@@ -84,8 +84,40 @@ namespace pf {
 			}
 			return Mii;
 		}
+		static double Mtotal_electrodeposition_ii(pf::PhaseNode& node, int con_i, int con_j) {
+			//if (con_i == con_j)
+			//	return Mii(con_i);
+			//else
+			//	return 0.0;
+			double Mii = 0.0;
+			if (con_i == con_j && con_i == active_comp_index) {
+				double liquid_phi = 1.0;
+				for (auto phase = node.begin(); phase < node.end(); phase++)
+					if (phase->phi > SYS_EPSILON) {
+						liquid_phi -= phase->phi;
+						for (auto phi_M = phase_Mii.begin(); phi_M < phase_Mii.end(); phi_M++)
+							if (phase->property == phi_M->index) {
+								for (auto M = phi_M->begin(); M < phi_M->end(); M++)
+									if (con_i == M->index)
+										Mii += phase->phi * M->val;
+							}
+					}
+				Mii += liquid_phi * Mii_elec;
+			}
+			return Mii;
+		}
 		static double Mtotal_ij(pf::PhaseNode& node, int con_i, int con_j) {
-			return Mij(con_i, con_j);
+			double Mij = 0.0;
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				if (phase->phi > SYS_EPSILON)
+					for (auto phi_M = phase_Mij.begin(); phi_M < phase_Mij.end(); phi_M++)
+						if (phase->property == phi_M->index) {
+							for (auto Mi = phi_M->begin(); Mi < phi_M->end(); Mi++)
+								if (con_i == Mi->index)
+									for (auto Mj = Mi->begin(); Mj < Mi->end(); Mj++)
+										Mij += phase->phi * Mj->val;
+						}
+			return 0.0;
 		}
 		static double Mgrand_ii(pf::PhaseNode& node, int con_i, int con_j) {
 			double Mii = 0.0;
@@ -177,43 +209,72 @@ namespace pf {
 			}
 			else if (Solvers::get_instance()->parameters.ConEType == ConEquationType::CEType_TotalX) {
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Con.Mii = ( M_00, M_11, ... ) \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Con.Mii = [(phase_0_M_00 , phase_0_M_11, ...) , ... ]\n", InputFileReader::get_instance()->debug_file);
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("#                  .Mij = [(M_00, M_01, ...), (M_10, M_11, ...), ... ]\n", InputFileReader::get_instance()->debug_file);
-				string Mij_key = "ModelsManager.Con.Mij", Mij_input = "[()]", Mii_key = "ModelsManager.Con.Mii", Mii_input = "()";
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("#                  .Mij = {[(phase_0_M_00, phase_0_M_01, ...), (phase_0_M_10, phase_0_M_11, ...), ... ], ... }\n", InputFileReader::get_instance()->debug_file);
+				string Mii_key = "ModelsManager.Con.Mii", Mii_input = "[()]";
 				if (InputFileReader::get_instance()->read_string_value(Mii_key, Mii_input, infile_debug)) {
 					M_bulk_ij = Mtotal_ii;
-					vector<input_value> Mii_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, Mii_key, Mii_input, infile_debug);
-					if (Mii_value.size() != Solvers::get_instance()->parameters.Components.size()) {
-						InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mii() isn't equal to Components \n", InputFileReader::get_instance()->debug_file);
+					vector<vector<input_value>> Mii_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_DOUBLE, Mii_key, Mii_input, infile_debug);
+					if (Mii_value.size() != Solvers::get_instance()->parameters.Phases.size()) {
+						InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mii[] isn't equal to Phases \n", InputFileReader::get_instance()->debug_file);
 						exit(0);
 					}
-					int i_index = 0;
-					for (auto xi = Solvers::get_instance()->parameters.Components.begin(); xi < Solvers::get_instance()->parameters.Components.end(); xi++) {
-						Mii.add_double(xi->index, Mii_value[i_index].double_value);
-						i_index++;
-					}
-				}
-				else if (InputFileReader::get_instance()->read_string_value(Mij_key, Mij_input, infile_debug)) {
-					M_bulk_ij = Mtotal_ij;
-					vector<vector<input_value>> Mij_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_DOUBLE, Mij_key, Mij_input, infile_debug);
-					if (Mij_value.size() != Solvers::get_instance()->parameters.Components.size()) {
-						InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mij[] isn't equal to Components \n", InputFileReader::get_instance()->debug_file);
-						exit(0);
-					}
-					int i_index = 0, j_index = 0;
-					for (auto xi = Solvers::get_instance()->parameters.Components.begin(); xi < Solvers::get_instance()->parameters.Components.end(); xi++) {
-						j_index = 0;
-						if (Mij_value[i_index].size() != Solvers::get_instance()->parameters.Components.size()) {
-							InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mij[()] isn't equal to Components \n", InputFileReader::get_instance()->debug_file);
+					int index_1 = 0;
+					for (auto phi = Solvers::get_instance()->parameters.Phases.begin(); phi < Solvers::get_instance()->parameters.Phases.end(); phi++) {
+						phase_Mii.add_tensor(phi->phi_property);
+						if (Mii_value[index_1].size() != phi->x.size()) {
+							InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mii[()] isn't equal to Phase Cons \n", InputFileReader::get_instance()->debug_file);
 							exit(0);
 						}
-						for (auto xj = Solvers::get_instance()->parameters.Components.begin(); xj < Solvers::get_instance()->parameters.Components.end(); xj++) {
-							Mij.add_double(xi->index, xj->index, Mij_value[i_index][j_index].double_value);
-							j_index++;
+						int index_2 = 0;
+						for (auto phi_con = phi->x.begin(); phi_con < phi->x.end(); phi_con++) {
+							phase_Mii(phi->phi_property).add_double(phi_con->index, Mii_value[index_1][index_2].double_value);
+							index_2++;
 						}
-						i_index++;
+						index_1++;
 					}
+				}
+				string Mij_key = "ModelsManager.Con.Mij", Mij_input = "{[()]}";
+				if (InputFileReader::get_instance()->read_string_value(Mij_key, Mij_input, infile_debug)) {
+					M_bulk_ij = Mtotal_ij;
+					vector<vector<vector<input_value>>> Mij_value = InputFileReader::get_instance()->trans_matrix_3d_const_const_const_to_input_value(InputValueType::IVType_DOUBLE, Mij_key, Mij_input, infile_debug);
+					if (Mij_value.size() != Solvers::get_instance()->parameters.Phases.size()) {
+						InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mij{} isn't equal to Phases \n", InputFileReader::get_instance()->debug_file);
+						exit(0);
+					}
+					int a_index = 0, i_index = 0, j_index = 0;
+					for (auto phi = Solvers::get_instance()->parameters.Phases.begin(); phi < Solvers::get_instance()->parameters.Phases.end(); phi++) {
+						i_index = 0;
+						phase_Mij.add_tensor(phi->phi_property);
+						if (Mij_value[a_index].size() != phi->x.size()) {
+							InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mij{[]} isn't equal to the number of components in aim phase \n", InputFileReader::get_instance()->debug_file);
+							exit(0);
+						}
+						for (auto xi = phi->x.begin(); xi < phi->x.end(); xi++) {
+							j_index = 0;
+							phase_Mij(phi->phi_property).add_tensor(xi->index);
+							if (Mij_value[a_index][i_index].size() != phi->x.size()) {
+								InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of ModelsManager.Con.Mij{[()]} isn't equal to the number of components in aim phase \n", InputFileReader::get_instance()->debug_file);
+								exit(0);
+							}
+							for (auto xj = phi->x.begin(); xj < phi->x.end(); xj++) {
+								phase_Mij(phi->phi_property)(xi->index).add_double(xj->index, Mij_value[a_index][i_index][j_index].double_value);
+								j_index++;
+							}
+							i_index++;
+						}
+						a_index++;
+					}
+				}
+				// - for electrodeposition
+				bool is_electric_field_on = false;
+				InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, false);
+				string active_comp_name = "";
+				if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, false) && is_electric_field_on) {
+					active_comp_index = Solvers::get_instance()->parameters.Components[active_comp_name].index;
+					InputFileReader::get_instance()->read_double_value("ModelsManager.Con.ElectroDeposition.Electrolyte_Mii", Mii_elec, infile_debug);
+					M_bulk_ij = Mtotal_electrodeposition_ii;
 				}
 				Solvers::get_instance()->C_Solver.M_ij = M_bulk_ij;
 			}

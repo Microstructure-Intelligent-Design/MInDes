@@ -37,14 +37,16 @@ namespace pf {
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
 			bool infile_debug = false;
 			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
+
 			if (infile_debug)
-			InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.physical_fields = (mechanic, fluid dynamic, electric) \n", InputFileReader::get_instance()->debug_file);
-			string fix_boundary_key = "Postprocess.physical_fields", fix_boundary_input = "(false,false,false)";
-			InputFileReader::get_instance()->read_string_value(fix_boundary_key, fix_boundary_input, infile_debug);
-			vector<input_value> fix_boundary_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_BOOL, fix_boundary_key, fix_boundary_input, infile_debug);
-			is_mechanical_field_on = fix_boundary_value[0].bool_value;
-			is_fluid_field_on = fix_boundary_value[1].bool_value;
-			is_electric_field_on = fix_boundary_value[2].bool_value;
+			InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.PhysicalFields.xxx = true/false (on/off) \n", InputFileReader::get_instance()->debug_file);
+
+			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.mechanics", is_mechanical_field_on, infile_debug);
+
+			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.fluid", is_fluid_field_on, infile_debug);
+
+			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, infile_debug);
+
 			if(is_electric_field_on)
 				pf::electric_field::init(phaseMesh);
 			if (is_fluid_field_on)
@@ -59,8 +61,15 @@ namespace pf {
 			pf::CpuMemoryUsage::init(phaseMesh);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-			if (is_electric_field_on)
+			if (is_electric_field_on){
+				for (int x = 0; x < phaseMesh.limit_x; x++)
+					for (int y = 0; y < phaseMesh.limit_y; y++)
+						for (int z = 0; z < phaseMesh.limit_z; z++) {
+							PhaseNode& node = phaseMesh(x, y, z);
+							node.customValues[101] = 1.0;
+						}
 				pf::electric_field::exec_pre(phaseMesh);
+			}
 			if (is_fluid_field_on)
 				pf::fluid_field::exec_pre(phaseMesh);
 			if (is_mechanical_field_on)

@@ -25,7 +25,7 @@ namespace pf {
 			for (int y = 0; y < phaseMesh->limit_y; y++)
 				for (int z = 0; z < phaseMesh->limit_z; z++) {
 					PhaseNode& node = (*phaseMesh)(x, y, z);
-					if(normalize_phi)
+					if (normalize_phi)
 						node.normalized_phi();
 					for (auto phase = node.begin(); phase < node.end(); phase++)
 						phase->old_phi = phase->phi;
@@ -200,7 +200,7 @@ namespace pf {
 									if (check_phase->index == phase->index && check_phase->phi >= Phi_Num_Cut_Off)
 										is_near = true;
 							}
-							if(is_near)
+							if (is_near)
 								phase->_flag = pf_NEAR_INTERFACE;
 							else
 								phase->_flag = pf_BULK;
@@ -277,11 +277,14 @@ namespace pf {
 					dfint_dphi(node, normalize_phi);
 					// equation //
 					for (auto alpha = node.begin(); alpha < node.end(); alpha++) {
-						alpha->bulk_increment = Source_i(node, *alpha);
-						if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON)
-							for (auto beta = node.begin(); beta < node.end(); beta++)
-								if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON)
-									alpha->bulk_increment += -Lij(node, *alpha, *beta) * dfbulk_dphi(node, *beta);
+						alpha->bulk_increment = Source_i(node, *alpha); {
+							if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON) {
+								for (auto beta = node.begin(); beta < node.end(); beta++) {
+									if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON)
+										alpha->bulk_increment += -Lij(node, *alpha, *beta) * dfbulk_dphi(node, *beta);
+								}
+							}
+						}
 					}
 					/*if (normalize_phi) {
 						double scale = 1.0, increment = 0.0;

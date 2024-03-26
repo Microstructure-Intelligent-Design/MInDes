@@ -390,8 +390,9 @@ namespace pf {
 				alpha->int_increment = 0.0;
 				if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON) {
 					for (auto beta = node.begin(); beta < node.end(); beta++)
-						if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON)
+						if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON) {
 							alpha->int_increment += -mobility(node, *alpha, *beta) * dfint_dphi_grad_standard(node, *beta);
+						}
 				}
 			}
 		}

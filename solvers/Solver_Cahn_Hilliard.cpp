@@ -592,50 +592,10 @@ namespace pf {
 				for (int z = 0; z < phaseMesh->limit_z; z++) {
 					PhaseNode& node = (*phaseMesh)(x, y, z);
 					if (node.customValues[ExternalFields::CON_Smooth_Phi] > threshold) {
-						if (node.customValues[ExternalFields::CON_Smooth_Old_Phi] < threshold) {
-							PhaseNode& upx_node = node.get_neighbor_node(Direction::x_up);
-							PhaseNode& downx_node = node.get_neighbor_node(Direction::x_down);
-							PhaseNode& upy_node = node.get_neighbor_node(Direction::y_up);
-							PhaseNode& downy_node = node.get_neighbor_node(Direction::y_down);
-							PhaseNode& upz_node = node.get_neighbor_node(Direction::z_up);
-							PhaseNode& downz_node = node.get_neighbor_node(Direction::z_down);
-							if (upx_node.customValues[ExternalFields::CON_Smooth_Phi] > threshold && upx_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = upx_node.x[c->index].value;
-							}
-							else if (downx_node.customValues[ExternalFields::CON_Smooth_Phi] > threshold && downx_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = downx_node.x[c->index].value;
-							}
-							else if (upy_node.customValues[ExternalFields::CON_Smooth_Phi] > threshold && upy_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = upy_node.x[c->index].value;
-							}
-							else if (downy_node.customValues[ExternalFields::CON_Smooth_Phi] > threshold && downy_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = downy_node.x[c->index].value;
-							}
-							else if (upz_node.customValues[ExternalFields::CON_Smooth_Phi] > threshold && upz_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = upz_node.x[c->index].value;
-							}
-							else if (downz_node.customValues[ExternalFields::CON_Smooth_Phi] > threshold && downz_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = downz_node.x[c->index].value;
-							}
-						}
-
 						for (auto pot = node.potential.begin(); pot < node.potential.end(); pot++)
 							pot->value = df_dx(node, pot->index);
 						for (auto m = node.kinetics_coeff.begin(); m < node.kinetics_coeff.end(); m++)
 							m->value = M_ij(node, m->pairIndex_1, m->pairIndex_2);
-
-					}
-					else {
-						if (node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-							for (auto comp = node.x.begin(); comp < node.x.end(); comp++)
-								comp->value = 0.0;
-						}
 					}
 				}
 #pragma omp parallel for
@@ -912,50 +872,10 @@ namespace pf {
 				for (int z = 0; z < phaseMesh->limit_z; z++) {
 					PhaseNode& node = (*phaseMesh)(x, y, z);
 					if (node.customValues[ExternalFields::CON_Smooth_Phi] < threshold) {
-						if (node.customValues[ExternalFields::CON_Smooth_Phi] > threshold) {
-							PhaseNode& upx_node = node.get_neighbor_node(Direction::x_up);
-							PhaseNode& downx_node = node.get_neighbor_node(Direction::x_down);
-							PhaseNode& upy_node = node.get_neighbor_node(Direction::y_up);
-							PhaseNode& downy_node = node.get_neighbor_node(Direction::y_down);
-							PhaseNode& upz_node = node.get_neighbor_node(Direction::z_up);
-							PhaseNode& downz_node = node.get_neighbor_node(Direction::z_down);
-							if (upx_node.customValues[ExternalFields::CON_Smooth_Phi] < threshold && upx_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = upx_node.x[c->index].value;
-							}
-							else if (downx_node.customValues[ExternalFields::CON_Smooth_Phi] < threshold && downx_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = downx_node.x[c->index].value;
-							}
-							else if (upy_node.customValues[ExternalFields::CON_Smooth_Phi] < threshold && upy_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = upy_node.x[c->index].value;
-							}
-							else if (downy_node.customValues[ExternalFields::CON_Smooth_Phi] < threshold && downy_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = downy_node.x[c->index].value;
-							}
-							else if (upz_node.customValues[ExternalFields::CON_Smooth_Phi] < threshold && upz_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = upz_node.x[c->index].value;
-							}
-							else if (downz_node.customValues[ExternalFields::CON_Smooth_Phi] < threshold && downz_node.customValues[ExternalFields::CON_Smooth_Old_Phi] > threshold) {
-								for (auto c = node.x.begin(); c < node.x.end(); c++)
-									c->value = downz_node.x[c->index].value;
-							}
-						}
-
 						for (auto pot = node.potential.begin(); pot < node.potential.end(); pot++)
 							pot->value = df_dx(node, pot->index);
 						for (auto m = node.kinetics_coeff.begin(); m < node.kinetics_coeff.end(); m++)
 							m->value = M_ij(node, m->pairIndex_1, m->pairIndex_2);
-
-					}
-					else {
-						if (node.customValues[ExternalFields::CON_Smooth_Old_Phi] < threshold) {
-							for (auto comp = node.x.begin(); comp < node.x.end(); comp++)
-								comp->value = 0.0;
-						}
 					}
 				}
 #pragma omp parallel for
@@ -1119,13 +1039,13 @@ namespace pf {
 						double smooth_grad_norm = s_phi_grad.abs();
 						if (smooth_grad_norm > SYS_EPSILON)
 							for (auto x = node.x.begin(); x < node.x.end(); x++)
-								x->ChemicalReactionFlux = smooth_grad_norm / node.customValues[ExternalFields::CON_Smooth_Phi] * int_flux(node, x->index);
+								x->ChemicalReactionFlux = smooth_grad_norm / (1.0 - node.customValues[ExternalFields::CON_Smooth_Phi]) * int_flux(node, x->index);
 						for (auto x = node.x.begin(); x < node.x.end(); x++) {
 							x->ChemicalReactionFlux += Source(node, x->index);
 						}
 						// phase transtion term
 						for (auto x = node.x.begin(); x < node.x.end(); x++) {
-							x->PhaseTransitionFlux -= x->value / node.customValues[ExternalFields::CON_Smooth_Phi]
+							x->PhaseTransitionFlux -= x->value / (1.0 - node.customValues[ExternalFields::CON_Smooth_Phi])
 								* (node.customValues[ExternalFields::CON_Smooth_Phi] - node.customValues[ExternalFields::CON_Smooth_Old_Phi]) / dt;
 						}
 						// summary
