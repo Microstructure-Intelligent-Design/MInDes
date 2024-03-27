@@ -44,7 +44,6 @@ namespace pf {
 		static double reaction_constant{};
 		static double electron_num{};
 		static double E_std{};
-		static double diff_coef_ele{}, diff_coef_sol{};
 		static double c_s{}, c_0{};
 		// - 
 		static PoissonEquationSolver electric_field_solver;
@@ -157,9 +156,6 @@ namespace pf {
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, infile_debug);
-
-				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Electrode", diff_coef_ele, infile_debug);
-				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.DiffusionCoefficient.Solution", diff_coef_sol, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, infile_debug);
 

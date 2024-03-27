@@ -39,7 +39,7 @@ namespace pf {
 			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
 
 			if (infile_debug)
-			InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.PhysicalFields.xxx = true/false (on/off) \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.PhysicalFields.xxx = true/false (on/off) \n", InputFileReader::get_instance()->debug_file);
 
 			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.mechanics", is_mechanical_field_on, infile_debug);
 
@@ -47,7 +47,7 @@ namespace pf {
 
 			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, infile_debug);
 
-			if(is_electric_field_on)
+			if (is_electric_field_on)
 				pf::electric_field::init(phaseMesh);
 			if (is_fluid_field_on)
 				pf::fluid_field::init(phaseMesh);
@@ -61,7 +61,7 @@ namespace pf {
 			pf::CpuMemoryUsage::init(phaseMesh);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-			if (is_electric_field_on){
+			if (is_electric_field_on) {
 
 				//for (int x = 0; x < phaseMesh.limit_x; x++)
 				//	for (int y = 0; y < phaseMesh.limit_y; y++)

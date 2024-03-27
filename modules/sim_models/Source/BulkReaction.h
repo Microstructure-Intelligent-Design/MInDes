@@ -55,7 +55,6 @@ namespace pf {
 
 				result = -L_eta * h_ * (std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
 					node.x[phase.index].value * std::exp(-0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)));
-
 			}
 			return result;
 		}
@@ -100,6 +99,7 @@ namespace pf {
 
 			auto source_potential{ temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff)) + con * D_eff * lap_phi };
 			auto source_xi{ -electric_field::c_s / electric_field::c_0 * dxi_dt };
+
 			return source_potential + source_xi;
 		}
 
@@ -122,7 +122,9 @@ namespace pf {
 			reaction_T = reaction_T_none;
 
 			string active_comp_name{};
-			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, false)) {
+			bool is_electric_field_on{};
+			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, false);
+			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, infile_debug) && is_electric_field_on) {
 				reaction_a = reaction_a_electrode_reaction;
 				reaction_i = reaction_i_electrode_reaction;
 			}
