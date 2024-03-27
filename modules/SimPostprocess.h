@@ -62,12 +62,13 @@ namespace pf {
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
 			if (is_electric_field_on){
-				for (int x = 0; x < phaseMesh.limit_x; x++)
-					for (int y = 0; y < phaseMesh.limit_y; y++)
-						for (int z = 0; z < phaseMesh.limit_z; z++) {
-							PhaseNode& node = phaseMesh(x, y, z);
-							node.customValues[101] = 1.0;
-						}
+
+				//for (int x = 0; x < phaseMesh.limit_x; x++)
+				//	for (int y = 0; y < phaseMesh.limit_y; y++)
+				//		for (int z = 0; z < phaseMesh.limit_z; z++) {
+				//			PhaseNode& node = phaseMesh(x, y, z);
+				//			node.customValues[101] = 1.0;
+				//		}
 				pf::electric_field::exec_pre(phaseMesh);
 			}
 			if (is_fluid_field_on)
