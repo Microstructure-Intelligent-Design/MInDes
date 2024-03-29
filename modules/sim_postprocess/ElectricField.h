@@ -56,6 +56,7 @@ namespace pf {
 		static int solver_max_iterate_times = 100;
 		static bool solver_debug = false;
 		static int solver_debug_output_steps = 100;
+		static double threshold{1.0-1e-3};
 		// - 
 		static int Nx = 1;
 		static int Ny = 1;
@@ -116,7 +117,7 @@ namespace pf {
 			// 2
 			for (auto phase = node.begin(); phase < node.end(); phase++)
 				for (auto c_phi = fix_domain_phi_value.begin(); c_phi < fix_domain_phi_value.end(); c_phi++)
-					if (phase->property == c_phi->index && phase->phi > (1.0 - Phi_Num_Cut_Off)) {
+					if (phase->property == c_phi->index && phase->phi > threshold) {
 						node.customValues[r_index] = c_phi->val;
 					}
 		}
@@ -159,7 +160,7 @@ namespace pf {
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, infile_debug);
 
-				electric_field_solver.set_RHS_calfunc(reaction_term);
+				//electric_field_solver.set_RHS_calfunc(reaction_term);
 			}
 
 			electric_field_solver.set_BoundaryCondition_calfunc(boundary);
@@ -168,6 +169,7 @@ namespace pf {
 			Ny = phaseMesh.limit_y;
 			Nz = phaseMesh.limit_z;
 			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.accuracy", solver_accuracy, infile_debug);
+			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.threshold", threshold, infile_debug);
 			InputFileReader::get_instance()->read_int_value("Modules.ElectricField.max_iteration_steps", solver_max_iterate_times, infile_debug);
 			if(InputFileReader::get_instance()->read_bool_value("Modules.ElectricField.debug", solver_debug, infile_debug))
 				InputFileReader::get_instance()->read_int_value("Modules.ElectricField.Debug.output_steps", solver_debug_output_steps, infile_debug);

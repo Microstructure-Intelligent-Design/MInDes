@@ -1,0 +1,113 @@
+###### whether to test this input file
+InputFile.debug = true
+
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 1000
+Solver.Loop.screen_loop_step = 10
+Solver.Loop.screen_output_step = 1000
+Solver.Loop.vts_output_step = 10
+#Solver.Loop.data_output_step = 1000000000
+
+# olver.Loop.begin_step = 0
+# olver.Loop.end_step = 1000
+# olver.Loop.screen_loop_step = 20
+# olver.Loop.screen_output_step = 100
+# olver.Loop.vts_output_step = 10
+Solver.Loop.data_output_step = 1000000000
+
+Solver.PCT.TimeInterval.dt = 1e-6
+
+Solver.Parallel.openmp_thread_counts = 1
+
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+
+# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ADIABATIC
+Solver.Mesh.BoundaryCondition.x_up = 2
+Solver.Mesh.BoundaryCondition.x_down = 2
+Solver.Mesh.BoundaryCondition.y_up = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+Solver.Mesh.BoundaryCondition.z_up = 1
+Solver.Mesh.BoundaryCondition.z_dowm = 1
+
+# .boundary = [(boundary, value), ... ] 
+#              boundary : 0 - x_down , 1 - x_up , 2 - y_down , 3 - y_up , 4 - z_down , 5 - z_up 
+#Solver.Mesh.BoundaryCondition.Potential.Fix.boundary = [(3,Li,1)]
+
+Solver.Phases = {[(E_trode),(Li)]}
+Solver.Comps = (Li)
+
+Postprocess.PCT.VTS.con = true
+Postprocess.PCT.VTS.potential = true
+Postprocess.PCT.VTS.energy_density = true
+Postprocess.PCT.VTS.phi = true
+
+# .boundary = [(boundary, con_name, value), ... ] 
+#              boundary : 0 - x_down , 1 - x_up , 2 - y_down , 3 - y_up , 4 - z_down , 5 - z_up 
+Solver.Mesh.BoundaryCondition.Con.Fix.boundary = [(1,Li,1.0)]
+
+# .matrix = {[(phi_index),(phi_name),(phi_comp_0_value, phi_comp_1_value, ... )],[(total_comp_0_value, total_comp_1_value, ... )],[(temp_value)]} 
+Preprocess.Microstructure.matrix = {[(0),(E_trode),(1.0)],[(1.0)],[(0.0)]}
+Preprocess.Microstructure.Matrix.phi = 0.0
+Preprocess.Microstructure.geometry_layer_number = 1
+# .property = (phi_index, phi_name, geometry_type, rotation_gauge, reverse_region) 
+#              geometry_type  : 0 - None, 1 - Ellipsoid, 2 - Polyhedron 
+#              rotation_gauge : 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
+#                               6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
+Preprocess.Microstructure.geometry_layer_0.property = (0,E_trode,1,1,false)
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,50,0),(6,6,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
+Preprocess.Microstructure.geometry_layer_0.is_normalized = false
+Preprocess.Microstructure.geometry_layer_0.x = [(Li,1.0)]
+
+###### models 1 - standard allen-chan , 2 - pair-wise , 3 - cahn-hilliard
+ModelsManager.Phi.equation = 1
+
+# ModelsManager.Phi.Lij.const  = Lii_value 
+#                      .matrix = [(phi_i, phi_j, Lij_value), ... ] 
+#                      .block = [(phi_begin, phi_end, Lij_value), ... ] 
+ModelsManager.Phi.Lij.const = 1500
+# ModelsManager.Phi.InterfaceEnergy.int_gradient : 3 - Int_GStandard
+ModelsManager.Phi.InterfaceEnergy.int_gradient = 3
+# ModelsManager.Phi.xi_a.const  = xi_a 
+#                       .matrix = [(phi_a, xi_a_value), ...] 
+ModelsManager.Phi.xi_a.const = 0.5
+
+# ModelsManager.Con.equation : 0 - Const, 1 - TotalConcentration, 2 - PhaseConcentration, 3 - GrandPotential
+ModelsManager.Con.equation = 1
+# ModelsManager.Con.valid_domain : 0 - Standard, 1 - Reverse
+ModelsManager.Con.valid_domain = 1
+ModelsManager.Con.ValidDomain.phase_indexes = ()
+ModelsManager.Con.Mii = [(10)]
+ModelsManager.Con.ElectroDeposition.Electrolyte_Mii = 1000
+
+# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 7 - HighOrder, 8 - SimpleDoubleWell
+ModelsManager.PhiCon.BulkEnergy.type = 8
+ModelsManager.PhiCon.BulkEnergy.SimpleDoubleWell.A = 0.25
+
+# Preprocess.relax_interface = (relax_steps, output_steps,is_interface_movable_in_relax ,fix_phi_after_relax) 
+Preprocess.relax_interface = (10000,1000,true,false)
+
+ModelsManager.PhiCon.ElectroDeposition.active_component = Li
+ModelsManager.PhiCon.ElectroDeposition.electrode_index = (0)
+ModelsManager.Phi.Butler_Volmer.Reaction_Constant = 400.0
+ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num = 1
+ModelsManager.Phi.Bulter_Volmer.Standard_Potential = 0.000000
+ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity = 76400
+ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con = 1000
+
+
+Postprocess.PhysicalFields.electric = true
+Modules.ElectricField.conductivity = (100.0)
+Modules.ElectricField.threshold = 0.9
+Modules.ElectricField.BackGround.conductivity = 100.0
+# Modules.ElectricField.fix_phi = [(phi_name, elec_potential), ... ] 
+Modules.ElectricField.fix_phi = [(E_trode,0.0)]
+Modules.ElectricField.accuracy = 0.000001
+Modules.ElectricField.max_iteration_steps = 100000
+Modules.ElectricField.debug = false
+Modules.ElectricField.Debug.output_steps = 100
+# Modules.ElectricField.fix_boundary.value = (x_down,x_up,y_down,y_up,z_down,z_up) 
+Modules.ElectricField.fix_boundary.type = (false,true,false,false,false,false)
+Modules.ElectricField.fix_boundary.value = (0.0,1,0,0,0,0)

@@ -52,6 +52,7 @@ namespace pf {
 				double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
 				auto eta_a = (phi_electrode - phi_solution - electric_field::E_std);
 				eta_a < -0.2 ? eta_a = -0.2 : eta_a>0 ? eta_a = 0 : 0;
+				//auto eta_a{ -0.2 };
 
 				result = -L_eta * h_ * (std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
 					node.x[phase.index].value * std::exp(-0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)));
@@ -154,7 +155,64 @@ namespace pf {
 
 		}
 		static void write_scalar(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
+			// check this module is open
 
+			ConEquationType _type = Solvers::get_instance()->parameters.ConEType;
+			fout << "<DataArray type = \"Float64\" Name = \"" << "elec_flux" <<
+				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+			for (int k = 0; k < phaseMesh.limit_z; k++)
+				for (int j = 0; j < phaseMesh.limit_y; j++)
+					for (int i = 0; i < phaseMesh.limit_x; i++) {
+						PhaseNode& node = phaseMesh(i, j, k);
+						double val = 0.0;
+						// - reaction 
+						if (_type == ConEquationType::CEType_TotalX) {
+							double dxi_dt{};
+							for (auto phase = node.begin(); phase < node.end(); phase++)
+								for (auto index = electric_field::electrode_index.begin(); index < electric_field::electrode_index.end(); index++)
+									if (*index == phase->index) {
+										dxi_dt += (phase->phi - phase->old_phi) / electric_field::time_interval;
+									}
+							val = -electric_field::c_s / electric_field::c_0 * dxi_dt;
+						}
+						// - 
+#ifdef _DEBUG
+						if (IS_NAN(val)) {  // problems here !!!!
+							cout << "DEBUG: battery_charge error !" << endl;
+							SYS_PROGRAM_STOP;
+						}
+#endif
+						fout << val << endl;
+					}
+			fout << "</DataArray>" << endl;
+
+			fout << "<DataArray type = \"Float64\" Name = \"" << "electrolyte_con" <<
+				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+			for (int k = 0; k < phaseMesh.limit_z; k++)
+				for (int j = 0; j < phaseMesh.limit_y; j++)
+					for (int i = 0; i < phaseMesh.limit_x; i++) {
+						PhaseNode& node = phaseMesh(i, j, k);
+						double val = 0.0;
+						// - reaction 
+						if (_type == ConEquationType::CEType_TotalX) {
+							double electrode_phi = 0.0;
+							for (auto phase = node.begin(); phase < node.end(); phase++)
+								for (auto index = electric_field::electrode_index.begin(); index < electric_field::electrode_index.end(); index++)
+									if (*index == phase->index) {
+										electrode_phi += phase->phi;
+									}
+							val = (1.0 - electrode_phi) * node.x[electric_field::active_component_index].value;
+						}
+						// - 
+#ifdef _DEBUG
+						if (IS_NAN(val)) {  // problems here !!!!
+							cout << "DEBUG: battery_charge error !" << endl;
+							SYS_PROGRAM_STOP;
+						}
+#endif
+						fout << val << endl;
+		}
+			fout << "</DataArray>" << endl;
 		}
 		static void write_vec3(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
 
