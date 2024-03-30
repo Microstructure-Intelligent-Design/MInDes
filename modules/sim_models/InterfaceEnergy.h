@@ -99,6 +99,13 @@ namespace pf {
 		static double_box matirx_xi_a;
 		static tensor2_double matirx_xi_ab;
 		static tensor3_double matirx_xi_abc;
+		// anisotropy
+		static bool is_anisotropy_on{};
+		static int anisotropy_model{};
+		static double aniso_strength{};
+		static double aniso_module_num{};
+		static double aniso_angle{};
+		//static;
 		// output
 		int_box interface_energy_standard_output;
 		PairFlag interface_energy_pairwise_output;
@@ -115,12 +122,25 @@ namespace pf {
 		static double xi_a_const(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
 			return const_xi_a;
 		};
+		static double xi_a_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
+			double theta = std::atan2(alpha.phi_grad.getY(), alpha.phi_grad.getX());
+			return const_xi_a * (1.0+aniso_strength*std::cos(aniso_module_num*theta));
+		}
+
 		static double xi_ab_const(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
 			return const_xi_ab;
+		}
+		static double xi_ab_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
+			return const_xi_ab;
 		};
+
 		static double xi_abc_const(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
 			return const_xi_abc;
 		};
+		static double xi_abc_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
+			return const_xi_abc;
+		};
+
 		static double xi_a_matrix(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
 			// to be defined
 			double _xi = 0.0;
@@ -129,29 +149,64 @@ namespace pf {
 					_xi = xi_a->value;
 			return _xi;
 		};
+		static double xi_a_matrix_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
+			// to be defined
+			double _xi = 0.0;
+			for (auto xi_a = matirx_xi_a.begin(); xi_a < matirx_xi_a.end(); xi_a++)
+				if (xi_a->index == alpha.index)
+					_xi = xi_a->value;
+			double theta = std::atan2(alpha.phi_grad.getY(), alpha.phi_grad.getX());
+			return _xi * (1.0 + aniso_strength * std::cos(aniso_module_num * theta));
+		};
+
 		static double xi_ab_matrix(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
 			// to be defined
 			double _xi = 0.0;
-			for(auto xi_a = matirx_xi_ab.begin(); xi_a < matirx_xi_ab.end(); xi_a++)
+			for (auto xi_a = matirx_xi_ab.begin(); xi_a < matirx_xi_ab.end(); xi_a++)
 				for (auto xi_b = xi_a->begin(); xi_b < xi_a->end(); xi_b++)
-					if ((xi_a->index == alpha.index && xi_b->index == beta.index) 
+					if ((xi_a->index == alpha.index && xi_b->index == beta.index)
 						|| (xi_a->index == beta.index && xi_b->index == alpha.index))
 						_xi = xi_b->val;
 			return _xi;
 		};
+		static double xi_ab_matrix_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
+			// to be defined
+			double _xi = 0.0;
+			for (auto xi_a = matirx_xi_ab.begin(); xi_a < matirx_xi_ab.end(); xi_a++)
+				for (auto xi_b = xi_a->begin(); xi_b < xi_a->end(); xi_b++)
+					if ((xi_a->index == alpha.index && xi_b->index == beta.index)
+						|| (xi_a->index == beta.index && xi_b->index == alpha.index))
+						_xi = xi_b->val;
+			return _xi;
+		};
+
 		static double xi_abc_matrix(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
 			// to be defined
 			double _xi = 0.0;
 			for (auto xi_a = matirx_xi_abc.begin(); xi_a < matirx_xi_abc.end(); xi_a++)
 				for (auto xi_b = xi_a->begin(); xi_b < xi_a->end(); xi_b++)
 					for (auto xi_c = xi_b->begin(); xi_c < xi_b->end(); xi_c++)
-					if ((xi_a->index == alpha.index && xi_b->index == beta.index && xi_c->index == gamma.index)
-						|| (xi_a->index == beta.index && xi_b->index == alpha.index && xi_c->index == gamma.index)
-						|| (xi_a->index == alpha.index && xi_b->index == gamma.index && xi_c->index == beta.index)
-						|| (xi_a->index == gamma.index && xi_b->index == beta.index && xi_c->index == alpha.index))
-						_xi = xi_c->val;
+						if ((xi_a->index == alpha.index && xi_b->index == beta.index && xi_c->index == gamma.index)
+							|| (xi_a->index == beta.index && xi_b->index == alpha.index && xi_c->index == gamma.index)
+							|| (xi_a->index == alpha.index && xi_b->index == gamma.index && xi_c->index == beta.index)
+							|| (xi_a->index == gamma.index && xi_b->index == beta.index && xi_c->index == alpha.index))
+							_xi = xi_c->val;
 			return _xi;
 		};
+		static double xi_abc_matrix_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
+			// to be defined
+			double _xi = 0.0;
+			for (auto xi_a = matirx_xi_abc.begin(); xi_a < matirx_xi_abc.end(); xi_a++)
+				for (auto xi_b = xi_a->begin(); xi_b < xi_a->end(); xi_b++)
+					for (auto xi_c = xi_b->begin(); xi_c < xi_b->end(); xi_c++)
+						if ((xi_a->index == alpha.index && xi_b->index == beta.index && xi_c->index == gamma.index)
+							|| (xi_a->index == beta.index && xi_b->index == alpha.index && xi_c->index == gamma.index)
+							|| (xi_a->index == alpha.index && xi_b->index == gamma.index && xi_c->index == beta.index)
+							|| (xi_a->index == gamma.index && xi_b->index == beta.index && xi_c->index == alpha.index))
+							_xi = xi_c->val;
+			return _xi;
+		};
+		// -----------------------------------------------------------
 		static double dfint_dphi_S2009(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, double intface_width) {
 			return _xi_ab(node, alpha, beta) * (intface_width * (beta.phi * alpha.laplacian - alpha.phi * beta.laplacian)
 				+ PI * PI / 2.0 / intface_width * (alpha.phi - beta.phi));
@@ -401,7 +456,30 @@ namespace pf {
 		}
 
 		static void load_interface_energy_model(bool infile_debug) {
-			
+
+			InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on", is_anisotropy_on, infile_debug);
+			if (is_anisotropy_on) {
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\\delta\\cos(n\\theta) \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.anisotropy_model", anisotropy_model, infile_debug);
+				switch (anisotropy_model)
+				{
+				case(1): {
+					std::string cos_model_key{ "ModelsManager.Phi.InterfaceEnergy.cos_model_parameters" };
+					std::string cos_model_value{ "()" };
+					InputFileReader::get_instance()->read_string_value(cos_model_key, cos_model_value, infile_debug);
+					std::vector<input_value> cos_model_para = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, cos_model_key, cos_model_value, infile_debug);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.cos_model_paras = (aniso_strength, aniso_module_num) \n", InputFileReader::get_instance()->debug_file);
+					aniso_strength = cos_model_para[0].double_value; aniso_module_num = cos_model_para[1].double_value;
+				}
+					   break;
+				default: {
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt_and_screen("Error, have you indicated the correct anisotropy model?", LOG_FILE_NAME);
+					exit(0);
+				}
+					   break;
+				}
+			}
+
 			if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
 				if (infile_debug)
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009\n", InputFileReader::get_instance()->debug_file);
@@ -429,9 +507,15 @@ namespace pf {
 				string matrix_key1 = "ModelsManager.Phi.xi_ab.matrix", matrix_input1 = "[()]";
 				if (InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.xi_ab.const", const_xi_ab, infile_debug)) {
 					_xi_ab = xi_ab_const;
+					if (is_anisotropy_on) {
+						_xi_ab = xi_ab_const_aniso_cos;
+					}
 				}
 				else if (InputFileReader::get_instance()->read_string_value(matrix_key1, matrix_input1, infile_debug)) {
 					_xi_ab = xi_ab_matrix;
+					if (is_anisotropy_on) {
+						_xi_ab = xi_ab_matrix_aniso_cos;
+					}
 					vector<InputValueType> matrix_structure; matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_DOUBLE);
 					vector<vector<input_value>> matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(matrix_structure, matrix_key1, matrix_input1, infile_debug);
 					for (int index = 0; index < matrix_value.size(); index++)
@@ -444,9 +528,15 @@ namespace pf {
 				string matrix_key2 = "ModelsManager.Phi.xi_abc.matrix", matrix_input2 = "[()]";
 				if (InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.xi_abc.const", const_xi_abc, infile_debug)) {
 					_xi_abc = xi_abc_const;
+					if (is_anisotropy_on) {
+						_xi_abc = xi_abc_const_aniso_cos;
+					}
 				}
 				else if (InputFileReader::get_instance()->read_string_value(matrix_key2, matrix_input2, infile_debug)) {
 					_xi_abc = xi_abc_matrix;
+					if (is_anisotropy_on) {
+						_xi_abc = xi_abc_matrix_aniso_cos;
+					}
 					vector<InputValueType> matrix_structure; matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_INT)
 						; matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_DOUBLE);
 					vector<vector<input_value>> matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(matrix_structure, matrix_key2, matrix_input2, infile_debug);
@@ -469,9 +559,15 @@ namespace pf {
 				string matrix_key1 = "ModelsManager.Phi.xi_a.matrix", matrix_input1 = "[()]";
 				if (InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.xi_a.const", const_xi_a, infile_debug)) {
 					_xi_a = xi_a_const;
+					if (is_anisotropy_on) {
+						_xi_a = xi_a_const_aniso_cos;
+					}
 				}
 				else if (InputFileReader::get_instance()->read_string_value(matrix_key1, matrix_input1, infile_debug)) {
 					_xi_a = xi_a_matrix;
+					if (is_anisotropy_on) {
+						_xi_a = xi_a_matrix_aniso_cos;
+					}
 					vector<InputValueType> matrix_structure; matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_DOUBLE);
 					vector<vector<input_value>> matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(matrix_structure, matrix_key1, matrix_input1, infile_debug);
 					for (int index = 0; index < matrix_value.size(); index++)
@@ -493,9 +589,15 @@ namespace pf {
 				string matrix_key1 = "ModelsManager.Phi.xi_a.matrix", matrix_input1 = "[()]";
 				if (InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.xi_a.const", const_xi_a, infile_debug)) {
 					_xi_a = xi_a_const;
+					if (is_anisotropy_on) {
+						_xi_a = xi_a_const_aniso_cos;
+					}
 				}
 				else if (InputFileReader::get_instance()->read_string_value(matrix_key1, matrix_input1, infile_debug)) {
 					_xi_a = xi_a_matrix;
+					if (is_anisotropy_on) {
+						_xi_a = xi_a_matrix_aniso_cos;
+					}
 					vector<InputValueType> matrix_structure; matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_DOUBLE);
 					vector<vector<input_value>> matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(matrix_structure, matrix_key1, matrix_input1, infile_debug);
 					for (int index = 0; index < matrix_value.size(); index++)
@@ -512,9 +614,9 @@ namespace pf {
 			_xi_abc = xi_abc_const;
 			_abs_grad_phi_pairwise = interface_energy_funcs::abs_grad_phi_S1996;
 			_abs_grad_phi_standard = interface_energy_funcs::abs_grad_phi_standard;
-			
+
 			load_interface_energy_model(infile_debug);
-			
+
 			if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
 				string df_dphi_key = "ModelsManager.Phi.InterfaceEnergy.vts_output", df_dphi_input = "[()]";
 				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.vts_output = [(phi_index_0, phi_index_1), ... ]\n", InputFileReader::get_instance()->debug_file);
