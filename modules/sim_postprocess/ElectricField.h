@@ -160,7 +160,7 @@ namespace pf {
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, infile_debug);
 
-				//electric_field_solver.set_RHS_calfunc(reaction_term);
+				electric_field_solver.set_RHS_calfunc(reaction_term);
 			}
 
 			electric_field_solver.set_BoundaryCondition_calfunc(boundary);
