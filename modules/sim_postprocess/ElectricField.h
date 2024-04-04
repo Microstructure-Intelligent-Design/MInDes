@@ -120,6 +120,8 @@ namespace pf {
 			if(InputFileReader::get_instance()->read_bool_value("Modules.ElectricField.debug", solver_debug, infile_debug))
 				InputFileReader::get_instance()->read_int_value("Modules.ElectricField.Debug.output_steps", solver_debug_output_steps, infile_debug);
 			// (DOWN_X, UP_X, DOWN_Y, UP_Y, DOWN_Z, UP_Z)
+			if (infile_debug)
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Modules.ElectricField.fix_boundary.value = (x_down,x_up,y_down,y_up,z_down,z_up) \n", InputFileReader::get_instance()->debug_file);
 			string fix_boundary_key = "Modules.ElectricField.fix_boundary.type", fix_boundary_input = "(false,false,false,false,false,false)";
 			InputFileReader::get_instance()->read_string_value(fix_boundary_key, fix_boundary_input, infile_debug);
 			vector<input_value> fix_boundary_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_BOOL, fix_boundary_key, fix_boundary_input, infile_debug);
@@ -146,6 +148,8 @@ namespace pf {
 				conductivity_phi.add_double(phi->phi_property, conductivity_phi_value[index].double_value);
 				index++;
 			}
+			if (infile_debug)
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Modules.ElectricField.fix_phi = [(phi,name, elec_potential), ... ] \n", InputFileReader::get_instance()->debug_file);
 			string fix_phi_key = "Modules.ElectricField.fix_phi", fix_phi_input = "[()]";
 			if (InputFileReader::get_instance()->read_string_value(fix_phi_key, fix_phi_input, infile_debug)) {
 				vector<InputValueType> fix_phi_structure; fix_phi_structure.push_back(InputValueType::IVType_STRING); fix_phi_structure.push_back(InputValueType::IVType_DOUBLE);
@@ -174,9 +178,9 @@ namespace pf {
 			fout << "<DataArray type = \"Float64\" Name = \"" << "elec_conductivity" <<
 				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 #pragma omp parallel for
-			for(int x = 0; x < phaseMesh.limit_x; x++)
+			for (int z = 0; z < phaseMesh.limit_z; z++)
 				for (int y = 0; y < phaseMesh.limit_y; y++)
-					for (int z = 0; z < phaseMesh.limit_z; z++) {
+					for (int x = 0; x < phaseMesh.limit_x; x++) {
 						PhaseNode& node = phaseMesh(x, y, z);
 						fout << node.customValues[ElectricalConductivity] << endl;
 					}
@@ -184,9 +188,9 @@ namespace pf {
 			fout << "<DataArray type = \"Float64\" Name = \"" << "elec_potential" <<
 				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 #pragma omp parallel for
-			for (int x = 0; x < phaseMesh.limit_x; x++)
+			for (int z = 0; z < phaseMesh.limit_z; z++)
 				for (int y = 0; y < phaseMesh.limit_y; y++)
-					for (int z = 0; z < phaseMesh.limit_z; z++) {
+					for (int x = 0; x < phaseMesh.limit_x; x++) {
 						PhaseNode& node = phaseMesh(x, y, z);
 						fout << node.customValues[ElectricalPotential] << endl;
 					}
@@ -194,9 +198,9 @@ namespace pf {
 			fout << "<DataArray type = \"Float64\" Name = \"" << "charge_density" <<
 				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 #pragma omp parallel for
-			for (int x = 0; x < phaseMesh.limit_x; x++)
+			for (int z = 0; z < phaseMesh.limit_z; z++)
 				for (int y = 0; y < phaseMesh.limit_y; y++)
-					for (int z = 0; z < phaseMesh.limit_z; z++) {
+					for (int x = 0; x < phaseMesh.limit_x; x++) {
 						PhaseNode& node = phaseMesh(x, y, z);
 						fout << node.customValues[ChargeDensity] << endl;
 					}

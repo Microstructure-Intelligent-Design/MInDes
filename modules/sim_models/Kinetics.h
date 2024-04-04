@@ -67,10 +67,22 @@ namespace pf {
 					phase.kinetics_coeff.set(xi->index, xj->index, M_phase(xi->index, xj->index));
 		}
 		static double Mtotal_ii(pf::PhaseNode& node, int con_i, int con_j) {
-			if (con_i == con_j)
-				return Mii(con_i);
-			else
-				return 0.0;
+			//if (con_i == con_j)
+			//	return Mii(con_i);
+			//else
+			//	return 0.0;
+			double Mii = 0.0;
+			if (con_i == con_j) {
+				for (auto phase = node.begin(); phase < node.end(); phase++)
+					if (phase->phi > SYS_EPSILON)
+						for (auto phi_M = phase_Mii.begin(); phi_M < phase_Mii.end(); phi_M++)
+							if (phase->property == phi_M->index) {
+								for (auto M = phi_M->begin(); M < phi_M->end(); M++)
+									if (con_i == M->index)
+										Mii += phase->phi * M->val;
+							}
+			}
+			return Mii;
 		}
 		static double Mtotal_ij(pf::PhaseNode& node, int con_i, int con_j) {
 			return Mij(con_i, con_j);
