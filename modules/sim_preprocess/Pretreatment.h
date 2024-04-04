@@ -28,11 +28,12 @@ namespace pf {
 	namespace pretreatment {
 		// for relax interface
 		static bool is_relax_interface_on = false;
+		static bool is_interface_movable{};
 		static int relaxation_steps = 0;
 		static int out_step = 100;
 		static bool is_fix_phi_in_loop = false;
 		// for merge phases
-		
+
 		// for remove nonexistent phases
 		static bool is_remove_inexistent_phis = false;
 		// for phi indexs re-ordering
@@ -49,7 +50,7 @@ namespace pf {
 		static vector<vector<int>> recons_phi;
 		static vector<int> recons_property;
 		// auto_merge_phis
-		
+
 		// optimization memory
 		static MemoryOptimization memory_optimization = MemoryOptimization::MO_NONE;
 		vector<int> fixed_phis;
@@ -179,15 +180,64 @@ namespace pf {
 					for (int y = 0; y < phaseMesh.limit_y; y++)
 						for (int z = 0; z < phaseMesh.limit_z; z++) {
 							PhaseNode& node = phaseMesh(x, y, z);
-							for (auto phase = node.Goast_Phase.begin(); phase < node.Goast_Phase.end(); phase++)
-								(*phase) = nullptr;
-							node.Goast_Phase.clear();
-							for (auto phase = node.begin(); phase < node.end(); phase++) {
-								//intphase and near intphase
-								if (phase->_flag) {
+							if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
+								for (auto phase = node.Goast_Phase.begin(); phase < node.Goast_Phase.end(); phase++)
+									(*phase) = nullptr;
+								node.Goast_Phase.clear();
+								for (auto phase = node.begin(); phase < node.end(); phase++) {
+									//intphase and near intphase
+									if (phase->_flag) {
+										phase->bulk_increment = 0.0;
+										phase->int_increment = 0.0;
+										node.Goast_Phase.push_back(&(*phase));
+										phase->phi_grad[0] = (node.get_neighbor_node(Direction::x_up)[phase->index].phi -
+											node.get_neighbor_node(Direction::x_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
+										phase->phi_grad[1] = (node.get_neighbor_node(Direction::y_up)[phase->index].phi -
+											node.get_neighbor_node(Direction::y_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
+										phase->phi_grad[2] = (node.get_neighbor_node(Direction::z_up)[phase->index].phi -
+											node.get_neighbor_node(Direction::z_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
+										if (diff_method == DifferenceMethod::FIVE_POINT) {
+											phase->laplacian = (node.get_neighbor_node(Direction::x_down)[phase->index].phi
+												+ node.get_neighbor_node(Direction::x_up)[phase->index].phi
+												+ node.get_neighbor_node(Direction::y_down)[phase->index].phi
+												+ node.get_neighbor_node(Direction::y_up)[phase->index].phi
+												+ node.get_neighbor_node(Direction::z_down)[phase->index].phi
+												+ node.get_neighbor_node(Direction::z_up)[phase->index].phi - 6 * phase->phi) / phaseMesh.dr / phaseMesh.dr;
+										}
+										else if (diff_method == DifferenceMethod::NINE_POINT) {
+											phase->laplacian = (4.0 * node.get_neighbor_node(Direction::x_down)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::x_up)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::y_down)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::y_up)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::z_down)[phase->index].phi
+												+ 4.0 * node.get_neighbor_node(Direction::z_up)[phase->index].phi
+												+ node.get_long_range_node(-1, -1, 0)[phase->index].phi
+												+ node.get_long_range_node(-1, 1, 0)[phase->index].phi
+												+ node.get_long_range_node(1, -1, 0)[phase->index].phi
+												+ node.get_long_range_node(1, 1, 0)[phase->index].phi
+												+ node.get_long_range_node(-1, 0, -1)[phase->index].phi
+												+ node.get_long_range_node(-1, 0, 1)[phase->index].phi
+												+ node.get_long_range_node(1, 0, -1)[phase->index].phi
+												+ node.get_long_range_node(1, 0, 1)[phase->index].phi
+												+ node.get_long_range_node(0, -1, -1)[phase->index].phi
+												+ node.get_long_range_node(0, -1, 1)[phase->index].phi
+												+ node.get_long_range_node(0, 1, -1)[phase->index].phi
+												+ node.get_long_range_node(0, 1, 1)[phase->index].phi - 36 * phase->phi) / 6.0 / phaseMesh.dr / phaseMesh.dr;
+										}
+									}
+									else {
+										phase->phi_grad[0] = 0.0;
+										phase->phi_grad[1] = 0.0;
+										phase->phi_grad[2] = 0.0;
+										phase->laplacian = 0.0;
+									}
+								}
+							}
+							else if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Standard || Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_CH_Standard) {
+								for (auto phase = node.begin(); phase < node.end(); phase++) {
+									//intphase and near intphase
 									phase->bulk_increment = 0.0;
 									phase->int_increment = 0.0;
-									node.Goast_Phase.push_back(&(*phase));
 									phase->phi_grad[0] = (node.get_neighbor_node(Direction::x_up)[phase->index].phi -
 										node.get_neighbor_node(Direction::x_down)[phase->index].phi) / 2.0 / phaseMesh.dr;
 									phase->phi_grad[1] = (node.get_neighbor_node(Direction::y_up)[phase->index].phi -
@@ -223,12 +273,6 @@ namespace pf {
 											+ node.get_long_range_node(0, 1, 1)[phase->index].phi - 36 * phase->phi) / 6.0 / phaseMesh.dr / phaseMesh.dr;
 									}
 								}
-								else {
-									phase->phi_grad[0] = 0.0;
-									phase->phi_grad[1] = 0.0;
-									phase->phi_grad[2] = 0.0;
-									phase->laplacian = 0.0;
-								}
 							}
 						}
 #pragma omp parallel for
@@ -236,7 +280,7 @@ namespace pf {
 					for (int y = 0; y < phaseMesh.limit_y; y++)
 						for (int z = 0; z < phaseMesh.limit_z; z++) {
 							PhaseNode& node = phaseMesh(x, y, z);
-							if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise){
+							if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
 								if (node.Goast_Phase.size() == 0)
 									continue;
 								//double first_term, second_term;
@@ -248,9 +292,11 @@ namespace pf {
 										for (auto beta = alpha + 1; beta < node.Goast_Phase.end(); beta++) {
 											double int_incre_b_a = 0.0;
 											int_incre_b_a = mobility(node, **alpha, **beta) / iwidth * interface_energy::dfint_dphi_S2009(node, **alpha, **beta, iwidth);
-											//< fix phi change begin
-											if (node.customFlags[ExternalFields::RELAX_interface_buff + (*alpha)->index] == 0 || node.customFlags[ExternalFields::RELAX_interface_buff + (*beta)->index] == 0)
-												int_incre_b_a = 0.0;
+											if (!is_interface_movable) {
+												//< fix phi change begin
+												if (node.customFlags[ExternalFields::RELAX_interface_buff + (*alpha)->index] == 0 || node.customFlags[ExternalFields::RELAX_interface_buff + (*beta)->index] == 0)
+													int_incre_b_a = 0.0;
+											}
 											//< fix phi change end
 											(*alpha)->int_increment += int_incre_b_a;
 											(*beta)->int_increment -= int_incre_b_a;
@@ -268,8 +314,10 @@ namespace pf {
 											double int_incre_b_a = mobility(node, **alpha, **beta) / iwidth
 												* (interface_energy::dfint_dphi_pairwise_acc(node, **beta, iwidth) - interface_energy::dfint_dphi_pairwise_acc(node, **alpha, iwidth));
 											//< fix phi change begin
-											if (node.customFlags[ExternalFields::RELAX_interface_buff + (*alpha)->index] == 0 || node.customFlags[ExternalFields::RELAX_interface_buff + (*beta)->index] == 0)
-												int_incre_b_a = 0.0;
+											if (!is_interface_movable) {
+												if (node.customFlags[ExternalFields::RELAX_interface_buff + (*alpha)->index] == 0 || node.customFlags[ExternalFields::RELAX_interface_buff + (*beta)->index] == 0)
+													int_incre_b_a = 0.0;
+											}
 											//< fix phi change end
 											(*alpha)->int_increment += int_incre_b_a;
 											(*beta)->int_increment -= int_incre_b_a;
@@ -287,15 +335,18 @@ namespace pf {
 								solver.dfint_dphi(node, Solvers::get_instance()->parameters.is_Normalize_Phi);
 								// equation //
 								for (auto alpha = node.begin(); alpha < node.end(); alpha++) {
-									alpha->bulk_increment = solver.Source_i(node, *alpha);
+									alpha->bulk_increment = 0.0;
 									if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON)
 										for (auto beta = node.begin(); beta < node.end(); beta++)
-											if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON)
+											if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON) {
 												alpha->bulk_increment += -solver.Lij(node, *alpha, *beta) * solver.dfbulk_dphi(node, *beta);
+											}
 									//< fix phi change begin
-									if (node.customFlags[ExternalFields::RELAX_interface_buff + alpha->index] == 0) {
-										alpha->int_increment = 0.0;
-										alpha->bulk_increment = 0.0;
+									if (!is_interface_movable) {
+										if (node.customFlags[ExternalFields::RELAX_interface_buff + alpha->index] == 0) {
+											alpha->int_increment = 0.0;
+											alpha->bulk_increment = 0.0;
+										}
 									}
 									//< fix phi change end
 								}
@@ -307,9 +358,11 @@ namespace pf {
 										phase->int_increment = solver.dfint_dphi(node, *phase);
 										phase->bulk_increment = solver.dfbulk_dphi(node, *phase);
 										//< fix phi change begin
-										if (node.customFlags[ExternalFields::RELAX_interface_buff + phase->index] == 0) {
-											phase->int_increment = 0.0;
-											phase->bulk_increment = 0.0;
+										if (!is_interface_movable){
+											if (node.customFlags[ExternalFields::RELAX_interface_buff + phase->index] == 0) {
+												phase->int_increment = 0.0;
+												phase->bulk_increment = 0.0;
+											}
 										}
 										//< fix phi change end
 									}
@@ -502,9 +555,9 @@ namespace pf {
 												if (_isnan(phi_a_increment)) {
 													cout << "DEBUG: phi_a_increment interaction term error !" << endl;
 													SYS_PROGRAM_STOP;
-												}
-#endif
 											}
+#endif
+										}
 										}
 										// source term
 										phi_a_increment += solver.Source_a(currentNode, *phi_a);
@@ -512,7 +565,7 @@ namespace pf {
 										if (_isnan(phi_a_increment)) {
 											cout << "DEBUG: phi_a_increment source term error !" << endl;
 											SYS_PROGRAM_STOP;
-										}
+									}
 #endif
 
 										phi_a->phi += phi_a_increment * dt;
@@ -541,16 +594,16 @@ namespace pf {
 											SYS_PROGRAM_STOP;
 										}
 #endif
-									}
 								}
 							}
 						}
+			}
 				if (r_istep % out_step == 0) {
 					stringstream log2;
 					log2 << "> iterated step:" << to_string(r_istep) << ",	max_phi_variation = " << MAX_PHI_INCRE << endl;
 					Solvers::get_instance()->writer.add_string_to_txt_and_screen(log2.str(), LOG_FILE_NAME);
 				}
-			}
+		}
 			for (auto phase = phaseMesh(0, 0, 0).begin(); phase < phaseMesh(0, 0, 0).end(); phase++)
 				phaseMesh.delete_customFlag_in_allnodes(ExternalFields::RELAX_interface_buff + phase->index);
 			stringstream log3;
@@ -558,7 +611,7 @@ namespace pf {
 			Solvers::get_instance()->current_istep = 0;
 			Solvers::get_instance()->real_time = 0.0;
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen(log3.str(), LOG_FILE_NAME);
-		}
+	}
 
 		static void remove_inexistent_phis(FieldStorage_forPhaseNode& phaseMesh) {
 			bool_box phis_need_erase;
@@ -678,7 +731,7 @@ namespace pf {
 							for (auto phase = node.begin(); phase < node.end(); phase++)
 								if (phase->index == fixed_phis[index] && phase->phi > (1.0 - SYS_EPSILON) && phase->_flag == pf_BULK) {
 									is_erase = true;
-									for(int rel_x = -1; rel_x <= 1; rel_x++)
+									for (int rel_x = -1; rel_x <= 1; rel_x++)
 										for (int rel_y = -1; rel_y <= 1; rel_y++)
 											for (int rel_z = -1; rel_z <= 1; rel_z++) {
 												if (rel_x == 0 && rel_y == 0 && rel_z == 0)
@@ -742,7 +795,7 @@ namespace pf {
 			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
 
 			if (infile_debug)
-			InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.reconstruct_phis = {[(phi_index_0, phi_index_1, ... ), (phi_name)], .... } \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.reconstruct_phis = {[(phi_index_0, phi_index_1, ... ), (phi_name)], .... } \n", InputFileReader::get_instance()->debug_file);
 			string reconstruct_phis_key = "Preprocess.reconstruct_phis", reconstruct_phis_input = "{[()]}";
 			if (InputFileReader::get_instance()->read_string_value(reconstruct_phis_key, reconstruct_phis_input, infile_debug)) {
 				is_reconstruct = true;
@@ -758,18 +811,19 @@ namespace pf {
 			}
 
 			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.relax_interface = (relax_steps, output_steps, fix_phi_after_relax) \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Preprocess.relax_interface = (relax_steps, output_steps, is_interface_movable_in_relax , fix_phi_after_relax) \n", InputFileReader::get_instance()->debug_file);
 			string relax_interface_key = "Preprocess.relax_interface", relax_interface_input = "()";
 			if (InputFileReader::get_instance()->read_string_value(relax_interface_key, relax_interface_input, infile_debug)) {
 				is_relax_interface_on = true;
 				vector<InputValueType> relax_interface_structure; relax_interface_structure.push_back(InputValueType::IVType_INT);
-				relax_interface_structure.push_back(InputValueType::IVType_INT); relax_interface_structure.push_back(InputValueType::IVType_BOOL);
+				relax_interface_structure.push_back(InputValueType::IVType_INT); relax_interface_structure.push_back(InputValueType::IVType_BOOL); relax_interface_structure.push_back(InputValueType::IVType_BOOL);
 				vector<input_value> relax_interface_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(relax_interface_structure, relax_interface_key, relax_interface_input, infile_debug);
 				relaxation_steps = relax_interface_value[0].int_value;
 				out_step = relax_interface_value[1].int_value;
-				is_fix_phi_in_loop = relax_interface_value[2].bool_value;
+				is_interface_movable = relax_interface_value[2].bool_value;
+				is_fix_phi_in_loop = relax_interface_value[3].bool_value;
 			}
-			
+
 			// should be concerned that matrix phases problem
 			InputFileReader::get_instance()->read_bool_value("Preprocess.remove_inexistent_phis", is_remove_inexistent_phis, infile_debug);
 
@@ -783,7 +837,7 @@ namespace pf {
 			if (InputFileReader::get_instance()->read_string_value(fill_phis_key, fill_phis_input, infile_debug)) {
 				is_filling_by_phi = true;
 				vector<InputValueType> fill_phis_structure; fill_phis_structure.push_back(InputValueType::IVType_INT);
-				fill_phis_structure.push_back(InputValueType::IVType_DOUBLE); fill_phis_structure.push_back(InputValueType::IVType_DOUBLE); 
+				fill_phis_structure.push_back(InputValueType::IVType_DOUBLE); fill_phis_structure.push_back(InputValueType::IVType_DOUBLE);
 				fill_phis_structure.push_back(InputValueType::IVType_DOUBLE);
 				vector<vector<vector<input_value>>> fill_phis_value = InputFileReader::get_instance()->trans_matrix_3d_const_array_const_to_input_value(fill_phis_structure, fill_phis_key, fill_phis_input, infile_debug);
 				for (int index = 0; index < fill_phis_value.size(); index++) {
@@ -809,7 +863,7 @@ namespace pf {
 					}
 					for (int x_index = 0; x_index < fill_phis_value[index][2].size(); x_index++)
 						total_con.add_double((Solvers::get_instance()->parameters.Components.begin() + x_index)->index, fill_phis_value[index][2][x_index].double_value);
-					
+
 					fill_phi_con.push_back(phi_con);
 					fill_total_con.push_back(total_con);
 					fill_temperature.push_back(fill_phis_value[index][3][0].double_value);
@@ -824,7 +878,7 @@ namespace pf {
 				}
 				tensor2_double matrix_Lij = interface_mobility::get_matirx_Lij();
 				PairValue block_Lij = interface_mobility::get_block_Lij();
-				for(auto Li = matrix_Lij.begin(); Li < matrix_Lij.end(); Li++)
+				for (auto Li = matrix_Lij.begin(); Li < matrix_Lij.end(); Li++)
 					for (auto Lj = Li->begin(); Lj < Li->end(); Lj++) {
 						for (auto fix_phi = fix_phi_index.begin(); fix_phi < fix_phi_index.end(); fix_phi++)
 							if (fix_phi->index == Li->index || fix_phi->index == Lj->index)
@@ -839,7 +893,7 @@ namespace pf {
 					for (auto grand_phi = no_grand_phi_index.begin(); grand_phi < no_grand_phi_index.end(); grand_phi++) {
 						grand_phi->value = 1;
 						for (auto index = Solvers::get_instance()->C_Solver.phase_indexes.begin(); index < Solvers::get_instance()->C_Solver.phase_indexes.end(); index++)
-							if(grand_phi->index == *index)
+							if (grand_phi->index == *index)
 								grand_phi->value = 0;
 					}
 				}
@@ -905,7 +959,7 @@ namespace pf {
 			}
 			if (memory_optimization == MemoryOptimization::MO_OPT)
 				optimization_memory_pair_wise_grand_potential(phaseMesh);
-			else if(memory_optimization == MemoryOptimization::MO_RESTORE)
+			else if (memory_optimization == MemoryOptimization::MO_RESTORE)
 				restore_memory_pair_wise_grand_potential(phaseMesh);
 		}
 
@@ -915,7 +969,7 @@ namespace pf {
 		}
 
 		static void deinit(FieldStorage_forPhaseNode& phaseMesh) {
-			
+
 		}
 
 		static void write_scalar(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
@@ -925,5 +979,5 @@ namespace pf {
 		static void write_vec3(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
 
 		}
-	}
+}
 }

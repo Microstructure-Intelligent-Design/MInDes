@@ -54,6 +54,10 @@ namespace pf {
 					sum_phi_j += p->phi * p->phi;
 			return 2.0 * DOUBLE_WELL_A * phi * (1.0 - phi) * (1.0 - 2.0 * phi) + 2.0 * DOUBLE_WELL_B * phi * sum_phi_j;
 		}
+		static double dfchem_dphi_double_well_simple(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			double phi = phase.phi;
+			return 2.0 * DOUBLE_WELL_A * phi * (1.0 - phi) * (1.0 - 2.0 * phi);
+		}
 		// LQ. Chen : sum_a{ - A/2.0 * phi_a * phi_a + B/4.0 * phi_a * phi_a * phi_a * phi_a } + C * sum_a{ sum_b!=a{ phi_a * phi_a * phi_b * phi_b } }
 		static double LQ_Chen_A = 0.0, LQ_Chen_B = 0.0, LQ_Chen_C = 0.0;
 		static double dfchem_dphi_LQ_Chen(pf::PhaseNode& node, pf::PhaseEntry& phase) {
@@ -151,7 +155,7 @@ namespace pf {
 					std::exit(0);
 					break;
 				case pf::dfdphi_DOUBLE_WELL_SIMPLE:
-					dfchem_dphi = dfchem_dphi_double_well;
+					dfchem_dphi = dfchem_dphi_double_well_simple;
 					InputFileReader::get_instance()->read_double_value("ModelsManager.PhiCon.BulkEnergy.SimpleDoubleWell.A", DOUBLE_WELL_A, infile_debug);
 				default:
 					break;

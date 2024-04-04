@@ -23,6 +23,7 @@ This program is free software: you can redistribute it and/or modify it under th
 namespace pf {
 	enum ElectricFieldIndex { ElectricalConductivity = 100, ElectricalPotential, ChargeDensity};
 	namespace electric_field_funcs {
+
 		static void rhs_cal(pf::PhaseNode& node, int rhs_index) {
 			node.customValues[rhs_index] = 0.0;
 		}
@@ -34,15 +35,28 @@ namespace pf {
 		}
 	}
 	namespace electric_field {
+
+		static vector<int> electrode_index{};
+		static int active_component_index = 0;
+		// - 
+		static double time_interval = 0.0;
+		// - 
+		static double reaction_constant{};
+		static double electron_num{};
+		static double E_std{};
+		static double c_s{}, c_0{};
+		// - 
 		static PoissonEquationSolver electric_field_solver;
 		static vector<bool> fix_domain_boundary;
 		static vector<double> fix_domain_boundary_value;
 		static tensor1_double fix_domain_phi_value;
 		static tensor1_double conductivity_phi;
+		static double conductivity_background = 0.0;
 		static double solver_accuracy = 1e-3;
 		static int solver_max_iterate_times = 100;
 		static bool solver_debug = false;
 		static int solver_debug_output_steps = 100;
+		static double threshold{1.0-1e-3};
 		// - 
 		static int Nx = 1;
 		static int Ny = 1;
@@ -54,11 +68,27 @@ namespace pf {
 			node.customValues[rhs_index] = 0.0;
 		}
 		static void conductivity(pf::PhaseNode& node, int lhs_index) {
-			double conductivity = 0.0;
-			for (auto phase = node.begin(); phase < node.end(); phase++)
+			double conductivity = 0.0, phi = 0.0;
+			for (auto phase = node.begin(); phase < node.end(); phase++) {
 				conductivity += phase->phi * conductivity_phi(phase->property);
-			node.customValues[lhs_index] = conductivity;
+				phi += phase->phi;
+			}
+			node.customValues[lhs_index] = conductivity + (1.0 - phi) * conductivity_background;
 		}
+		
+		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055
+		static void reaction_term(pf::PhaseNode& node, int rhs_index) {
+			double dxi_dt{};
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				for (auto index = electrode_index.begin(); index < electrode_index.end(); index++)
+					if (*index == phase->index) {
+						dxi_dt += (phase->phi - phase->old_phi)/ time_interval;
+					}
+			double result{ c_s * FaradayConstant * electron_num * dxi_dt };
+
+			node.customValues[rhs_index] = result;
+		}
+
 		static void boundary(pf::PhaseNode& node, int r_index) {
 			// node.customValues[r_index] = custom;
 			if(fix_domain_boundary[Boundary::DOWN_X] && node._x == 0)
@@ -87,7 +117,7 @@ namespace pf {
 			// 2
 			for (auto phase = node.begin(); phase < node.end(); phase++)
 				for (auto c_phi = fix_domain_phi_value.begin(); c_phi < fix_domain_phi_value.end(); c_phi++)
-					if (phase->property == c_phi->index && phase->phi > (1.0 - Phi_Num_Cut_Off)) {
+					if (phase->property == c_phi->index && phase->phi > threshold) {
 						node.customValues[r_index] = c_phi->val;
 					}
 		}
@@ -110,12 +140,36 @@ namespace pf {
 			fix_domain_boundary_value[Boundary::UP_Y] = 0.0; 
 			fix_domain_boundary_value[Boundary::UP_Z] = 0.0;
 			electric_field_solver.set_LHS_calfunc(conductivity);
+
+			time_interval = Solvers::get_instance()->parameters.dt;
+			bool is_electric_field_on = false;
+			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, false);
+			std::string active_comp_name{};
+			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, infile_debug) && is_electric_field_on) {
+				active_component_index = Solvers::get_instance()->parameters.Components[active_comp_name].index;
+
+				string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
+				InputFileReader::get_instance()->read_string_value(electrode_key, electrode_input, infile_debug);
+				vector<pf::input_value> electrode_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, electrode_key, electrode_input, infile_debug);
+				for (int index = 0; index < electrode_value.size(); index++)
+					electrode_index.push_back(electrode_value[index].int_value);
+
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Constant", reaction_constant, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num", electron_num, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.Bulter_Volmer.Standard_Potential", E_std, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
+				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, infile_debug);
+
+				electric_field_solver.set_RHS_calfunc(reaction_term);
+			}
+
 			electric_field_solver.set_BoundaryCondition_calfunc(boundary);
 			electric_field_solver.set_field_variable(1.0, 0.0, 0.0);
 			Nx = phaseMesh.limit_x;
 			Ny = phaseMesh.limit_y;
 			Nz = phaseMesh.limit_z;
 			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.accuracy", solver_accuracy, infile_debug);
+			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.threshold", threshold, infile_debug);
 			InputFileReader::get_instance()->read_int_value("Modules.ElectricField.max_iteration_steps", solver_max_iterate_times, infile_debug);
 			if(InputFileReader::get_instance()->read_bool_value("Modules.ElectricField.debug", solver_debug, infile_debug))
 				InputFileReader::get_instance()->read_int_value("Modules.ElectricField.Debug.output_steps", solver_debug_output_steps, infile_debug);
@@ -144,12 +198,19 @@ namespace pf {
 			InputFileReader::get_instance()->read_string_value(conductivity_phi_key, conductivity_phi_input, infile_debug);
 			vector<input_value> conductivity_phi_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, conductivity_phi_key, conductivity_phi_input, infile_debug);
 			int index = 0;
+			if (conductivity_phi_value.size() != Solvers::get_instance()->parameters.Phases.size()) {
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ERROR : size of Modules.ElectricField.conductivity isn't equal to the number of phases \n", InputFileReader::get_instance()->debug_file);
+				exit(0);
+			}
 			for(auto phi = Solvers::get_instance()->parameters.Phases.begin(); phi < Solvers::get_instance()->parameters.Phases.end(); phi++){
 				conductivity_phi.add_double(phi->phi_property, conductivity_phi_value[index].double_value);
 				index++;
 			}
+
+			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.BackGround.conductivity", conductivity_background, infile_debug);
+
 			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Modules.ElectricField.fix_phi = [(phi,name, elec_potential), ... ] \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Modules.ElectricField.fix_phi = [(phi_name, elec_potential), ... ] \n", InputFileReader::get_instance()->debug_file);
 			string fix_phi_key = "Modules.ElectricField.fix_phi", fix_phi_input = "[()]";
 			if (InputFileReader::get_instance()->read_string_value(fix_phi_key, fix_phi_input, infile_debug)) {
 				vector<InputValueType> fix_phi_structure; fix_phi_structure.push_back(InputValueType::IVType_STRING); fix_phi_structure.push_back(InputValueType::IVType_DOUBLE);

@@ -247,9 +247,6 @@ namespace pf {
 				if (parameters.vts_output_step > 0)
 					output_to_vts(WriteVTSType::WVTSType_LOOP);
 
-				if (parameters.data_output_step > 0)
-					write_data_file();
-
 				timer::time_interval_precision_secs_end(output_times);
 				Solvers_Timer.t_interval_output += output_times;
 
@@ -259,14 +256,10 @@ namespace pf {
 			// timer
 			timer::time_interval_precision_secs_begin(output_times);
 
-			if (parameters.data_output_step > 0) {
-				writer.add_string_to_txt_and_screen("> Error, write data file failed at the end of Program! \n", LOG_FILE_NAME);
-			}
 			if (parameters.vts_output_step > 0)
 				output_to_vts(WriteVTSType::WVTSType_END);
 			timer::time_interval_precision_secs_end(output_times);
 			Solvers_Timer.t_interval_output += output_times;
-
 
 			timer::time_interval_precision_secs_begin(Solvers_Timer.t_interval_modules_deinit);
 			// init treatment functions
@@ -335,7 +328,6 @@ namespace pf {
 		void output_with_loop();
 		void output_to_screen(string _postprocessing);
 		void output_to_vts(WriteVTSType _type);
-		void write_data_file();
 		void mid_selection();
 		void activation_info();
 		void license_info();
