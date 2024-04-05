@@ -24,7 +24,7 @@ This program is free software: you can redistribute it and/or modify it under th
 namespace pf {
 	namespace bulk_reaction {
 		// - 
-
+		static bool is_electrode_reaction_on = false;
 		//------phi source-----//
 
 		static double (*reaction_a)(pf::PhaseNode& node, pf::PhaseEntry& phase);  // main function
@@ -44,9 +44,7 @@ namespace pf {
 			double result = 0.0;
 			if (is_cal) {
 				double charge_trans_coeff{ 0.5 }, & alpha{ charge_trans_coeff };
-				double& L_eta{ electric_field::reaction_constant }, & xi{ phase.phi }, & n{ electric_field::electron_num };
-
-				auto h_ = 30.0 * xi * xi * (1 - xi) * (1 - xi);
+				double& L_eta{ electric_field::reaction_constant }, & n{ electric_field::electron_num };
 
 				double phi_electrode{ electric_field::fix_domain_phi_value(phase.property) };
 				double phi_solution{ node.customValues[ElectricFieldIndex::ElectricalPotential] };
@@ -54,8 +52,8 @@ namespace pf {
 				eta_a < -0.2 ? eta_a = -0.2 : eta_a>0 ? eta_a = 0 : 0;
 				//auto eta_a{ -0.2 };
 
-				result = -L_eta * h_ * (std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
-					node.x[phase.index].value * std::exp(-0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)));
+				result = -L_eta * interpolation_func(phase.phi) * (std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
+					node.x[electric_field::active_component_index].value * std::exp(-0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)));
 			}
 			return result;
 		}
@@ -156,7 +154,8 @@ namespace pf {
 		}
 		static void write_scalar(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
 			// check this module is open
-
+			if (!is_electrode_reaction_on)
+				return;
 			ConEquationType _type = Solvers::get_instance()->parameters.ConEType;
 			fout << "<DataArray type = \"Float64\" Name = \"" << "elec_flux" <<
 				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;

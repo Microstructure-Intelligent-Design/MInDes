@@ -67,10 +67,6 @@ namespace pf {
 					phase.kinetics_coeff.set(xi->index, xj->index, M_phase(xi->index, xj->index));
 		}
 		static double Mtotal_ii(pf::PhaseNode& node, int con_i, int con_j) {
-			//if (con_i == con_j)
-			//	return Mii(con_i);
-			//else
-			//	return 0.0;
 			double Mii = 0.0;
 			if (con_i == con_j) {
 				for (auto phase = node.begin(); phase < node.end(); phase++)
@@ -85,16 +81,12 @@ namespace pf {
 			return Mii;
 		}
 		static double Mtotal_electrodeposition_ii(pf::PhaseNode& node, int con_i, int con_j) {
-			//if (con_i == con_j)
-			//	return Mii(con_i);
-			//else
-			//	return 0.0;
 			double Mii = 0.0;
 			if (con_i == con_j && con_i == active_comp_index) {
-				double liquid_phi = 1.0;
+				double solid_phi = 0.0;
 				for (auto phase = node.begin(); phase < node.end(); phase++)
 					if (phase->phi > SYS_EPSILON) {
-						liquid_phi -= phase->phi;
+						solid_phi += phase->phi;
 						for (auto phi_M = phase_Mii.begin(); phi_M < phase_Mii.end(); phi_M++)
 							if (phase->property == phi_M->index) {
 								for (auto M = phi_M->begin(); M < phi_M->end(); M++)
@@ -102,7 +94,10 @@ namespace pf {
 										Mii += phase->phi * M->val;
 							}
 					}
-				Mii += liquid_phi * Mii_elec;
+				if (solid_phi > SYS_EPSILON)
+					Mii = Mii / solid_phi;
+				double h_func = interpolation_func(solid_phi);
+				Mii = Mii * h_func + Mii_elec * (1.0 - h_func);
 			}
 			return Mii;
 		}

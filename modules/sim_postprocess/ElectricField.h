@@ -73,7 +73,8 @@ namespace pf {
 				conductivity += phase->phi * conductivity_phi(phase->property);
 				phi += phase->phi;
 			}
-			node.customValues[lhs_index] = conductivity + (1.0 - phi) * conductivity_background;
+			double h_func = interpolation_func(phi);
+			node.customValues[lhs_index] = conductivity * h_func + conductivity_background * (1.0 - h_func);
 		}
 		
 		// From http://dx.doi.org/10.1016/j.jpowsour.2015.09.055

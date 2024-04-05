@@ -34,4 +34,13 @@ namespace pf {
 		, DF_Macro_TwoPhase = ExternalFields::LBM_Symbols_INDEX_0 + LBM_Symbols::LBM_SIZE * 2
 		, DF_Macro_TwoPhase_f_macro_old = ExternalFields::LBM_Symbols_INDEX_0 + LBM_Symbols::LBM_SIZE * 3, DF_Macro_TwoPhase_velocity_old
 		, EFP_Crack = 0, EFP_Crack_Incre = 1000, EFP_GrainEigenStrain_Region = 2000 };
+
+	static double interpolation_func(double phi) {
+		return phi * phi * phi * (6.0 * phi * phi - 15.0 * phi + 10.0);
+	}
+
+	static double dinterpolation_func_dphi(double phi) {
+		return 30.0 * phi * phi * (1.0 - phi) * (1.0 - phi);
+	}
+
 }

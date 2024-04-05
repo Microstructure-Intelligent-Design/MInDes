@@ -100,11 +100,11 @@ namespace pf {
 		static tensor2_double matirx_xi_ab;
 		static tensor3_double matirx_xi_abc;
 		// anisotropy
-		static bool is_anisotropy_on{};
-		static int anisotropy_model{};
-		static double aniso_strength{};
-		static double aniso_module_num{};
-		static double aniso_angle{};
+		static bool is_anisotropy_on = false;
+		static int anisotropy_model = 0;
+		static double aniso_strength = 0.0;
+		static double aniso_module_num = 1.0;
+		static double aniso_angle = 0.0;
 		//static;
 		// output
 		int_box interface_energy_standard_output;
@@ -124,7 +124,7 @@ namespace pf {
 		};
 		static double xi_a_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
 			double theta = std::atan2(alpha.phi_grad.getY(), alpha.phi_grad.getX());
-			return const_xi_a * (1.0+aniso_strength*std::cos(aniso_module_num*theta));
+			return const_xi_a * (1.0 + aniso_strength * std::cos(aniso_module_num * (theta - aniso_angle)));
 		}
 
 		static double xi_ab_const(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
@@ -156,7 +156,7 @@ namespace pf {
 				if (xi_a->index == alpha.index)
 					_xi = xi_a->value;
 			double theta = std::atan2(alpha.phi_grad.getY(), alpha.phi_grad.getX());
-			return _xi * (1.0 + aniso_strength * std::cos(aniso_module_num * theta));
+			return _xi * (1.0 + aniso_strength * std::cos(aniso_module_num * (theta - aniso_angle)));
 		};
 
 		static double xi_ab_matrix(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
@@ -457,29 +457,6 @@ namespace pf {
 
 		static void load_interface_energy_model(bool infile_debug) {
 
-			InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on", is_anisotropy_on, infile_debug);
-			if (is_anisotropy_on) {
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\\delta\\cos(n\\theta) \n", InputFileReader::get_instance()->debug_file);
-				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.anisotropy_model", anisotropy_model, infile_debug);
-				switch (anisotropy_model)
-				{
-				case(1): {
-					std::string cos_model_key{ "ModelsManager.Phi.InterfaceEnergy.cos_model_parameters" };
-					std::string cos_model_value{ "()" };
-					InputFileReader::get_instance()->read_string_value(cos_model_key, cos_model_value, infile_debug);
-					std::vector<input_value> cos_model_para = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, cos_model_key, cos_model_value, infile_debug);
-					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.cos_model_paras = (aniso_strength, aniso_module_num) \n", InputFileReader::get_instance()->debug_file);
-					aniso_strength = cos_model_para[0].double_value; aniso_module_num = cos_model_para[1].double_value;
-				}
-					   break;
-				default: {
-					InputFileReader::get_instance()->debug_writer->add_string_to_txt_and_screen("Error, have you indicated the correct anisotropy model?", LOG_FILE_NAME);
-					exit(0);
-				}
-					   break;
-				}
-			}
-
 			if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
 				if (infile_debug)
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.int_gradient : 0 - Steinbach_1996 , 1 - Steinbach_1999 , 2 - Steinbach_G2009\n", InputFileReader::get_instance()->debug_file);
@@ -604,6 +581,31 @@ namespace pf {
 						matirx_xi_a.add_double(matrix_value[index][0].int_value, matrix_value[index][1].double_value);
 				}
 			}
+
+			InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on", is_anisotropy_on, infile_debug);
+			if (is_anisotropy_on) {
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\\delta\\cos(n\\theta) \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.anisotropy_model", anisotropy_model, infile_debug);
+				std::string aniso_model_key{ "ModelsManager.Phi.InterfaceEnergy.cos_model_parameters" };
+				std::vector<input_value> aniso_model_para;
+				std::string aniso_model_value{ "()" };
+				switch (anisotropy_model)
+				{
+				case(1):
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.cos_model_paras = (aniso_strength, aniso_module_num, aniso_angle) \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->read_string_value(aniso_model_key, aniso_model_value, infile_debug);
+					aniso_model_para = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, aniso_model_key, aniso_model_value, infile_debug);
+					aniso_strength = aniso_model_para[0].double_value;
+					aniso_module_num = aniso_model_para[1].double_value;
+					aniso_angle = AngleToRadians(aniso_model_para[2].double_value);
+					break;
+				default:
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt_and_screen("Error, have you indicated the correct anisotropy model?", LOG_FILE_NAME);
+					exit(0);
+					break;
+				}
+			}
+
 		}
 
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
