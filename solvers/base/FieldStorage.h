@@ -504,6 +504,58 @@ namespace pf {
 		double dx;
 	};
 
+	class FieldStorage_forCustomNode {
+	public:
+		FieldStorage_forCustomNode() {
+		};
+		~FieldStorage_forCustomNode() {
+			free();
+		};
+
+		void init(int _Nx, int _Ny, int _Nz, double _dx, BoundaryCondition bc_x, BoundaryCondition bc_y, BoundaryCondition bc_z) {
+			//<maxNum 
+			Nx = _Nx;
+			Ny = _Ny;
+			Nz = _Nz;
+			if (bc_x != PERIODIC) {
+				Nx = _Nx * 2;
+			}
+			if (bc_y != PERIODIC) {
+				Ny = _Ny * 2;
+			}
+			if (bc_z != PERIODIC) {
+				Nz = _Nz * 2;
+			}
+			_mesh.resize(Nx * Ny * Nz);
+			dx = _dx;
+		}
+		void free() {
+			_mesh.clear();
+			Nx = 0;
+			Ny = 0;
+			Nz = 0;
+			dx = 0.0;
+		}
+		int size() {
+			return int(_mesh.size());
+		}
+
+		double_box& operator()(const int x, const int y, const int z) {
+			if (x >= 0 && x < Nx && y >= 0 && y < Ny && z >= 0 && z < Nz)
+				return _mesh[x + y * Nx + z * Nx * Ny];
+			else {
+				cout << "FieldStorage_forCustomNode error ! limit value error !" << endl;
+				SYS_PROGRAM_STOP;
+			}
+		}
+
+		std::vector<double_box> _mesh;
+		int Nx;                                                                ///< System size along X direction
+		int Ny;                                                                ///< System size along y direction
+		int Nz;                                                                ///< System size along z direction
+		double dx;
+	};
+
 	struct VectorNode {
 		VectorNode() {
 		}

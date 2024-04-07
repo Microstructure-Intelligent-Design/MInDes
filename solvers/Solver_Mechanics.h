@@ -19,27 +19,6 @@ This program is free software: you can redistribute it and/or modify it under th
 
 #pragma once
 #include"base.h"
-
-#ifdef _WIN32
-//windowsƽ̨ x86 or x68
-#ifdef _WIN64
- //x64
-#include "../lib/x64/fftw3.h"
-#pragma comment(lib,"lib/x64/libfftw3-3.lib")
-#pragma comment(lib,"lib/x64/libfftw3f-3.lib")
-#pragma comment(lib,"lib/x64/libfftw3l-3.lib")
-#else
- //x86
-#include "../lib/x86/fftw3.h"
-#pragma comment(lib,"lib/x86/libfftw3-3.lib")
-#pragma comment(lib,"lib/x86/libfftw3f-3.lib")
-#pragma comment(lib,"lib/x86/libfftw3l-3.lib")
-#endif //_WIN64
-#else
-//unix
-#include "../lib/linux/fftw3.h"
-#endif //_WIN32
-const std::complex< double > I(0.0, 1.0);
 namespace pf {
 	enum VelocityDomainIndex { VDIndex_OLD, VDIndex_NOW, VDIndex_FUTURE };
 	namespace mechanical_boundary_condition_funcs {
@@ -305,6 +284,28 @@ namespace pf {
 		void free() {
 			mechanicalField.free();
 			phaseMesh = nullptr;
+			for (int n = 0; n < 6; n++)
+			{
+				fftw_destroy_plan(ForwardPlanRHS[n]);
+
+				delete[] rlRHSide[n];
+				delete[] rcRHSide[n];
+			}
+
+			for (int n = 0; n < 3; n++)
+			{
+				fftw_destroy_plan(BackwardPlanU[n]);
+
+				delete[] rlU[n];
+				delete[] rcU[n];
+				delete[] Q[n];
+			}
+			for (int n = 0; n < 9; n++)
+			{
+				fftw_destroy_plan(BackwardPlanDefGrad[n]);
+				delete[] rcDefGrad[n];
+				delete[] rlDefGrad[n];
+			}
 		}
 
 		void cal_parameters_before_calculation(bool is_plastic);

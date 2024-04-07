@@ -1,4 +1,4 @@
-/*
+﻿/*
 This file is a part of the microstructure intelligent design software project.
 
 Created:     Qi Huang 2023.04
@@ -22,6 +22,7 @@ This program is free software: you can redistribute it and/or modify it under th
 namespace pf {
 	static int poison_protect_index = -3333;
 	namespace poissonEquationSolver {
+		// - explicit
 		static void rhs_cal(pf::PhaseNode& node, int rhs_index) {
 			node.customValues[rhs_index] = 0.0;
 		}
@@ -33,17 +34,17 @@ namespace pf {
 		}
 	}
 
-	class PoissonEquationSolver
+	class PoissonEquationSolver_Explicit
 	{
 	public:
-		PoissonEquationSolver() {};
-		PoissonEquationSolver(FieldStorage_forPhaseNode& _phaseMesh, int LHS_index, int R_index, int RHS_index, string _solver_name = "PoissonEquationSolver") {
+		PoissonEquationSolver_Explicit() {};
+		PoissonEquationSolver_Explicit(FieldStorage_forPhaseNode& _phaseMesh, int LHS_index, int R_index, int RHS_index, string _solver_name = "PoissonEquationSolver_Explicit") {
 			init_field(_phaseMesh, LHS_index, R_index, RHS_index, _solver_name);
 		}
-		~PoissonEquationSolver() {
+		~PoissonEquationSolver_Explicit() {
 			clear();
 		};
-		void init_field(FieldStorage_forPhaseNode& _phaseMesh, int LHS_index, int R_index, int RHS_index, string _solver_name = "PoissonEquationSolver") {
+		void init_field(FieldStorage_forPhaseNode& _phaseMesh, int LHS_index, int R_index, int RHS_index, string _solver_name = "PoissonEquationSolver_Explicit") {
 			phaseMesh = &_phaseMesh;
 			solver_name = _solver_name;
 			LHS_INDEX = LHS_index;
@@ -95,4 +96,5 @@ namespace pf {
 			boundary = nullptr;
 		}
 	};
+
 }

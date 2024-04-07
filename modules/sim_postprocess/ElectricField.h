@@ -21,6 +21,7 @@ This program is free software: you can redistribute it and/or modify it under th
 #include "../Base.h"
 
 namespace pf {
+	enum ElectricFieldSolver { EFS_NONE, EFS_EXPLICITE_DIFFERENCE, EFS_EXPLICITE_FOURIER_SPECTRAL, EFS_IMPLICIT_FOURIER_SPECTRAL };
 	enum ElectricFieldIndex { ElectricalConductivity = 100, ElectricalPotential, ChargeDensity};
 	namespace electric_field_funcs {
 
@@ -35,7 +36,8 @@ namespace pf {
 		}
 	}
 	namespace electric_field {
-
+		static int electric_field_solver = ElectricFieldSolver::EFS_NONE;
+		// - 
 		static vector<int> electrode_index{};
 		static int active_component_index = 0;
 		// - 
@@ -46,7 +48,13 @@ namespace pf {
 		static double E_std{};
 		static double c_s{}, c_0{};
 		// - 
-		static PoissonEquationSolver electric_field_solver;
+		static PoissonEquationSolver_Explicit electric_field_solver_diff;
+		static FourierTransformSolver electric_field_solver_fourier;
+		static double im_dt = 0.0;
+		static double im_varient = 0.0;
+		static double im_max_varient = 0.0;
+		static string im_solver_name = "ElectricFieldSolver_fourier";
+		// -
 		static vector<bool> fix_domain_boundary;
 		static vector<double> fix_domain_boundary_value;
 		static tensor1_double fix_domain_phi_value;
@@ -124,31 +132,102 @@ namespace pf {
 						node.customValues[r_index] = c_phi->val;
 					}
 		}
+
+		static void init_real_space(std::complex<double>& basic_real_space, PhaseNode& node, int real_x, int real_y, int real_z) {
+			node.customValues[ElectricalPotential] = 0.0;
+			// node.customValues[r_index] = custom;
+			if (fix_domain_boundary[Boundary::DOWN_X] && node._x == 0)
+				node.customValues[ElectricalPotential] = fix_domain_boundary_value[Boundary::DOWN_X];
+			if (fix_domain_boundary[Boundary::UP_X] && node._x == Nx - 1)
+				node.customValues[ElectricalPotential] = fix_domain_boundary_value[Boundary::UP_X];
+			if (fix_domain_boundary[Boundary::DOWN_Y] && node._y == 0)
+				node.customValues[ElectricalPotential] = fix_domain_boundary_value[Boundary::DOWN_Y];
+			if (fix_domain_boundary[Boundary::UP_Y] && node._y == Ny - 1)
+				node.customValues[ElectricalPotential] = fix_domain_boundary_value[Boundary::UP_Y];
+			if (fix_domain_boundary[Boundary::DOWN_Z] && node._z == 0)
+				node.customValues[ElectricalPotential] = fix_domain_boundary_value[Boundary::DOWN_Z];
+			if (fix_domain_boundary[Boundary::UP_Z] && node._z == Nz - 1)
+				node.customValues[ElectricalPotential] = fix_domain_boundary_value[Boundary::UP_Z];
+			// 2
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				for (auto c_phi = fix_domain_phi_value.begin(); c_phi < fix_domain_phi_value.end(); c_phi++)
+					if (phase->property == c_phi->index && phase->phi > threshold) {
+						node.customValues[ElectricalPotential] = c_phi->val;
+					}
+			// - 
+			basic_real_space._Val[FFTW_REAL] = node.customValues[ElectricalPotential];
+			// basic_real_space._Val[FFTW_IMAG] = 0.0;
+		}
+
+		static void fill_node_real_space(vector<std::complex<double>>& real_space, PhaseNode& node, int real_x, int real_y, int real_z) {
+			// - calculate real space
+
+			// - calculate node
+			if (real_x != node._x || real_y != node._y || real_z != node._z)
+				return;
+			double conductivity = 0.0, phi = 0.0;
+			for (auto phase = node.begin(); phase < node.end(); phase++) {
+				conductivity += phase->phi * conductivity_phi(phase->property);
+				phi += phase->phi;
+			}
+			if (phi > SYS_EPSILON)
+				conductivity = conductivity / phi;
+			double h_func = interpolation_func(phi);
+			node.customValues[ElectricalConductivity] = conductivity * h_func + conductivity_background * (1.0 - h_func);
+		}
+
+		static std::complex<double> dynamic_equation_fourier_space_ex(vector<std::complex<double>> fourier_space, pf::PhaseNode& node, double Q2, double Q4) {
+			double parameter = 1.0 - Q2 * node.customValues[ElectricalConductivity] * im_dt;
+			return fourier_space[0] * parameter;
+		}
+
+		static std::complex<double> dynamic_equation_fourier_space_im(vector<std::complex<double>> fourier_space, pf::PhaseNode& node, double Q2, double Q4) {
+			double parameter = 1.0 + Q2 * node.customValues[ElectricalConductivity] * im_dt;
+			return fourier_space[0] / parameter;
+		}
+
+		static void boundary_condition_real_space(std::complex<double>& basic_real_space, PhaseNode& node, int real_x, int real_y, int real_z) {
+			// node.customValues[r_index] = custom;
+			if (fix_domain_boundary[Boundary::DOWN_X] && node._x == 0)
+				basic_real_space._Val[FFTW_REAL] = fix_domain_boundary_value[Boundary::DOWN_X];
+			if (fix_domain_boundary[Boundary::UP_X] && node._x == Nx - 1)
+				basic_real_space._Val[FFTW_REAL] = fix_domain_boundary_value[Boundary::UP_X];
+			if (fix_domain_boundary[Boundary::DOWN_Y] && node._y == 0)
+				basic_real_space._Val[FFTW_REAL] = fix_domain_boundary_value[Boundary::DOWN_Y];
+			if (fix_domain_boundary[Boundary::UP_Y] && node._y == Ny - 1)
+				basic_real_space._Val[FFTW_REAL] = fix_domain_boundary_value[Boundary::UP_Y];
+			if (fix_domain_boundary[Boundary::DOWN_Z] && node._z == 0)
+				basic_real_space._Val[FFTW_REAL] = fix_domain_boundary_value[Boundary::DOWN_Z];
+			if (fix_domain_boundary[Boundary::UP_Z] && node._z == Nz - 1)
+				basic_real_space._Val[FFTW_REAL] = fix_domain_boundary_value[Boundary::UP_Z];
+			// 2
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				for (auto c_phi = fix_domain_phi_value.begin(); c_phi < fix_domain_phi_value.end(); c_phi++)
+					if (phase->property == c_phi->index && phase->phi > threshold) {
+						basic_real_space._Val[FFTW_REAL] = c_phi->val;
+					}
+			/*if (basic_real_space > 1.0)
+				basic_real_space = 1.0;
+			else if(basic_real_space < 0.0)
+				basic_real_space = 0.0;*/
+			// varient
+			double varient = abs(node.customValues[ElectricalPotential] - basic_real_space._Val[FFTW_REAL]);
+			if (varient > im_varient)
+				im_varient = varient;
+			// set
+			node.customValues[ElectricalPotential] = basic_real_space._Val[FFTW_REAL];
+		}
+
 		static void init(FieldStorage_forPhaseNode& phaseMesh) {
 			bool infile_debug = false;
 			InputFileReader::get_instance()->read_bool_value("InputFile.debug", infile_debug, false);
-			electric_field_solver.init_field(Solvers::get_instance()->phaseMesh, ElectricalConductivity, ElectricalPotential, ChargeDensity, "ElectricFieldSolver");
-			fix_domain_boundary.resize(6); 
-			fix_domain_boundary[Boundary::DOWN_X] = false; 
-			fix_domain_boundary[Boundary::DOWN_Y] = false; 
-			fix_domain_boundary[Boundary::DOWN_Z] = false;
-			fix_domain_boundary[Boundary::UP_X] = false; 
-			fix_domain_boundary[Boundary::UP_Y] = false; 
-			fix_domain_boundary[Boundary::UP_Z] = false;
-			fix_domain_boundary_value.resize(6); 
-			fix_domain_boundary_value[Boundary::DOWN_X] = 0.0; 
-			fix_domain_boundary_value[Boundary::DOWN_Y] = 0.0; 
-			fix_domain_boundary_value[Boundary::DOWN_Z] = 0.0;
-			fix_domain_boundary_value[Boundary::UP_X] = 0.0; 
-			fix_domain_boundary_value[Boundary::UP_Y] = 0.0; 
-			fix_domain_boundary_value[Boundary::UP_Z] = 0.0;
-			electric_field_solver.set_LHS_calfunc(conductivity);
 
 			time_interval = Solvers::get_instance()->parameters.dt;
-			bool is_electric_field_on = false;
-			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, false);
+			InputFileReader::get_instance()->read_int_value("Postprocess.PhysicalFields.electric", electric_field_solver, false);
+			if (electric_field_solver == ElectricFieldSolver::EFS_NONE)
+				return;
 			std::string active_comp_name{};
-			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, infile_debug) && is_electric_field_on) {
+			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, infile_debug) && electric_field_solver) {
 				active_component_index = Solvers::get_instance()->parameters.Components[active_comp_name].index;
 
 				string electrode_key = "ModelsManager.PhiCon.ElectroDeposition.electrode_index", electrode_input = "()";
@@ -163,11 +242,50 @@ namespace pf {
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity", c_s, infile_debug);
 				InputFileReader::get_instance()->read_double_value("ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con", c_0, infile_debug);
 
-				electric_field_solver.set_RHS_calfunc(reaction_term);
+				//electric_field_solver_ex.set_RHS_calfunc(reaction_term);
 			}
 
-			electric_field_solver.set_BoundaryCondition_calfunc(boundary);
-			electric_field_solver.set_field_variable(1.0, 0.0, 0.0);
+			electric_field_solver_diff.init_field(Solvers::get_instance()->phaseMesh, ElectricalConductivity, ElectricalPotential, ChargeDensity, "ElectricFieldSolver_DIFF");
+			fix_domain_boundary.resize(6);
+			fix_domain_boundary[Boundary::DOWN_X] = false;
+			fix_domain_boundary[Boundary::DOWN_Y] = false;
+			fix_domain_boundary[Boundary::DOWN_Z] = false;
+			fix_domain_boundary[Boundary::UP_X] = false;
+			fix_domain_boundary[Boundary::UP_Y] = false;
+			fix_domain_boundary[Boundary::UP_Z] = false;
+			fix_domain_boundary_value.resize(6);
+			fix_domain_boundary_value[Boundary::DOWN_X] = 0.0;
+			fix_domain_boundary_value[Boundary::DOWN_Y] = 0.0;
+			fix_domain_boundary_value[Boundary::DOWN_Z] = 0.0;
+			fix_domain_boundary_value[Boundary::UP_X] = 0.0;
+			fix_domain_boundary_value[Boundary::UP_Y] = 0.0;
+			fix_domain_boundary_value[Boundary::UP_Z] = 0.0;
+
+			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
+
+				electric_field_solver_diff.set_LHS_calfunc(conductivity);
+
+				electric_field_solver_diff.set_BoundaryCondition_calfunc(boundary);
+				electric_field_solver_diff.set_field_variable(1.0, 0.0, 0.0);
+			}
+			else if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_FOURIER_SPECTRAL || electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL) {
+				InputFileReader::get_instance()->read_double_value("Modules.ElectricField.dt", im_dt, infile_debug);
+				BoundaryCondition x_bc = BoundaryCondition::PERIODIC, y_bc = BoundaryCondition::PERIODIC, z_bc = BoundaryCondition::PERIODIC;
+				if (phaseMesh._bc_x_up != BoundaryCondition::PERIODIC || phaseMesh._bc_x_down != BoundaryCondition::PERIODIC)
+					x_bc = BoundaryCondition::ADIABATIC;
+				if (phaseMesh._bc_y_up != BoundaryCondition::PERIODIC || phaseMesh._bc_y_down != BoundaryCondition::PERIODIC)
+					y_bc = BoundaryCondition::ADIABATIC;
+				if (phaseMesh._bc_z_up != BoundaryCondition::PERIODIC || phaseMesh._bc_z_down != BoundaryCondition::PERIODIC)
+					z_bc = BoundaryCondition::ADIABATIC;
+				electric_field_solver_fourier.init(phaseMesh, x_bc, y_bc, z_bc);
+				electric_field_solver_fourier.init_real_space = init_real_space;
+				electric_field_solver_fourier.fill_node_real_space = fill_node_real_space;
+				if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_FOURIER_SPECTRAL)
+					electric_field_solver_fourier.dynamic_equation_fourier_space = dynamic_equation_fourier_space_ex;
+				else if(electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL)
+					electric_field_solver_fourier.dynamic_equation_fourier_space = dynamic_equation_fourier_space_im;
+				electric_field_solver_fourier.boundary_condition_real_space = boundary_condition_real_space;
+			}
 			Nx = phaseMesh.limit_x;
 			Ny = phaseMesh.limit_y;
 			Nz = phaseMesh.limit_z;
@@ -221,24 +339,73 @@ namespace pf {
 					for (auto fix_phi = fix_phi_value.begin(); fix_phi < fix_phi_value.end(); fix_phi++)
 						fix_domain_phi_value.add_double(Solvers::get_instance()->parameters.Phases[(*fix_phi)[0].string_value].phi_property, (*fix_phi)[1].double_value);
 			}
+
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE: ElectricField has been initialized !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
 			stringstream output;
-			int iterate_steps = electric_field_solver.solve_whole_domain(solver_accuracy, solver_max_iterate_times, solver_debug, solver_debug_output_steps);
-			output << "> Solver :" << electric_field_solver.solver_name << ", iterate " << iterate_steps << " times." << endl;
-			Solvers::get_instance()->writer.add_string_to_txt_and_screen(output.str(), LOG_FILE_NAME);
+			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
+				int iterate_steps = electric_field_solver_diff.solve_whole_domain(solver_accuracy, solver_max_iterate_times, solver_debug, solver_debug_output_steps);
+				output << "> Solver :" << electric_field_solver_diff.solver_name << ", iterate " << iterate_steps << " times." << endl;
+				Solvers::get_instance()->writer.add_string_to_txt_and_screen(output.str(), LOG_FILE_NAME);
+			}
+			else if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_FOURIER_SPECTRAL || electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL) {
+				electric_field_solver_fourier.init_basic_real_space();
+				im_max_varient = 0.0;
+				int iterate_steps = 1;
+				for (iterate_steps = 1; iterate_steps <= solver_max_iterate_times; iterate_steps++) {
+					im_varient = 0.0;
+					electric_field_solver_fourier.solve_one_step();
+					if (solver_debug && (iterate_steps % solver_debug_output_steps == 0)) {
+						output.str("");
+						output << im_solver_name << " iterate " << iterate_steps << " times !" << endl;
+						output << im_solver_name << " variation = " << im_varient << " !" << endl;
+						Solvers::get_instance()->writer.add_string_to_txt_and_screen(output.str(), LOG_FILE_NAME);
+					}
+					if (im_max_varient < im_varient)
+						im_max_varient = im_varient;
+					if (im_varient < solver_accuracy)
+						break;
+				}
+				if (solver_debug) {
+					output.str("");
+					output << im_solver_name << " iterate " << iterate_steps << " times !" << endl;
+					output << im_solver_name << " max_variation = " << im_max_varient << " !" << endl;
+					Solvers::get_instance()->writer.add_string_to_txt_and_screen(output.str(), LOG_FILE_NAME);
+				}
+				output.str("");
+				output << "> Solver :" << im_solver_name << ", iterate " << iterate_steps << " times," << " max_variation = " << im_max_varient << endl;
+				Solvers::get_instance()->writer.add_string_to_txt_and_screen(output.str(), LOG_FILE_NAME);
+			}
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			stringstream report;
-			int iterate_steps = electric_field_solver.solve_whole_domain(solver_accuracy, solver_max_iterate_times, solver_debug, solver_debug_output_steps);
-			report << "> Solver :" << electric_field_solver.solver_name << ", iterate " << iterate_steps << " times." << endl;
+			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
+				int iterate_steps = electric_field_solver_diff.solve_whole_domain(solver_accuracy, solver_max_iterate_times, false, solver_debug_output_steps);
+				report << "> Solver :" << electric_field_solver_diff.solver_name << ", iterate " << iterate_steps << " times." << endl;
+			}
+			else if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_FOURIER_SPECTRAL || electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL) {
+				electric_field_solver_fourier.init_basic_real_space();
+				im_max_varient = 0.0;
+				int iterate_steps = 1;
+				for (iterate_steps = 1; iterate_steps <= solver_max_iterate_times; iterate_steps++) {
+					im_varient = 0.0;
+					electric_field_solver_fourier.solve_one_step();
+					if (im_max_varient < im_varient)
+						im_max_varient = im_varient;
+					if (im_varient < solver_accuracy)
+						break;
+				}
+				report << "> Solver :" << im_solver_name << ", iterate " << iterate_steps << " times," << " max_variation = " << im_max_varient << endl;
+			}
 			return report.str();
 		}
 		static void deinit(FieldStorage_forPhaseNode& phaseMesh) {
 			
 		}
 		static void write_scalar(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
+			if (electric_field_solver == ElectricFieldSolver::EFS_NONE)
+				return;
 			fout << "<DataArray type = \"Float64\" Name = \"" << "elec_conductivity" <<
 				"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 #pragma omp parallel for
@@ -269,6 +436,27 @@ namespace pf {
 						fout << node.customValues[ChargeDensity] << endl;
 					}
 			fout << "</DataArray>" << endl;
+			// debug Q2 Q4
+			if (solver_debug && (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_FOURIER_SPECTRAL || electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL) && false) {
+				fout << "<DataArray type = \"Float64\" Name = \"" << "Q2" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+#pragma omp parallel for
+				for (int z = 0; z < phaseMesh.limit_z; z++)
+					for (int y = 0; y < phaseMesh.limit_y; y++)
+						for (int x = 0; x < phaseMesh.limit_x; x++) {
+							fout << electric_field_solver_fourier.Q2(x, y, z) << endl;
+						}
+				fout << "</DataArray>" << endl;
+				fout << "<DataArray type = \"Float64\" Name = \"" << "Q4" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+#pragma omp parallel for
+				for (int z = 0; z < phaseMesh.limit_z; z++)
+					for (int y = 0; y < phaseMesh.limit_y; y++)
+						for (int x = 0; x < phaseMesh.limit_x; x++) {
+							fout << electric_field_solver_fourier.Q4(x, y, z) << endl;
+						}
+				fout << "</DataArray>" << endl;
+			}
 		}
 		static void write_vec3(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
 

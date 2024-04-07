@@ -19,21 +19,21 @@ This program is free software: you can redistribute it and/or modify it under th
 
 #include"Solver_poisson_equation.h"
 namespace pf {
-	void PoissonEquationSolver::set_RHS_value() {
+	void PoissonEquationSolver_Explicit::set_RHS_value() {
 #pragma omp parallel for
 		for (int x = 0; x < phaseMesh->limit_x; x++)
 			for (int y = 0; y < phaseMesh->limit_y; y++)
 				for (int z = 0; z < phaseMesh->limit_z; z++)
 					setRHS_value((*phaseMesh)(x, y, z), RHS_INDEX);
 	}
-	void PoissonEquationSolver::set_LHS_value() {
+	void PoissonEquationSolver_Explicit::set_LHS_value() {
 #pragma omp parallel for
 		for (int x = 0; x < phaseMesh->limit_x; x++)
 			for (int y = 0; y < phaseMesh->limit_y; y++)
 				for (int z = 0; z < phaseMesh->limit_z; z++)
 					setLHS_value((*phaseMesh)(x, y, z), LHS_INDEX);
 	}
-	int PoissonEquationSolver::solve_whole_domain(double accuracy, int MAXIterations, bool debug_solver, int output_step) {
+	int PoissonEquationSolver_Explicit::solve_whole_domain(double accuracy, int MAXIterations, bool debug_solver, int output_step) {
 		double dx = phaseMesh->dr, MAXVariation = 0.0;
 		int iteration_times = 0;
 		set_RHS_value();
@@ -77,7 +77,7 @@ namespace pf {
 		}
 		return iteration_times;
 	}
-	int PoissonEquationSolver::solve_whole_domain_with_average_boundary_condition(double accuracy, int MAXIterations, double average_value, bool debug_solver, int output_step) {
+	int PoissonEquationSolver_Explicit::solve_whole_domain_with_average_boundary_condition(double accuracy, int MAXIterations, double average_value, bool debug_solver, int output_step) {
 		double dx = phaseMesh->dr, MAXVariation = 0.0, current_average = 0.0;
 		int iteration_times = 0;
 		set_RHS_value();
@@ -125,7 +125,7 @@ namespace pf {
 		}
 		return iteration_times;
 	}
-	int PoissonEquationSolver::solve_inside_phases_region(double accuracy, int MAXIterations, vector<int> phaseIndexes, double phi_threshold, bool debug_solver, int output_step) {
+	int PoissonEquationSolver_Explicit::solve_inside_phases_region(double accuracy, int MAXIterations, vector<int> phaseIndexes, double phi_threshold, bool debug_solver, int output_step) {
 		double dx = phaseMesh->dr, MAXVariation = 0.0;
 		int iteration_times = 0, Smooth_Phi_index = poison_protect_index + LHS_INDEX;
 		set_RHS_value();
@@ -186,7 +186,7 @@ namespace pf {
 		}
 		return iteration_times;
 	}
-	int PoissonEquationSolver::solve_outside_phases_region(double accuracy, int MAXIterations, vector<int> phaseIndexes, double phi_threshold, bool debug_solver, int output_step) {
+	int PoissonEquationSolver_Explicit::solve_outside_phases_region(double accuracy, int MAXIterations, vector<int> phaseIndexes, double phi_threshold, bool debug_solver, int output_step) {
 		double dx = phaseMesh->dr, MAXVariation = 0.0;
 		int iteration_times = 0, Smooth_Phi_index = poison_protect_index + LHS_INDEX;
 		set_RHS_value();

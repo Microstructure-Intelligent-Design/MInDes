@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 This file is a part of the microstructure intelligent design software project.
 
 Created:     Qi Huang 2023.04
@@ -24,6 +24,28 @@ This program is free software: you can redistribute it and/or modify it under th
 #include "base/timer.h"
 #include "base/WriteToFile.h"
 #include "base/RotationMatrix.h"
+#ifdef _WIN32
+//windowsÆ½Ì¨ x86 or x68
+#ifdef _WIN64
+ //x64
+#include "../lib/x64/fftw3.h"
+#pragma comment(lib,"lib/x64/libfftw3-3.lib")
+#pragma comment(lib,"lib/x64/libfftw3f-3.lib")
+#pragma comment(lib,"lib/x64/libfftw3l-3.lib")
+#else
+ //x86
+#include "../lib/x86/fftw3.h"
+#pragma comment(lib,"lib/x86/libfftw3-3.lib")
+#pragma comment(lib,"lib/x86/libfftw3f-3.lib")
+#pragma comment(lib,"lib/x86/libfftw3l-3.lib")
+#endif //_WIN64
+#else
+//unix
+#include "../lib/linux/fftw3.h"
+#endif //_WIN32
+#define FFTW_REAL 0
+#define FFTW_IMAG 1
+const std::complex<double> I(0.0, 1.0);
 namespace pf {
 	using namespace std;
 
@@ -86,7 +108,7 @@ namespace pf {
 		return *this;
 	}
 
-	//¶şÎ¬doubleÊ¸Á¿
+	//äºŒç»´doubleçŸ¢é‡
 	struct  Vec2d
 	{
 		double x, y;
@@ -108,7 +130,7 @@ namespace pf {
 		}
 	};
 
-	//ÅĞ¶ÏµãÔÚÏß¶ÎÉÏ
+	//åˆ¤æ–­ç‚¹åœ¨çº¿æ®µä¸Š
 	static bool IsPointOnLine(double px0, double py0, double px1, double py1, double px2, double py2)
 	{
 		bool flag = false;
@@ -120,7 +142,7 @@ namespace pf {
 		return flag;
 	}
 
-	//ÅĞ¶ÏÁ½Ïß¶ÎÏà½»
+	//åˆ¤æ–­ä¸¤çº¿æ®µç›¸äº¤
 	static bool IsIntersect(double px1, double py1, double px2, double py2, double px3, double py3, double px4, double py4)
 	{
 		bool flag = false;
@@ -137,7 +159,7 @@ namespace pf {
 		return flag;
 	}
 
-	//ÅĞ¶ÏµãÔÚ¶à±ßĞÎÄÚ
+	//åˆ¤æ–­ç‚¹åœ¨å¤šè¾¹å½¢å†…
 	static bool is_Point_In_Polygon_2D(double x, double y, const vector<Vec2d>& POL)
 	{
 		bool isInside = false;
@@ -155,10 +177,10 @@ namespace pf {
 		double py = y;
 		double linePoint1x = x;
 		double linePoint1y = y;
-		double linePoint2x = minX - 10;			//È¡×îĞ¡µÄXÖµ»¹Ğ¡µÄÖµ×÷ÎªÉäÏßµÄÖÕµã
+		double linePoint2x = minX - 10;			//å–æœ€å°çš„Xå€¼è¿˜å°çš„å€¼ä½œä¸ºå°„çº¿çš„ç»ˆç‚¹
 		double linePoint2y = y;
 
-		//±éÀúÃ¿Ò»Ìõ±ß
+		//éå†æ¯ä¸€æ¡è¾¹
 		for (int i = 0; i < int(POL.size()) - 1; i++)
 		{
 			double cx1 = POL[i].x;
@@ -171,26 +193,26 @@ namespace pf {
 				return true;
 			}
 
-			if (fabs(cy2 - cy1) < SYS_EPSILON)   //Æ½ĞĞÔò²»Ïà½»
+			if (fabs(cy2 - cy1) < SYS_EPSILON)   //å¹³è¡Œåˆ™ä¸ç›¸äº¤
 			{
 				continue;
 			}
 
 			if (IsPointOnLine(cx1, cy1, linePoint1x, linePoint1y, linePoint2x, linePoint2y))
 			{
-				if (cy1 > cy2)			//Ö»±£Ö¤ÉÏ¶Ëµã+1
+				if (cy1 > cy2)			//åªä¿è¯ä¸Šç«¯ç‚¹+1
 				{
 					count++;
 				}
 			}
 			else if (IsPointOnLine(cx2, cy2, linePoint1x, linePoint1y, linePoint2x, linePoint2y))
 			{
-				if (cy2 > cy1)			//Ö»±£Ö¤ÉÏ¶Ëµã+1
+				if (cy2 > cy1)			//åªä¿è¯ä¸Šç«¯ç‚¹+1
 				{
 					count++;
 				}
 			}
-			else if (IsIntersect(cx1, cy1, cx2, cy2, linePoint1x, linePoint1y, linePoint2x, linePoint2y))   //ÒÑ¾­ÅÅ³ıÆ½ĞĞµÄÇé¿ö
+			else if (IsIntersect(cx1, cy1, cx2, cy2, linePoint1x, linePoint1y, linePoint2x, linePoint2y))   //å·²ç»æ’é™¤å¹³è¡Œçš„æƒ…å†µ
 			{
 				count++;
 			}
