@@ -145,14 +145,10 @@ namespace pf {
 						rlDomain[index][XYZ]._Val[FFTW_REAL] = real_space[index]._Val[FFTW_REAL];
 				}
 		// transform real space to fourier space
-#pragma omp parallel sections// OMP BEGIN
-		{
-			for (int index = 0; index < rlc_space_size; index++) {
-#pragma omp section
-				{
-					fftw_execute(ForwardPlan[index]);
-				}
-			}
+
+#pragma omp parallel for
+		for (int index = 0; index < rlc_space_size; index++) {
+			fftw_execute(ForwardPlan[index]);
 		}
 		// calculation in fourier space
 #pragma omp parallel for
