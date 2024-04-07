@@ -825,7 +825,7 @@ namespace pf {
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
 			string report = "";
 			definiteNucleation();
-			if (Solvers::get_instance()->parameters.is_Normalize_Phi)
+			if (Solvers::get_instance()->parameters.is_Normalize_Phi && Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise)
 				phaseMesh.normalize_phi_in_mesh();
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen(report, LOG_FILE_NAME);
 		}

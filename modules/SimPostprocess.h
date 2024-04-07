@@ -46,7 +46,7 @@ namespace pf {
 			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.fluid", is_fluid_field_on, infile_debug);
 
 			if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.PhysicalFields.electric = 0 - NONE, 1 - EXPLICITE_DIFFERENCE, , 2 - EXPLICITE_FOURIER_SPECTRAL, 3 - IMPLICIT_FOURIER_SPECTRAL \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Postprocess.PhysicalFields.electric = 0 - NONE, 1 - EXPLICITE_DIFFERENCE, 2 - EXPLICITE_FOURIER_SPECTRAL, 3 - IMPLICIT_FOURIER_SPECTRAL \n", InputFileReader::get_instance()->debug_file);
 			InputFileReader::get_instance()->read_int_value("Postprocess.PhysicalFields.electric", is_electric_field_on, infile_debug);
 
 			if (is_electric_field_on)

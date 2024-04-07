@@ -31,7 +31,8 @@ namespace pf {
 		dfdcon_N_CRACK_WELL,
 		dfdcon_N_CRACK_OBSTACLE,
 		dfdphi_HighOrder,
-		dfdphi_DOUBLE_WELL_SIMPLE
+		dfdphi_DOUBLE_WELL_SIMPLE,
+		dfdphi_DOUBLE_OBSTACLE_SIMPLE
 	};
 	enum dfdconType { // phi , total con , temperature
 		dfdcon_Const,
@@ -57,6 +58,9 @@ namespace pf {
 		static double dfchem_dphi_double_well_simple(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			double phi = phase.phi;
 			return 2.0 * DOUBLE_WELL_A * phi * (1.0 - phi) * (1.0 - 2.0 * phi);
+		}
+		static double dfchem_dphi_double_obstacle_simple(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			return DOUBLE_WELL_A * (1.0 - 2.0 * phase.phi);
 		}
 		// LQ. Chen : sum_a{ - A/2.0 * phi_a * phi_a + B/4.0 * phi_a * phi_a * phi_a * phi_a } + C * sum_a{ sum_b!=a{ phi_a * phi_a * phi_b * phi_b } }
 		static double LQ_Chen_A = 0.0, LQ_Chen_B = 0.0, LQ_Chen_C = 0.0;
@@ -135,7 +139,7 @@ namespace pf {
 			if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Standard || Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_CH_Standard) {
 				int model_type = 0;
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 7 - HighOrder, 8 - SimpleDoubleWell\n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 7 - HighOrder, 8 - SimpleDoubleWell, 9 - SimpleObstacle\n", InputFileReader::get_instance()->debug_file);
 				InputFileReader::get_instance()->read_int_value("ModelsManager.PhiCon.BulkEnergy.type", model_type, infile_debug);
 				switch (model_type)
 				{
@@ -157,6 +161,11 @@ namespace pf {
 				case pf::dfdphi_DOUBLE_WELL_SIMPLE:
 					dfchem_dphi = dfchem_dphi_double_well_simple;
 					InputFileReader::get_instance()->read_double_value("ModelsManager.PhiCon.BulkEnergy.SimpleDoubleWell.A", DOUBLE_WELL_A, infile_debug);
+					break;
+				case pf::dfdphi_DOUBLE_OBSTACLE_SIMPLE:
+					dfchem_dphi = dfchem_dphi_double_obstacle_simple;
+					InputFileReader::get_instance()->read_double_value("ModelsManager.PhiCon.BulkEnergy.SimpleDoubleObstacle.A", DOUBLE_WELL_A, infile_debug);
+					break;
 				default:
 					break;
 				}

@@ -4,13 +4,15 @@ InputFile.debug = true
 Solver.Loop.begin_step = 0
 Solver.Loop.end_step = 10000
 Solver.Loop.screen_loop_step = 100
-Solver.Loop.screen_output_step = 1000
+Solver.Loop.screen_output_step = 100
 Solver.Loop.vts_output_step = 100
 Solver.Loop.data_output_step = 1000000000
 
-Solver.PCT.TimeInterval.dt = 2e-6
+Solver.Phi.is_normalize = true
 
-Solver.Parallel.openmp_thread_counts = 1
+Solver.PCT.TimeInterval.dt = dt
+
+Solver.Parallel.openmp_thread_counts = 10
 
 Solver.Mesh.Nx = 100
 Solver.Mesh.Ny = 100
@@ -38,10 +40,10 @@ Postprocess.PCT.VTS.phi = true
 
 # .boundary = [(boundary, con_name, value), ... ] 
 #              boundary : 0 - x_down , 1 - x_up , 2 - y_down , 3 - y_up , 4 - z_down , 5 - z_up 
-Solver.Mesh.BoundaryCondition.Con.Fix.boundary = [(1,Li,0.5)]
+Solver.Mesh.BoundaryCondition.Con.Fix.boundary = [(1,Li,init_con)]
 
 # .matrix = {[(phi_index),(phi_name),(phi_comp_0_value, phi_comp_1_value, ... )],[(total_comp_0_value, total_comp_1_value, ... )],[(temp_value)]} 
-Preprocess.Microstructure.matrix = {[(0),(E_trode),(0.5)],[(0.5)],[(0.0)]}
+Preprocess.Microstructure.matrix = {[(0),(E_trode),(init_con)],[(init_con)],[(0.0)]}
 Preprocess.Microstructure.Matrix.phi = 0.0
 Preprocess.Microstructure.geometry_layer_number = 1
 # .property = (phi_index, phi_name, geometry_type, rotation_gauge, reverse_region) 
@@ -49,10 +51,10 @@ Preprocess.Microstructure.geometry_layer_number = 1
 #              rotation_gauge : 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
 #                               6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
 Preprocess.Microstructure.geometry_layer_0.property = (0,E_trode,1,1,false)
-Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,50,0),(3,3,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,50,0),(2,2,0),(0,0,0)]
 Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
 Preprocess.Microstructure.geometry_layer_0.is_normalized = false
-Preprocess.Microstructure.geometry_layer_0.x = [(Li,0.5)]
+Preprocess.Microstructure.geometry_layer_0.x = [(Li,init_con)]
 
 ###### models 1 - standard allen-chan , 2 - pair-wise , 3 - cahn-hilliard
 ModelsManager.Phi.equation = 1
@@ -61,19 +63,19 @@ ModelsManager.Phi.equation = 1
 #                      .matrix = [(phi_i, phi_j, Lij_value), ... ] 
 #                      .block = [(phi_begin, phi_end, Lij_value), ... ] 
 # L_sigma
-ModelsManager.Phi.Lij.const = 150
+ModelsManager.Phi.Lij.const = PHI_INT_L
 # ModelsManager.Phi.InterfaceEnergy.int_gradient : 3 - Int_GStandard
 ModelsManager.Phi.InterfaceEnergy.int_gradient = 3
 
 # ModelsManager.Phi.xi_a.const  = xi_a 
 #                       .matrix = [(phi_a, xi_a_value), ...] 
 # kappa
-ModelsManager.Phi.xi_a.const = 2.0
+ModelsManager.Phi.xi_a.const = 3.0
 
 ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on = true
-ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\delta\cos(n\theta) 
+# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\delta\cos(n\theta) 
 ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1
-ModelsManager.Phi.InterfaceEnergy.cos_model_parameters = (0.1,4.0)
+ModelsManager.Phi.InterfaceEnergy.cos_model_parameters = (aniso_strength,4.0,0.0)
 
 # ModelsManager.Con.equation : 0 - Const, 1 - TotalConcentration, 2 - PhaseConcentration, 3 - GrandPotential
 ModelsManager.Con.equation = 1
@@ -81,37 +83,65 @@ ModelsManager.Con.equation = 1
 ModelsManager.Con.valid_domain = 1
 ModelsManager.Con.ValidDomain.phase_indexes = ()
 # Deff = ConMii*xi+ElyteMii*(1-xi)
-ModelsManager.Con.Mii = [(10)]
-ModelsManager.Con.ElectroDeposition.Electrolyte_Mii = 20000
+ModelsManager.Con.Mii = [(Solid_Mii)]
+ModelsManager.Con.ElectroDeposition.Electrolyte_Mii = Electrolyte_Mii
 
-# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 7 - HighOrder, 8 - SimpleDoubleWell
-ModelsManager.PhiCon.BulkEnergy.type = 8
+# ModelsManager.PhiCon.BulkEnergy.type : 1 - DoubleWell, 2 - LQ_Chen, 3 - H_Liang , 
+#                         7 - HighOrder, 8 - SimpleDoubleWell, 9 - SimpleObstacle
+ModelsManager.PhiCon.BulkEnergy.type = 9
 # g'(xi)
-ModelsManager.PhiCon.BulkEnergy.SimpleDoubleWell.A = 2.0
+ModelsManager.PhiCon.BulkEnergy.SimpleDoubleObstacle.A = 1.0
 
 # Preprocess.relax_interface = (relax_steps, output_steps,is_interface_movable_in_relax ,fix_phi_after_relax) 
-Preprocess.relax_interface = (10000,1000,true,false)
+# Preprocess.relax_interface = (60,10,true,false)
 
 ModelsManager.PhiCon.ElectroDeposition.active_component = Li
 ModelsManager.PhiCon.ElectroDeposition.electrode_index = (0)
 # L_eta
-ModelsManager.Phi.Butler_Volmer.Reaction_Constant = 40.0
+ModelsManager.Phi.Butler_Volmer.Reaction_Constant = PHI_REAC_L
 ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num = 1
-ModelsManager.Phi.Bulter_Volmer.Standard_Potential = 0.000000
+ModelsManager.Phi.Bulter_Volmer.Standard_Potential = 0.0
 # ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity = 76400
+# ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity = 10000
 ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con = 1000
 
-
-Postprocess.PhysicalFields.electric = true
-Modules.ElectricField.conductivity = (100.0)
-Modules.ElectricField.threshold = 0.9
-Modules.ElectricField.BackGround.conductivity = 100.0
+# Postprocess.PhysicalFields.electric = 0 - NONE, 1 - EXPLICITE_DIFFERENCE, , 2 - EXPLICITE_FOURIER_SPECTRAL, 3 - IMPLICIT_FOURIER_SPECTRAL 
+Postprocess.PhysicalFields.electric = 1
+Modules.ElectricField.conductivity = (1.0)
+Modules.ElectricField.threshold = 0.99
+Modules.ElectricField.BackGround.conductivity = 1.0
 # Modules.ElectricField.fix_phi = [(phi_name, elec_potential), ... ] 
-Modules.ElectricField.fix_phi = [(E_trode,0.0)]
-Modules.ElectricField.accuracy = 0.000001
-Modules.ElectricField.max_iteration_steps = 100000
-Modules.ElectricField.debug = false
+Modules.ElectricField.fix_phi = [(E_trode,electrode_V)]
+Modules.ElectricField.accuracy = electric_potential_distribution
+Modules.ElectricField.max_iteration_steps = 1000
+Modules.ElectricField.debug = true
 Modules.ElectricField.Debug.output_steps = 100
 # Modules.ElectricField.fix_boundary.value = (x_down,x_up,y_down,y_up,z_down,z_up) 
 Modules.ElectricField.fix_boundary.type = (false,true,false,false,false,false)
-Modules.ElectricField.fix_boundary.value = (0.0,1.0,0,0,0,0)
+Modules.ElectricField.fix_boundary.value = (0,0,0,0,0,0)
+
+
+######################### define custom variables and functions #########################
+# Define.Var = A,0.1
+# Define.Func = ABC@{[(A*PHI<1>)]}@
+# default functions      : "pow", "sqrt", "abs", "exp", "ln", "log", "sin", "cos", "tan", "asin", "acos", "atan"
+#########################################################################################
+Define.Var = dt,1e-3
+
+# 100
+Define.Var = Electrolyte_Mii,1.0
+Define.Func = Solid_Mii@{[(Electrolyte_Mii*0.1)]}@
+
+Define.Var = PHI_L,1.0
+Define.Func = PHI_INT_L@{[(PHI_L*15.0)]}@
+Define.Func = PHI_REAC_L@{[(PHI_L*5.0)]}@
+
+######################### adjust parameters #########################
+
+Define.Var = init_con,1.0
+
+Define.Var = electrode_V,-1.0
+
+Define.Var = electric_potential_distribution,1e-3
+
+Define.Var = aniso_strength,0.1

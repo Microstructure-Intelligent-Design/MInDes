@@ -124,6 +124,7 @@ namespace pf {
 			bool is_electric_field_on{};
 			InputFileReader::get_instance()->read_bool_value("Postprocess.PhysicalFields.electric", is_electric_field_on, false);
 			if (InputFileReader::get_instance()->read_string_value("ModelsManager.PhiCon.ElectroDeposition.active_component", active_comp_name, infile_debug) && is_electric_field_on) {
+				is_electrode_reaction_on = true;
 				reaction_a = reaction_a_electrode_reaction;
 				reaction_i = reaction_i_electrode_reaction;
 			}

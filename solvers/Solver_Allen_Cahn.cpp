@@ -25,8 +25,14 @@ namespace pf {
 			for (int y = 0; y < phaseMesh->limit_y; y++)
 				for (int z = 0; z < phaseMesh->limit_z; z++) {
 					PhaseNode& node = (*phaseMesh)(x, y, z);
-					if (normalize_phi)
-						node.normalized_phi();
+					if (normalize_phi) {
+						for (auto phase = node.begin(); phase < node.end(); phase++) {
+							if (phase->phi > (1.0 - SYS_EPSILON))
+								phase->phi = 1.0;
+							else if (phase->phi < SYS_EPSILON)
+								phase->phi = 0.0;
+						}
+					}
 					for (auto phase = node.begin(); phase < node.end(); phase++)
 						phase->old_phi = phase->phi;
 				}

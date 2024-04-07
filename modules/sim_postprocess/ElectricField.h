@@ -264,9 +264,7 @@ namespace pf {
 			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
 
 				electric_field_solver_diff.set_LHS_calfunc(conductivity);
-
 				electric_field_solver_diff.set_BoundaryCondition_calfunc(boundary);
-				electric_field_solver_diff.set_field_variable(1.0, 0.0, 0.0);
 			}
 			else if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_FOURIER_SPECTRAL || electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL) {
 				InputFileReader::get_instance()->read_double_value("Modules.ElectricField.dt", im_dt, infile_debug);
@@ -345,6 +343,7 @@ namespace pf {
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
 			stringstream output;
 			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
+				electric_field_solver_diff.set_field_variable(1.0, 0.0, 0.0);
 				int iterate_steps = electric_field_solver_diff.solve_whole_domain(solver_accuracy, solver_max_iterate_times, solver_debug, solver_debug_output_steps);
 				output << "> Solver :" << electric_field_solver_diff.solver_name << ", iterate " << iterate_steps << " times." << endl;
 				Solvers::get_instance()->writer.add_string_to_txt_and_screen(output.str(), LOG_FILE_NAME);
@@ -381,6 +380,7 @@ namespace pf {
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
 			stringstream report;
 			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
+				electric_field_solver_diff.set_field_variable(1.0, 0.0, 0.0);
 				int iterate_steps = electric_field_solver_diff.solve_whole_domain(solver_accuracy, solver_max_iterate_times, false, solver_debug_output_steps);
 				report << "> Solver :" << electric_field_solver_diff.solver_name << ", iterate " << iterate_steps << " times." << endl;
 			}
