@@ -23,6 +23,7 @@ This program is free software: you can redistribute it and/or modify it under th
 namespace pf {
 	enum Int_Gradient { Steinbach_1996, Steinbach_1999, Steinbach_G2009, Int_GStandard };
 	enum Int_Potential { Nestler_Well, Nestler_Obstacle, Steinbach_P2009 };
+	enum Int_AnisoModel { No_Aniso, Aniso_Cos_E1, Aniso_Cos_E2 };
 
 	namespace interface_energy_funcs {
 		static double xi_ab(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
@@ -101,7 +102,7 @@ namespace pf {
 		static tensor3_double matirx_xi_abc;
 		// anisotropy
 		static bool is_anisotropy_on = false;
-		static int anisotropy_model = 0;
+		static int anisotropy_model = Int_AnisoModel::No_Aniso;
 		static double aniso_strength = 0.0;
 		static double aniso_module_num = 1.0;
 		static double aniso_angle = 0.0;
@@ -122,22 +123,13 @@ namespace pf {
 		static double xi_a_const(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
 			return const_xi_a;
 		};
-		static double xi_a_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
-			double theta = std::atan2(alpha.phi_grad.getY(), alpha.phi_grad.getX());
-			return const_xi_a * (1.0 + aniso_strength * std::cos(aniso_module_num * (theta - aniso_angle)));
-		}
-
 		static double xi_ab_const(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
 			return const_xi_ab;
 		}
 		static double xi_ab_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
 			return const_xi_ab;
 		};
-
 		static double xi_abc_const(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
-			return const_xi_abc;
-		};
-		static double xi_abc_const_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
 			return const_xi_abc;
 		};
 
@@ -149,27 +141,8 @@ namespace pf {
 					_xi = xi_a->value;
 			return _xi;
 		};
-		static double xi_a_matrix_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha) {
-			// to be defined
-			double _xi = 0.0;
-			for (auto xi_a = matirx_xi_a.begin(); xi_a < matirx_xi_a.end(); xi_a++)
-				if (xi_a->index == alpha.index)
-					_xi = xi_a->value;
-			double theta = std::atan2(alpha.phi_grad.getY(), alpha.phi_grad.getX());
-			return _xi * (1.0 + aniso_strength * std::cos(aniso_module_num * (theta - aniso_angle)));
-		};
 
 		static double xi_ab_matrix(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
-			// to be defined
-			double _xi = 0.0;
-			for (auto xi_a = matirx_xi_ab.begin(); xi_a < matirx_xi_ab.end(); xi_a++)
-				for (auto xi_b = xi_a->begin(); xi_b < xi_a->end(); xi_b++)
-					if ((xi_a->index == alpha.index && xi_b->index == beta.index)
-						|| (xi_a->index == beta.index && xi_b->index == alpha.index))
-						_xi = xi_b->val;
-			return _xi;
-		};
-		static double xi_ab_matrix_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta) {
 			// to be defined
 			double _xi = 0.0;
 			for (auto xi_a = matirx_xi_ab.begin(); xi_a < matirx_xi_ab.end(); xi_a++)
@@ -193,19 +166,31 @@ namespace pf {
 							_xi = xi_c->val;
 			return _xi;
 		};
-		static double xi_abc_matrix_aniso_cos(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, pf::PhaseEntry& gamma) {
-			// to be defined
-			double _xi = 0.0;
-			for (auto xi_a = matirx_xi_abc.begin(); xi_a < matirx_xi_abc.end(); xi_a++)
-				for (auto xi_b = xi_a->begin(); xi_b < xi_a->end(); xi_b++)
-					for (auto xi_c = xi_b->begin(); xi_c < xi_b->end(); xi_c++)
-						if ((xi_a->index == alpha.index && xi_b->index == beta.index && xi_c->index == gamma.index)
-							|| (xi_a->index == beta.index && xi_b->index == alpha.index && xi_c->index == gamma.index)
-							|| (xi_a->index == alpha.index && xi_b->index == gamma.index && xi_c->index == beta.index)
-							|| (xi_a->index == gamma.index && xi_b->index == beta.index && xi_c->index == alpha.index))
-							_xi = xi_c->val;
-			return _xi;
-		};
+
+		// store epsilon and epsilon*Depsilon_Dtheta inside nodes
+		static void _xi_a_aniso_cos_e1(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			double theta = std::atan2(phase.phi_grad.getY(), phase.phi_grad.getX());
+			double angle = aniso_module_num * (theta - aniso_angle);
+			double sigma = 1 + aniso_strength * std::cos(angle);
+			double xi = _xi_a(node, phase);
+			double epsilon = xi * sigma;
+			double De_Dtheta = -1.0 * xi * aniso_strength * aniso_module_num * std::sin(angle);
+			node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff, epsilon);
+			node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived, De_Dtheta);
+		}
+
+		// store epsilon and epsilon*Depsilon_Dtheta inside nodes
+		static void _xi_a_aniso_cos_e2(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			double theta = std::atan2(phase.phi_grad.getY(), phase.phi_grad.getX());
+			double angle = aniso_module_num * (theta - aniso_angle);
+			double sigma = 1 + aniso_strength * std::cos(angle);
+			double xi = _xi_a(node, phase);
+			double epsilon = xi * sigma;
+			double e_de = -1.0 * epsilon * xi * aniso_strength * aniso_module_num * std::sin(angle);
+			node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff, epsilon);
+			node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived, e_de);
+		}
+
 		// -----------------------------------------------------------
 		static double dfint_dphi_S2009(pf::PhaseNode& node, pf::PhaseEntry& alpha, pf::PhaseEntry& beta, double intface_width) {
 			return _xi_ab(node, alpha, beta) * (intface_width * (beta.phi * alpha.laplacian - alpha.phi * beta.laplacian)
@@ -341,7 +326,21 @@ namespace pf {
 				Solvers::get_instance()->writer.add_string_to_txt_and_screen("> ERROR: Phi Pair-Wise models hasn't been defined !\n", LOG_FILE_NAME);
 				exit(0);
 			}
-		};
+		}
+
+		// From DOI 10.1007/978-3-319-41196-5 CHAP 4 SEC 7
+		// calculate gradient energy terms (three terms)
+		static double dfint_dphi_aniso_cos_e1(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			pf::Vector3 e_de_grad = node.cal_customValues_gradient(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived);
+			double epsilon = node.customValues[pf::ExternalFieldsPlus::EFP_AnisoGradCoeff];
+			return 0.5 * (phase.phi_grad.getY() * e_de_grad.getX() - phase.phi_grad.getX() * e_de_grad.getY()) - epsilon * phase.laplacian;
+		}
+		static double dfint_dphi_aniso_cos_e2(pf::PhaseNode& node, pf::PhaseEntry& phase) {
+			pf::Vector3 e_de_grad = node.cal_customValues_gradient(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived);
+			double epsilon = node.customValues[pf::ExternalFieldsPlus::EFP_AnisoGradCoeff];
+			return phase.phi_grad.getY() * e_de_grad.getX() - phase.phi_grad.getX() * e_de_grad.getY() - epsilon * epsilon * phase.laplacian;
+		}
+
 		static void cal_interface_increment_ac_pair_wise_normal(pf::PhaseNode& node, bool adjust_phi_0_1) {
 			//double first_term, second_term;
 			auto mobility = Solvers::get_instance()->Phi_Solver_AC.Lij;
@@ -451,6 +450,33 @@ namespace pf {
 				}
 			}
 		}
+		static void cal_interface_aniso_cos_e1(pf::PhaseNode& node, bool adjust_phi_0_1) {
+			auto mobility = Solvers::get_instance()->Phi_Solver_AC.Lij;
+			// calculate dfint_dphi for every nodes
+			for (auto alpha = node.begin(); alpha < node.end(); alpha++) {
+				alpha->int_increment = 0.0;
+				if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON) {
+					for (auto beta = node.begin(); beta < node.end(); beta++)
+						if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON) {
+							alpha->int_increment += -mobility(node, *alpha, *beta) * dfint_dphi_aniso_cos_e1(node, *beta);
+						}
+				}
+			}
+		}
+		static void cal_interface_aniso_cos_e2(pf::PhaseNode& node, bool adjust_phi_0_1) {
+			auto mobility = Solvers::get_instance()->Phi_Solver_AC.Lij;
+			// calculate dfint_dphi for every nodes
+			for (auto alpha = node.begin(); alpha < node.end(); alpha++) {
+				alpha->int_increment = 0.0;
+				if (alpha->laplacian > SYS_EPSILON || alpha->laplacian < -SYS_EPSILON) {
+					for (auto beta = node.begin(); beta < node.end(); beta++)
+						if (beta->laplacian > SYS_EPSILON || beta->laplacian < -SYS_EPSILON) {
+							alpha->int_increment += -mobility(node, *alpha, *beta) * dfint_dphi_aniso_cos_e2(node, *beta);
+						}
+				}
+			}
+		}
+
 		static double cal_interface_increment_ch_standard(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			return dfint_dphi_grad_standard(node, phase);
 		}
@@ -458,21 +484,33 @@ namespace pf {
 		static void load_interface_anisotropic_model(bool infile_debug) {
 			InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on", is_anisotropy_on, infile_debug);
 			if (is_anisotropy_on) {
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\\delta\\cos(n\\theta) \n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\\delta\\cos(n\\theta), e^2; 2: 1+\\delta\\cos(n\\theta), e\n", InputFileReader::get_instance()->debug_file);
 				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.anisotropy_model", anisotropy_model, infile_debug);
 				std::string aniso_model_key{ "ModelsManager.Phi.InterfaceEnergy.cos_model_parameters" };
 				std::vector<input_value> aniso_model_para;
 				std::string aniso_model_value{ "()" };
 				switch (anisotropy_model)
 				{
-				case(1):
+				case(Int_AnisoModel::Aniso_Cos_E1): {
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.cos_model_paras = (aniso_strength, aniso_module_num, aniso_angle) \n", InputFileReader::get_instance()->debug_file);
 					InputFileReader::get_instance()->read_string_value(aniso_model_key, aniso_model_value, infile_debug);
 					aniso_model_para = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, aniso_model_key, aniso_model_value, infile_debug);
 					aniso_strength = aniso_model_para[0].double_value;
 					aniso_module_num = aniso_model_para[1].double_value;
 					aniso_angle = AngleToRadians(aniso_model_para[2].double_value);
+					Solvers::get_instance()->Phi_Solver_AC.dfint_dphi = cal_interface_aniso_cos_e1;
 					break;
+				}
+				case(Int_AnisoModel::Aniso_Cos_E2): {
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.cos_model_paras = (aniso_strength, aniso_module_num, aniso_angle) \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->read_string_value(aniso_model_key, aniso_model_value, infile_debug);
+					aniso_model_para = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_DOUBLE, aniso_model_key, aniso_model_value, infile_debug);
+					aniso_strength = aniso_model_para[0].double_value;
+					aniso_module_num = aniso_model_para[1].double_value;
+					aniso_angle = AngleToRadians(aniso_model_para[2].double_value);
+					Solvers::get_instance()->Phi_Solver_AC.dfint_dphi = cal_interface_aniso_cos_e2;
+					break;
+				}
 				default:
 					InputFileReader::get_instance()->debug_writer->add_string_to_txt_and_screen("Error, have you indicated the correct anisotropy model?", LOG_FILE_NAME);
 					exit(0);
@@ -549,22 +587,16 @@ namespace pf {
 				string matrix_key1 = "ModelsManager.Phi.xi_a.matrix", matrix_input1 = "[()]";
 				if (InputFileReader::get_instance()->read_double_value("ModelsManager.Phi.xi_a.const", const_xi_a, infile_debug)) {
 					_xi_a = xi_a_const;
-					load_interface_anisotropic_model(infile_debug);
-					if (is_anisotropy_on) {
-						_xi_a = xi_a_const_aniso_cos;
-					}
 				}
 				else if (InputFileReader::get_instance()->read_string_value(matrix_key1, matrix_input1, infile_debug)) {
 					_xi_a = xi_a_matrix;
-					load_interface_anisotropic_model(infile_debug);
-					if (is_anisotropy_on) {
-						_xi_a = xi_a_matrix_aniso_cos;
-					}
 					vector<InputValueType> matrix_structure; matrix_structure.push_back(InputValueType::IVType_INT); matrix_structure.push_back(InputValueType::IVType_DOUBLE);
 					vector<vector<input_value>> matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(matrix_structure, matrix_key1, matrix_input1, infile_debug);
 					for (int index = 0; index < matrix_value.size(); index++)
 						matirx_xi_a.add_double(matrix_value[index][0].int_value, matrix_value[index][1].double_value);
 				}
+				// borrow xi_a from before
+				load_interface_anisotropic_model(infile_debug);
 			}
 			else if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_CH_Standard) {
 				if (infile_debug)
@@ -629,9 +661,48 @@ namespace pf {
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : InterfaceEnergy !\n", LOG_FILE_NAME);
 		}
 		static void exec_pre(FieldStorage_forPhaseNode& phaseMesh) {
-
+			if (is_anisotropy_on) {
+#pragma omp parallel for
+				for (int x = 0; x < phaseMesh.limit_x; x++)
+					for (int y = 0; y < phaseMesh.limit_y; y++)
+						for (int z = 0; z < phaseMesh.limit_z; z++) {
+							PhaseNode& node = (phaseMesh)(x, y, z);
+							node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff, 0.0);
+							node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived, 0.0);
+						}
+			}
 		}
 		static string exec_loop(FieldStorage_forPhaseNode& phaseMesh) {
+			if (is_anisotropy_on) {
+				switch (anisotropy_model)
+				{
+				case(Int_AnisoModel::Aniso_Cos_E1): {
+#pragma omp parallel for
+					for (int x = 0; x < phaseMesh.limit_x; x++)
+						for (int y = 0; y < phaseMesh.limit_y; y++)
+							for (int z = 0; z < phaseMesh.limit_z; z++) {
+								PhaseNode& node = (phaseMesh)(x, y, z);
+								for (auto phase = node.begin(); phase < node.end(); phase++) {
+									_xi_a_aniso_cos_e1(node, *phase);
+								}
+							}
+				}
+				case(Int_AnisoModel::Aniso_Cos_E2): {
+#pragma omp parallel for
+					for (int x = 0; x < phaseMesh.limit_x; x++)
+						for (int y = 0; y < phaseMesh.limit_y; y++)
+							for (int z = 0; z < phaseMesh.limit_z; z++) {
+								PhaseNode& node = (phaseMesh)(x, y, z);
+								for (auto phase = node.begin(); phase < node.end(); phase++) {
+									_xi_a_aniso_cos_e2(node, *phase);
+								}
+							}
+				}
+				default:
+					break;
+				}
+
+			}
 			string report = "";
 			return report;
 		}
