@@ -484,7 +484,7 @@ namespace pf {
 		static void load_interface_anisotropic_model(bool infile_debug) {
 			InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on", is_anisotropy_on, infile_debug);
 			if (is_anisotropy_on) {
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\\delta\\cos(n\\theta), e^2; 2: 1+\\delta\\cos(n\\theta), e\n", InputFileReader::get_instance()->debug_file);
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 0: no anisotropic; 1: 1+\\delta\\cos(n\\theta), e^1; 2: 1+\\delta\\cos(n\\theta), e^2\n", InputFileReader::get_instance()->debug_file);
 				InputFileReader::get_instance()->read_int_value("ModelsManager.Phi.InterfaceEnergy.anisotropy_model", anisotropy_model, infile_debug);
 				std::string aniso_model_key{ "ModelsManager.Phi.InterfaceEnergy.cos_model_parameters" };
 				std::vector<input_value> aniso_model_para;
@@ -667,8 +667,23 @@ namespace pf {
 					for (int y = 0; y < phaseMesh.limit_y; y++)
 						for (int z = 0; z < phaseMesh.limit_z; z++) {
 							PhaseNode& node = (phaseMesh)(x, y, z);
-							node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff, 0.0);
-							node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived, 0.0);
+							for (auto phase = node.begin(); phase < node.end(); phase++) {
+								double xi = _xi_a(node, *phase);
+								switch (anisotropy_model) {
+								case(Int_AnisoModel::Aniso_Cos_E1): {
+									node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff, xi);
+									break;
+								}
+								case(Int_AnisoModel::Aniso_Cos_E2): {
+									node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff, xi * xi);
+									break;
+								}
+								default: {
+									break;
+								}
+								}
+								node.customValues.add_double(pf::ExternalFieldsPlus::EFP_AnisoGradCoeff_Derived, 0.0);
+							}
 						}
 			}
 		}
@@ -686,6 +701,7 @@ namespace pf {
 									_xi_a_aniso_cos_e1(node, *phase);
 								}
 							}
+					break;
 				}
 				case(Int_AnisoModel::Aniso_Cos_E2): {
 #pragma omp parallel for
@@ -697,6 +713,7 @@ namespace pf {
 									_xi_a_aniso_cos_e2(node, *phase);
 								}
 							}
+					break;
 				}
 				default:
 					break;
