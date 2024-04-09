@@ -96,7 +96,7 @@ namespace pf {
 			double& n{ electric_field::electron_num };
 			double temp_const{ n * FaradayConstant / (GAS_CONSTANT * ROOM_TEMP) };
 
-			auto source_potential{ temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff)) + con * D_eff * lap_phi };
+			auto source_potential{ temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff) + con * D_eff * lap_phi) };
 			auto source_xi{ -electric_field::c_s / electric_field::c_0 * dxi_dt };
 
 			return source_potential + source_xi;

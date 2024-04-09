@@ -61,7 +61,7 @@ namespace pf {
 		static tensor1_double conductivity_phi;
 		static double conductivity_background = 0.0;
 		static double solver_accuracy = 1e-3;
-		static int solver_max_iterate_times = 100;
+		static int solver_max_iterate_times = 0;
 		static bool solver_debug = false;
 		static int solver_debug_output_steps = 100;
 		static double threshold{1.0-1e-3};
@@ -126,11 +126,11 @@ namespace pf {
 				fix_conduc /= phi_sum;
 			node.customValues[r_index] = node.customValues[r_index] * (1.0 - phi_sum) + fix_conduc * phi_sum;*/
 			// 2
+			for (auto c_phi = fix_domain_phi_value.begin(); c_phi < fix_domain_phi_value.end(); c_phi++)
 			for (auto phase = node.begin(); phase < node.end(); phase++)
-				for (auto c_phi = fix_domain_phi_value.begin(); c_phi < fix_domain_phi_value.end(); c_phi++)
-					if (phase->property == c_phi->index && phase->phi > threshold) {
-						node.customValues[r_index] = c_phi->val;
-					}
+				if (phase->property == c_phi->index && phase->phi > threshold) {
+					node.customValues[r_index] = c_phi->val;
+				}
 		}
 
 		static void init_real_space(std::complex<double>& basic_real_space, PhaseNode& node, int real_x, int real_y, int real_z) {

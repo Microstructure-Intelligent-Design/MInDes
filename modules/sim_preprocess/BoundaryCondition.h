@@ -24,9 +24,15 @@ namespace pf {
 	namespace boundary_condition {
 		static tensor3_double temperature_source_point;
 		static double_box temperature_source_boundary;
+
 		static int_box phi_source_boundary;
+
 		static tensor2_double con_source_boundary;
+		static tensor2_double fix_domain_con_value;
+		static double fix_domain_con_threshold = 0.5;
+
 		static tensor3_double phase_con_source_boundary;
+
 		static tensor2_double grand_potential_source_boundary;
 
 		static int Nx = 1;
@@ -126,6 +132,13 @@ namespace pf {
 						break;
 					}
 				}
+				for (auto c_phi = fix_domain_con_value.begin(); c_phi < fix_domain_con_value.end(); c_phi++)
+					for (auto c_con = c_phi->begin(); c_con < c_phi->end(); c_con++)
+						for (auto phase = node.begin(); phase < node.end(); phase++)
+							if (phase->property == c_phi->index && phase->phi > fix_domain_con_threshold)
+								for (auto con = node.x.begin(); con < node.x.end(); con++)
+									if (con->index == c_con->index)
+										con->value = c_con->val;
 			}
 			static void boundary_condition_grand_potential(pf::PhaseNode& node, int comp_index) {
 				for (auto bc = grand_potential_source_boundary.begin(); bc < grand_potential_source_boundary.end(); bc++) {
@@ -359,6 +372,17 @@ namespace pf {
 					for (auto con_boundary = con_boundary_value.begin(); con_boundary < con_boundary_value.end(); con_boundary++) {
 						con_source_boundary.add_double((*con_boundary)[0].int_value, Solvers::get_instance()->parameters.Components[(*con_boundary)[1].string_value].index, (*con_boundary)[2].double_value);
 					}
+				}
+
+				if (infile_debug)
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# Solver.Mesh.BoundaryCondition.Con.Fix.in_phi = [(phi_name, con_name, value), ... ] \n", InputFileReader::get_instance()->debug_file);
+				string fix_phi_key = "Solver.Mesh.BoundaryCondition.Con.Fix.in_phi", fix_phi_input = "[()]";
+				if (InputFileReader::get_instance()->read_string_value(fix_phi_key, fix_phi_input, infile_debug)) {
+					vector<InputValueType> fix_phi_structure; fix_phi_structure.push_back(InputValueType::IVType_STRING); fix_phi_structure.push_back(InputValueType::IVType_STRING); fix_phi_structure.push_back(InputValueType::IVType_DOUBLE);
+					vector<vector<input_value>> fix_phi_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value(fix_phi_structure, fix_phi_key, fix_phi_input, infile_debug);
+					for (auto fix_phi = fix_phi_value.begin(); fix_phi < fix_phi_value.end(); fix_phi++)
+						fix_domain_con_value.add_double(Solvers::get_instance()->parameters.Phases[(*fix_phi)[0].string_value].phi_property, Solvers::get_instance()->parameters.Components[(*fix_phi)[1].string_value].index, (*fix_phi)[2].double_value);
+					InputFileReader::get_instance()->read_double_value("Solver.Mesh.BoundaryCondition.Con.Fix.In_Phi.threshold", fix_domain_con_threshold, infile_debug);
 				}
 			}
 			else if (Solvers::get_instance()->parameters.ConEType == ConEquationType::CEType_GrandP) {
