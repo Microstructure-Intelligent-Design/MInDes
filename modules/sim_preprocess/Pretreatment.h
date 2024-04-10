@@ -146,11 +146,11 @@ namespace pf {
 							if (Solvers::get_instance()->parameters.is_Normalize_Phi)
 								currentNode.normalized_phi();
 							for (auto phase = currentNode.begin(); phase < currentNode.end(); phase++) {
-								phase->old_phi = phase->phi;
 								phase->_flag = phaseMesh.currentFlag(currentNode, phase->index);
 							}
 						}
 						for (auto phase = currentNode.begin(); phase < currentNode.end(); phase++) {
+							phase->old_phi = phase->phi;
 							if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
 								Solvers::get_instance()->Phi_Solver_AC.Boundary_Condition(currentNode, *phase);
 							}
@@ -386,6 +386,7 @@ namespace pf {
 										else if ((*phase)->phi < SYS_EPSILON)
 											(*phase)->phi = 0.0;
 									}
+									(*phase)->old_phi = (*phase)->phi;
 									if ((*phase)->phi > 0.5 && currentNode.customFlags[ExternalFields::RELAX_interface_buff + (*phase)->index] == -1)
 										currentNode.customFlags[ExternalFields::RELAX_interface_buff + (*phase)->index] = 0;
 									else if ((*phase)->phi < 0.5 && currentNode.customFlags[ExternalFields::RELAX_interface_buff + (*phase)->index] == 1)
@@ -460,6 +461,7 @@ namespace pf {
 											else if (phase->phi < SYS_EPSILON)
 												phase->phi = 0.0;
 										}
+										phase->old_phi = phase->phi;
 										if (phase->phi > 0.5 && currentNode.customFlags[ExternalFields::RELAX_interface_buff + phase->index] == -1)
 											currentNode.customFlags[ExternalFields::RELAX_interface_buff + phase->index] = 0;
 										else if (phase->phi < 0.5 && currentNode.customFlags[ExternalFields::RELAX_interface_buff + phase->index] == 1)
@@ -576,6 +578,7 @@ namespace pf {
 											else if (phi_a->phi < SYS_EPSILON)
 												phi_a->phi = 0.0;
 										}
+										phi_a->old_phi = phi_a->phi;
 										if (phi_a->phi > 0.5 && currentNode.customFlags[ExternalFields::RELAX_interface_buff + phi_a->index] == -1)
 											currentNode.customFlags[ExternalFields::RELAX_interface_buff + phi_a->index] = 0;
 										else if (phi_a->phi < 0.5 && currentNode.customFlags[ExternalFields::RELAX_interface_buff + phi_a->index] == 1)

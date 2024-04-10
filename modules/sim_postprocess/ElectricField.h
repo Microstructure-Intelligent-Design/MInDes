@@ -54,6 +54,7 @@ namespace pf {
 		static double im_varient = 0.0;
 		static double im_max_varient = 0.0;
 		static string im_solver_name = "ElectricFieldSolver_fourier";
+		static int source_term_index = 0;
 		// -
 		static vector<bool> fix_domain_boundary;
 		static vector<double> fix_domain_boundary_value;
@@ -65,6 +66,7 @@ namespace pf {
 		static bool solver_debug = false;
 		static int solver_debug_output_steps = 100;
 		static double threshold{1.0-1e-3};
+		static double nFC = 0.0;
 		// - 
 		static int Nx = 1;
 		static int Ny = 1;
@@ -95,7 +97,7 @@ namespace pf {
 					if (*index == phase->index) {
 						dxi_dt += (phase->phi - phase->old_phi)/ time_interval;
 					}
-			double result{ c_s * FaradayConstant * electron_num * dxi_dt };
+			double result{ nFC * dxi_dt };
 
 			node.customValues[rhs_index] = result;
 		}
@@ -161,7 +163,15 @@ namespace pf {
 
 		static void fill_node_real_space(vector<std::complex<double>>& real_space, PhaseNode& node, int real_x, int real_y, int real_z) {
 			// - calculate real space
-
+			double source = 0.0;
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				for (auto index = electrode_index.begin(); index < electrode_index.end(); index++)
+					if (*index == phase->index) {
+						source += (phase->phi - phase->old_phi) / time_interval;
+					}
+			source = -nFC * source * im_dt;
+			node.customValues[ChargeDensity] = -source;
+			real_space[source_term_index]._Val[FFTW_REAL] = source;
 			// - calculate node
 			if (real_x != node._x || real_y != node._y || real_z != node._z)
 				return;
@@ -178,12 +188,12 @@ namespace pf {
 
 		static std::complex<double> dynamic_equation_fourier_space_ex(vector<std::complex<double>> fourier_space, pf::PhaseNode& node, double Q2, double Q4) {
 			double parameter = 1.0 - Q2 * node.customValues[ElectricalConductivity] * im_dt;
-			return fourier_space[0] * parameter;
+			return fourier_space[0] * parameter + fourier_space[source_term_index];
 		}
 
 		static std::complex<double> dynamic_equation_fourier_space_im(vector<std::complex<double>> fourier_space, pf::PhaseNode& node, double Q2, double Q4) {
 			double parameter = 1.0 + Q2 * node.customValues[ElectricalConductivity] * im_dt;
-			return fourier_space[0] / parameter;
+			return (fourier_space[0] + fourier_space[source_term_index]) / parameter;
 		}
 
 		static void boundary_condition_real_space(std::complex<double>& basic_real_space, PhaseNode& node, int real_x, int real_y, int real_z) {
@@ -262,7 +272,7 @@ namespace pf {
 			fix_domain_boundary_value[Boundary::UP_Z] = 0.0;
 
 			if (electric_field_solver == ElectricFieldSolver::EFS_EXPLICITE_DIFFERENCE) {
-
+				electric_field_solver_diff.set_RHS_calfunc(reaction_term);
 				electric_field_solver_diff.set_LHS_calfunc(conductivity);
 				electric_field_solver_diff.set_BoundaryCondition_calfunc(boundary);
 			}
@@ -283,12 +293,14 @@ namespace pf {
 				else if(electric_field_solver == ElectricFieldSolver::EFS_IMPLICIT_FOURIER_SPECTRAL)
 					electric_field_solver_fourier.dynamic_equation_fourier_space = dynamic_equation_fourier_space_im;
 				electric_field_solver_fourier.boundary_condition_real_space = boundary_condition_real_space;
+				source_term_index = electric_field_solver_fourier.new_one_real_and_fourier_space();
 			}
 			Nx = phaseMesh.limit_x;
 			Ny = phaseMesh.limit_y;
 			Nz = phaseMesh.limit_z;
 			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.accuracy", solver_accuracy, infile_debug);
 			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.threshold", threshold, infile_debug);
+			InputFileReader::get_instance()->read_double_value("Modules.ElectricField.nFC", nFC, infile_debug);
 			InputFileReader::get_instance()->read_int_value("Modules.ElectricField.max_iteration_steps", solver_max_iterate_times, infile_debug);
 			if(InputFileReader::get_instance()->read_bool_value("Modules.ElectricField.debug", solver_debug, infile_debug))
 				InputFileReader::get_instance()->read_int_value("Modules.ElectricField.Debug.output_steps", solver_debug_output_steps, infile_debug);

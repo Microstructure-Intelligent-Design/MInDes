@@ -94,7 +94,7 @@ namespace pf {
 			Vector3 grad_D_eff{ node.kinetics_coeff.get_gradientVec3(con_i, con_i) };
 
 			double& n{ electric_field::electron_num };
-			double temp_const{ n * FaradayConstant / (GAS_CONSTANT * ROOM_TEMP) };
+			double temp_const{ electric_field::nFC / (GAS_CONSTANT * ROOM_TEMP * electric_field::c_s) };
 
 			auto source_potential{ temp_const * (D_eff * (grad_con * grad_phi) + con * (grad_phi * grad_D_eff) + con * D_eff * lap_phi) };
 			auto source_xi{ -electric_field::c_s / electric_field::c_0 * dxi_dt };

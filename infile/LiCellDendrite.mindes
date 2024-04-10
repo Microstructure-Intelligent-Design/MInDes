@@ -41,6 +41,9 @@ Postprocess.PCT.VTS.phi = true
 # .boundary = [(boundary, con_name, value), ... ] 
 #              boundary : 0 - x_down , 1 - x_up , 2 - y_down , 3 - y_up , 4 - z_down , 5 - z_up 
 Solver.Mesh.BoundaryCondition.Con.Fix.boundary = [(1,Li,init_con)]
+# Solver.Mesh.BoundaryCondition.Con.Fix.in_phi = [(phi_name, con_name, value), ... ] 
+# Solver.Mesh.BoundaryCondition.Con.Fix.in_phi = [(E_trode,Li,0.0)]
+# Solver.Mesh.BoundaryCondition.Con.Fix.In_Phi.threshold = 0.9999
 
 # .matrix = {[(phi_index),(phi_name),(phi_comp_0_value, phi_comp_1_value, ... )],[(total_comp_0_value, total_comp_1_value, ... )],[(temp_value)]} 
 Preprocess.Microstructure.matrix = {[(0),(E_trode),(init_con)],[(init_con)],[(0.0)]}
@@ -51,7 +54,7 @@ Preprocess.Microstructure.geometry_layer_number = 1
 #              rotation_gauge : 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
 #                               6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
 Preprocess.Microstructure.geometry_layer_0.property = (0,E_trode,1,1,false)
-Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,50,0),(2,2,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(0,50,0),(4,3,0),(0,0,0)]
 Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
 Preprocess.Microstructure.geometry_layer_0.is_normalized = false
 Preprocess.Microstructure.geometry_layer_0.x = [(Li,init_con)]
@@ -70,12 +73,13 @@ ModelsManager.Phi.InterfaceEnergy.int_gradient = 3
 # ModelsManager.Phi.xi_a.const  = xi_a 
 #                       .matrix = [(phi_a, xi_a_value), ...] 
 # kappa
-ModelsManager.Phi.xi_a.const = 3.0
+ModelsManager.Phi.xi_a.const = 2.0
 
 ModelsManager.Phi.InterfaceEnergy.is_anisotropy_on = true
-# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1: 1+\delta\cos(n\theta) 
-ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 1
-ModelsManager.Phi.InterfaceEnergy.cos_model_parameters = (aniso_strength,4.0,0.0)
+
+# ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 0: no anisotropic; 1: 1+\delta\cos(n\theta), e^1; 2: 1+\delta\cos(n\theta), e^2
+ModelsManager.Phi.InterfaceEnergy.anisotropy_model = 2
+ModelsManager.Phi.InterfaceEnergy.cos_model_parameters = (aniso_strength,aniso_model,0.0)
 
 # ModelsManager.Con.equation : 0 - Const, 1 - TotalConcentration, 2 - PhaseConcentration, 3 - GrandPotential
 ModelsManager.Con.equation = 1
@@ -93,7 +97,7 @@ ModelsManager.PhiCon.BulkEnergy.type = 9
 ModelsManager.PhiCon.BulkEnergy.SimpleDoubleObstacle.A = 1.0
 
 # Preprocess.relax_interface = (relax_steps, output_steps,is_interface_movable_in_relax ,fix_phi_after_relax) 
-# Preprocess.relax_interface = (60,10,true,false)
+Preprocess.relax_interface = (30,10,true,false)
 
 ModelsManager.PhiCon.ElectroDeposition.active_component = Li
 ModelsManager.PhiCon.ElectroDeposition.electrode_index = (0)
@@ -102,41 +106,46 @@ ModelsManager.Phi.Butler_Volmer.Reaction_Constant = PHI_REAC_L
 ModelsManager.Phi.Butler_Volmer.Reaction_Electron_Num = 1
 ModelsManager.Phi.Bulter_Volmer.Standard_Potential = 0.0
 # ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity = 76400
-# ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity = 10000
+ModelsManager.Con.Bulter_Volmer.Electrode_Metal_SiteDensity = Electrode_Metal_SiteDensity
 ModelsManager.Con.Bulter_Volmer.Electrolyte_Cation_Con = 1000
 
 # Postprocess.PhysicalFields.electric = 0 - NONE, 1 - EXPLICITE_DIFFERENCE, , 2 - EXPLICITE_FOURIER_SPECTRAL, 3 - IMPLICIT_FOURIER_SPECTRAL 
 Postprocess.PhysicalFields.electric = 1
 Modules.ElectricField.conductivity = (1.0)
 Modules.ElectricField.threshold = 0.99
+Modules.ElectricField.nFC = 0.0
 Modules.ElectricField.BackGround.conductivity = 1.0
 # Modules.ElectricField.fix_phi = [(phi_name, elec_potential), ... ] 
 Modules.ElectricField.fix_phi = [(E_trode,electrode_V)]
 Modules.ElectricField.accuracy = electric_potential_distribution
-Modules.ElectricField.max_iteration_steps = 1000
+Modules.ElectricField.max_iteration_steps = 100000
 Modules.ElectricField.debug = true
 Modules.ElectricField.Debug.output_steps = 100
 # Modules.ElectricField.fix_boundary.value = (x_down,x_up,y_down,y_up,z_down,z_up) 
 Modules.ElectricField.fix_boundary.type = (false,true,false,false,false,false)
 Modules.ElectricField.fix_boundary.value = (0,0,0,0,0,0)
 
-
 ######################### define custom variables and functions #########################
 # Define.Var = A,0.1
 # Define.Func = ABC@{[(A*PHI<1>)]}@
 # default functions      : "pow", "sqrt", "abs", "exp", "ln", "log", "sin", "cos", "tan", "asin", "acos", "atan"
 #########################################################################################
-Define.Var = dt,1e-3
+######################### adjust parameters #########################
 
-# 100
-Define.Var = Electrolyte_Mii,1.0
-Define.Func = Solid_Mii@{[(Electrolyte_Mii*0.1)]}@
+Define.Var = aniso_strength,0.1
+Define.Var = aniso_model,4.0
+
+Define.Var = Electrolyte_Mii,1000.0
+Define.Var = Solid_Mii,1000.0
+
+Define.Var = Electrode_Metal_SiteDensity,1000
+
+#########################################################################################
+Define.Var = dt,1e-4
 
 Define.Var = PHI_L,1.0
 Define.Func = PHI_INT_L@{[(PHI_L*15.0)]}@
 Define.Func = PHI_REAC_L@{[(PHI_L*5.0)]}@
-
-######################### adjust parameters #########################
 
 Define.Var = init_con,1.0
 
@@ -144,4 +153,3 @@ Define.Var = electrode_V,-1.0
 
 Define.Var = electric_potential_distribution,1e-3
 
-Define.Var = aniso_strength,0.1
