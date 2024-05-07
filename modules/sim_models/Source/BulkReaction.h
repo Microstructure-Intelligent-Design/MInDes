@@ -52,7 +52,7 @@ namespace pf {
 				eta_a < -0.2 ? eta_a = -0.2 : eta_a>0 ? eta_a = 0 : 0;
 				//auto eta_a{ -0.2 };
 
-				result = -L_eta * interpolation_func(phase.phi) * (std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
+				result = -L_eta * dinterpolation_func_dphi(phase.phi) * (std::exp(0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)) -
 					node.x[electric_field::active_component_index].value * std::exp(-0.5 * n * FaradayConstant * eta_a / (GAS_CONSTANT * ROOM_TEMP)));
 			}
 			return result;
