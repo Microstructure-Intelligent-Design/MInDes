@@ -23,6 +23,7 @@ This program is free software: you can redistribute it and/or modify it under th
 #include "BulkEnergy/MechanicalEnergy.h"
 #include "BulkEnergy/ElectricEnergy.h"
 #include "BulkEnergy/MagneticEnergy.h"
+#include "BulkEnergy/OtherEnergy.h"
 
 namespace pf {
 	namespace bulk_energy {
@@ -41,21 +42,25 @@ namespace pf {
 		static double (*fmech_density)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static double (*felec_density)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static double (*fmag_density)(pf::PhaseNode& node, pf::PhaseEntry& phase);
+		static double (*fother_density)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		// phi driving force
 		static double (*dfchem_dphi)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static double (*dfmech_dphi)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static double (*dfelec_dphi)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static double (*dfmag_dphi)(pf::PhaseNode& node, pf::PhaseEntry& phase);
+		static double (*dfother_dphi)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		// phase con potential
 		static void (*dfchem_dcon)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static void (*dfmech_dcon)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static void (*dfelec_dcon)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		static void (*dfmag_dcon)(pf::PhaseNode& node, pf::PhaseEntry& phase);
+		static void (*dfother_dcon)(pf::PhaseNode& node, pf::PhaseEntry& phase);
 		// total con & grand potential
 		static double (*dfchem_dconi)(pf::PhaseNode& node, int con_i);
 		static double (*dfmech_dconi)(pf::PhaseNode& node, int con_i);
 		static double (*dfelec_dconi)(pf::PhaseNode& node, int con_i);
 		static double (*dfmag_dconi)(pf::PhaseNode& node, int con_i);
+		static double (*dfother_dconi)(pf::PhaseNode& node, int con_i);
 		// + grand potential
 		static double (*dPhiCon_du)(pf::PhaseNode& node, pf::PhaseEntry& phase, int con_i);
 		static void (*Phi_con)(pf::PhaseNode& node, pf::PhaseEntry& phase);
@@ -63,13 +68,15 @@ namespace pf {
 		static double bulk_energy_density(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			return dfbulk_dphi_const(node, phase)
 				+ fchem_density(node, phase) + fmech_density(node, phase)
-				+ felec_density(node, phase) + fmag_density(node, phase);
+				+ felec_density(node, phase) + fmag_density(node, phase)
+				+ fother_density(node, phase);
 		}
 
 		static double dfbulk_dphi(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			return dfbulk_dphi_const(node, phase)
 				+ dfchem_dphi(node, phase) + dfmech_dphi(node, phase)
-				+ dfelec_dphi(node, phase) + dfmag_dphi(node, phase);
+				+ dfelec_dphi(node, phase) + dfmag_dphi(node, phase)
+				+ dfother_dphi(node, phase);
 		}
 
 		static void dfbulk_dcon(pf::PhaseNode& node, pf::PhaseEntry& phase) {
@@ -77,13 +84,15 @@ namespace pf {
 			dfmech_dcon(node, phase);
 			dfelec_dcon(node, phase);
 			dfmag_dcon(node, phase);
+			dfother_dcon(node, phase);
 		}
 
 		static double dfbulk_dconi(pf::PhaseNode& node, int con_i) {
 			return dfchem_dconi(node, con_i) +
 				dfmech_dconi(node, con_i) +
 				dfelec_dconi(node, con_i) +
-				dfmag_dconi(node, con_i);
+				dfmag_dconi(node, con_i) +
+				dfother_dconi(node, con_i);
 		}
 
 		static double dphase_con_du(pf::PhaseNode& node, pf::PhaseEntry& phase, int con_i) {
@@ -123,7 +132,7 @@ namespace pf {
 			if (Solvers::get_instance()->parameters.PhiEType != PhiEquationType::PEType_Const) {
 				string bulk_energy_const_key = "ModelsManager.Phi.BulkEnergy.const", bulk_energy_const_input = "[()]";
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.BulkEnergy.const = [(phi_name, bulk_energy), ... ]\n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.BulkEnergy.const = [(phi_name, bulk_energy), ... ]\n", InputFileReader::get_instance()->debug_file);
 				if (InputFileReader::get_instance()->read_string_value(bulk_energy_const_key, bulk_energy_const_input, infile_debug)) {
 					// BulkEnergy.const = [(phi_name,value), ... ]
 					vector<InputValueType> bulk_energy_const_structure; bulk_energy_const_structure.push_back(InputValueType::IVType_STRING); bulk_energy_const_structure.push_back(InputValueType::IVType_DOUBLE);
@@ -159,11 +168,17 @@ namespace pf {
 			dfmag_dconi = magnetic_energy::dfmag_dcon_i;
 			fmag_density = magnetic_energy::fmag_density;
 
+			other_energy::init(phaseMesh);
+			dfother_dphi = other_energy::dfother_dphi;
+			dfother_dcon = other_energy::dfother_dcon;
+			dfother_dconi = other_energy::dfother_dconi;
+			fother_density = other_energy::fother_density;
+
 			// output
 			if (Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_AC_Pairwise) {
 				string df_dphi_key = "ModelsManager.Phi.BulkEnergy.vts_output", df_dphi_input = "[()]";
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.BulkEnergy.vts_output = [(phi_index_0, phi_index_1), ... ]\n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.BulkEnergy.vts_output = [(phi_index_0, phi_index_1), ... ]\n", InputFileReader::get_instance()->debug_file);
 				if (InputFileReader::get_instance()->read_string_value(df_dphi_key, df_dphi_input, infile_debug)) {
 					vector<vector<input_value>> df_dphi_value;
 					df_dphi_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_INT, df_dphi_key, df_dphi_input, infile_debug);
@@ -175,7 +190,7 @@ namespace pf {
 				Solvers::get_instance()->parameters.PhiEType == PhiEquationType::PEType_CH_Standard) {
 				string df_dphi_key = "ModelsManager.Phi.BulkEnergy.vts_output", df_dphi_input = "()";
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.BulkEnergy.vts_output = (phi_index_0, phi_index_1, ...) \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Phi.BulkEnergy.vts_output = (phi_index_0, phi_index_1, ...) \n", InputFileReader::get_instance()->debug_file);
 				if (InputFileReader::get_instance()->read_string_value(df_dphi_key, df_dphi_input, infile_debug)) {
 					vector<input_value> df_dphi_value;
 					df_dphi_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, df_dphi_key, df_dphi_input, infile_debug);
@@ -185,7 +200,7 @@ namespace pf {
 			}
 			//InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.BulkEnergyDensityMerge.vts_output", is_energy_density_merge_output, infile_debug);
 			//InputFileReader::get_instance()->read_bool_value("ModelsManager.Phi.BulkEnergyDensity.vts_output", is_energy_density_output, infile_debug);
-			
+
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : BulkEnergy !\n", LOG_FILE_NAME);
 		}
 		static void deinit(FieldStorage_forPhaseNode& phaseMesh) {

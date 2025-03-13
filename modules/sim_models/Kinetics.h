@@ -41,6 +41,7 @@ namespace pf {
 		// for electrodeposition
 		static int active_comp_index = 0;
 		static double Mii_elec = 0.0;
+		static double Dconst{};
 		// temp
 		static tensor1_double phase_Dtemp;
 
@@ -51,6 +52,10 @@ namespace pf {
 					if (phi->property == D->index)
 						D_temp += phi->phi * D->val;
 			return D_temp;
+		}
+
+		static double D_const(pf::PhaseNode& node) {
+			return Dconst;
 		}
 
 		static void Mphase_ii(pf::PhaseNode& node, pf::PhaseEntry& phase) {
@@ -142,9 +147,9 @@ namespace pf {
 			D_phase_temp = kinetics_funcs::D_default;
 			if (Solvers::get_instance()->parameters.ConEType == ConEquationType::CEType_PhaseX) {
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Con.Mii = [(phase_0_M_00 , phase_0_M_11, ...) , ... ]\n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Con.Mii = [(phase_0_M_00 , phase_0_M_11, ...) , ... ]\n", InputFileReader::get_instance()->debug_file);
 				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("#                  .Mij = {[(phase_0_M_00, phase_0_M_01, ...), (phase_0_M_10, phase_0_M_11, ...), ... ], ... }\n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("#                  .Mij = {[(phase_0_M_00, phase_0_M_01, ...), (phase_0_M_10, phase_0_M_11, ...), ... ], ... }\n", InputFileReader::get_instance()->debug_file);
 				string Mii_key = "ModelsManager.Con.Mii", Mii_input = "[()]";
 				if (InputFileReader::get_instance()->read_string_value(Mii_key, Mii_input, infile_debug)) {
 					M_phase_ij = Mphase_ii;
@@ -302,8 +307,10 @@ namespace pf {
 				Solvers::get_instance()->C_Solver.M_ij = M_bulk_ij;
 			}
 			if (Solvers::get_instance()->parameters.TempEType == TemperatureEquationType::TType_Standard) {
-				if (infile_debug)
-				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Temp.Dtemp = ( phase_0_D , phase_1_D , ... ) \n", InputFileReader::get_instance()->debug_file);
+				if (infile_debug) {
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.Temp.Dtemp = ( phase_0_D , phase_1_D , ... ) \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("#                   .Dconst= 0.0 \n", InputFileReader::get_instance()->debug_file);
+				}
 				string D_a_key = "ModelsManager.Temp.Dtemp", D_a_input = "()";
 				if (InputFileReader::get_instance()->read_string_value(D_a_key, D_a_input, infile_debug)) {
 					D_phase_temp = D_temp;
@@ -317,6 +324,9 @@ namespace pf {
 						phase_Dtemp.add_double(phi->phi_property, D_a_value[a_index].double_value);
 						a_index++;
 					}
+				}
+				if (InputFileReader::get_instance()->read_double_value("ModelsManager.Temp.Dconst", Dconst, infile_debug)) {
+					D_phase_temp = D_const;
 				}
 				Solvers::get_instance()->T_Solver.D_temp = D_phase_temp;
 			}

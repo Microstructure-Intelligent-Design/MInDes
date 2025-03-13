@@ -167,7 +167,7 @@ namespace pf {
 			return _xi;
 		};
 
-		// store epsilon and epsilon*Depsilon_Dtheta inside nodes
+		// store epsilon and Depsilon_Dtheta inside nodes
 		static void _xi_a_aniso_cos_e1(pf::PhaseNode& node, pf::PhaseEntry& phase) {
 			double theta = std::atan2(phase.phi_grad.getY(), phase.phi_grad.getX());
 			double angle = aniso_module_num * (theta - aniso_angle);

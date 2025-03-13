@@ -104,9 +104,19 @@ namespace pf {
 
 		//------Temperature source-----//
 
+		double T_latent_heat_kappa{};
+
 		static double reaction_T_none(pf::PhaseNode& node) {
 			return 0.0;
 		}
+
+		static double reaction_T_latent_heat(pf::PhaseNode& node) {
+			double dphi_dt{}, dt{ Solvers::get_instance()->parameters.dt };
+			for (auto phase = node.begin(); phase < node.end(); phase++)
+				dphi_dt += (phase->phi - phase->old_phi) / dt;
+			return T_latent_heat_kappa * dphi_dt;
+		}
+
 		static double (*reaction_T)(pf::PhaseNode& node);   // main function
 
 
@@ -128,6 +138,21 @@ namespace pf {
 				reaction_a = reaction_a_electrode_reaction;
 				reaction_i = reaction_i_electrode_reaction;
 			}
+
+			if (infile_debug) {
+				InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.PhiCon.Temperature.BulkReaction.latent_heat = true/false \n", InputFileReader::get_instance()->debug_file);
+			}
+			bool is_latent_heat_on{};
+			InputFileReader::get_instance()->read_bool_value("ModelsManager.PhiCon.Temperature.BulkReaction.latent_heat", is_latent_heat_on, infile_debug);
+			if (is_latent_heat_on) {
+				if (infile_debug) {
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("# ModelsManager.PhiCon.Temperature.kappa = 0.0 \n", InputFileReader::get_instance()->debug_file);
+					InputFileReader::get_instance()->debug_writer->add_string_to_txt("#									 kappa: latent heat contribution coefficient from phase evolution \n", InputFileReader::get_instance()->debug_file);
+				}
+				InputFileReader::get_instance()->read_double_value("ModelsManager.PhiCon.Temperature.kappa", T_latent_heat_kappa, infile_debug);
+				reaction_T = reaction_T_latent_heat;
+			}
+
 			Solvers::get_instance()->writer.add_string_to_txt_and_screen("> MODULE INIT : Bulk Reaction !\n", LOG_FILE_NAME);
 		}
 
@@ -211,7 +236,7 @@ namespace pf {
 						}
 #endif
 						fout << val << endl;
-		}
+					}
 			fout << "</DataArray>" << endl;
 		}
 		static void write_vec3(ofstream& fout, FieldStorage_forPhaseNode& phaseMesh) {
