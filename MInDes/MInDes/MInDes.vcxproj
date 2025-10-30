@@ -82,14 +82,13 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
 xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\Debug\libmindes-init.dll" "$(SolutionDir)MInDes" /Y /D</Command>
+xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -106,14 +105,13 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Debug\libmindes-init.dll" "$(SolutionDir)MIn
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
 xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\Release\libmindes-init.dll" "$(SolutionDir)MInDes" /Y /D</Command>
+xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,14 +126,13 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Release\libmindes-init.dll" "$(SolutionDir)M
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
 xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\Debug\libmindes-init.dll" "$(SolutionDir)MInDes" /Y /D</Command>
+xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,14 +149,13 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Debug\libmindes-init.dll" "$(SolutionDir)MIn
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
 xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\Release\libmindes-init.dll" "$(SolutionDir)MInDes" /Y /D</Command>
+xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
