@@ -1,0 +1,15 @@
+x64
+libmindes-init/
+!MInDes/MInDes/lib/x64
+.vs
+*.txt
+*.vts
+*.dat
+*.o
+*.in
+MInDes/MInDes/_init
+MInDes/MInDes/*.dll
+MInDes/MInDes/src/modules/preprocess_modules/**/*.cpp
+MInDes/MInDes/src/modules/input_modules/**/*.cpp
+MInDes/MInDes/src/modules/model_modules/**/*.cpp
+MInDes/MInDes/src/modules/postprocess_modules/**/*.cpp

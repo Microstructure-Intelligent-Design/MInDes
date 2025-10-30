@@ -1,0 +1,34 @@
+###### Init Solver
+Solver.Mesh.Nx = 64
+Solver.Mesh.Ny = 64
+Solver.Mesh.Nz = 64
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (20,0,false)
+
+# .matrix_phi = ( phi_index, phi_value ) 
+Preprocess.Microstructure.matrix_phi = (0, 1.0)
+
+Preprocess.Microstructure.geometry_layer_number = 1
+# .property = (phi_index, geometry_type, rotation_gauge, reverse_region) 
+#              geometry_type  : 0 - None, 1 - Ellipsoid, 2 - Polyhedron, 3 - Geo_SegmentedCylinder, 4 - RectangularCuboid 
+#              rotation_gauge : 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
+#                               6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
+#  The origin of the simulation mesh is ( x = 1 , y = 1 , z = 1 ). 
+Preprocess.Microstructure.geometry_layer_0.property = (1,1,1,false)
+# .ellipsoid = [(core_x,core_y,core_z),(radius_x,radius_y,radius_z),(rotation_angle_1,rotation_angle_2,rotation_angle_3)] 
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(33,33,33),(30,20,10),(0,10,0)]
+Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
+Preprocess.Microstructure.geometry_layer_0.is_normalized = true
+
+# .voronoi = (phi_index_begin, phi_index_end)
+Preprocess.Microstructure.voronoi = (1,19)
+Preprocess.Microstructure.Voronoi.rand_seed = 10
+Preprocess.Microstructure.Voronoi.const_distance = 12
+Preprocess.Microstructure.Voronoi.VTS.debug = true
+# .in_phi_indexs = (in phi_index1, ... ) 
+Preprocess.Microstructure.Voronoi.in_phi_indexs = (1)
+Preprocess.Microstructure.Voronoi.is_periodic = false
+
+Solver.Output.VTS.frequence = 1000
+Solver.Output.VTS.with_boundary = false
+Solver.Output.VTS.phi_index = true

@@ -1,0 +1,30 @@
+###### custom functions
+# Define.Var = A,0.1
+# Define.Func = ABC@{[(A*PHI<1>)]}@
+# default field variable: "PHI", "dPHI_dt", "lap_PHI", "PHI_X", "dPHI_X_dt", "X", "dX_dt", "T", "dT_dt", "lap_T", "P", "dP_dt", "lap_P", "PHI_P", "dPHI_P_dt", "lap_PHI_P"
+# default functions		: "pow", "sqrt", "abs", "exp", "ln", "log", "sin", "cos", "tan", "asin", "acos", "atan"
+
+###### Init Solver
+Solver.Mesh.Nx = 300
+Solver.Mesh.Ny = 300
+Solver.Mesh.Nz = 1
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (3,0,false)
+
+# .matrix_phi = ( phi_index, phi_value ) 
+Preprocess.Microstructure.matrix_phi = (0, 1.0)
+
+Preprocess.Microstructure.bmp24.file_path = bone.bmp
+Preprocess.Microstructure.bmp24.layer_number = 2
+# .gray_threshold = (range_left, range_right) 
+Preprocess.Microstructure.bmp24_layer_0.gray_threshold = (0.6,1.0)
+# .phi = ( phi_index, phi_value, is_normalized ) 
+Preprocess.Microstructure.bmp24_layer_0.phi = (2,1,true)
+# .gray_threshold = (range_left, range_right) 
+Preprocess.Microstructure.bmp24_layer_1.gray_threshold = (0.1,0.6)
+# .phi = ( phi_index, phi_value, is_normalized ) 
+Preprocess.Microstructure.bmp24_layer_1.phi = (1,1,true)
+
+Solver.Output.VTS.frequence = 1000
+Solver.Output.VTS.with_boundary = false
+Solver.Output.VTS.phi_index = true

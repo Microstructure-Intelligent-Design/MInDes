@@ -1,9 +1,0 @@
-###### custom functions
-# Define.Var = A,0.1
-# Define.Func = ABC@{[(A*PHI<1>)]}@
-# default field variable: "PHI", "dPHI_dt", "lap_PHI", "PHI_X", "dPHI_X_dt", "X", "dX_dt", "T", "dT_dt", "lap_T", "P", "dP_dt", "lap_P", "PHI_P", "dPHI_P_dt", "lap_PHI_P"
-# default functions		: "pow", "sqrt", "abs", "exp", "ln", "log", "sin", "cos", "tan", "asin", "acos", "atan"
-
-InputFile.debug = true
-
-

@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\modules">
+      <UniqueIdentifier>{10d571cc-037f-4f29-8eed-2c642c455014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\tools">
+      <UniqueIdentifier>{72fc964c-47c0-47c4-8031-947f0441264c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\base">
+      <UniqueIdentifier>{0099d930-cd47-4503-abcd-8dc558286744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\input">
+      <UniqueIdentifier>{beac727c-1e6c-43b2-9c1c-6e1edbe307a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\models">
+      <UniqueIdentifier>{0867739f-78a9-42f0-bed3-8ad3614d9054}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\preprocess">
+      <UniqueIdentifier>{aea93d41-4ec2-4343-b8c3-fedb850fb07e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\postprocess">
+      <UniqueIdentifier>{be899be9-dfb4-4044-ae04-6b710a5c7415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\input\infile">
+      <UniqueIdentifier>{e12aca3c-39d5-4b00-802f-8a0b86a39069}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\preprocess\microstructure_init">
+      <UniqueIdentifier>{92f8f685-1b4b-4fc8-8ecc-43142f2bc500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{ccb93bdc-12f1-4348-94b0-e916807a4f53}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\base\whereami.c">
+      <Filter>src\modules\base</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\MainIterator.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MainIterator_Params.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tools\timer.h">
+      <Filter>src\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\MACRO_DEF.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\Mesh_0.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\RotationMatrix.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\VectorMatrix.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\infile_selector.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\InputFileMath.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\InputFileReader.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\QuickStartUp.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\selectFile.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\SimuInfo.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\inputfiles\UserStartUp.h">
+      <Filter>src\modules\input\infile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\InputModulesManager.h">
+      <Filter>src\modules\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\ioFiles_Params.h">
+      <Filter>src\modules\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\input_modules\ProgramPath.h">
+      <Filter>src\modules\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\Model_Params.h">
+      <Filter>src\modules\models</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ModelModulesManager.h">
+      <Filter>src\modules\models</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\CpuMemoryUsage.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\PostprocessModulesManager.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\WriteVTS.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\GeometryStructure.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h">
+      <Filter>src\modules\preprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\PreprocessModulesManager.h">
+      <Filter>src\modules\preprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\whereami.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\Module.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\WriteMeshData.h">
+      <Filter>src\modules\preprocess</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

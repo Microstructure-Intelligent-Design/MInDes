@@ -1,0 +1,16 @@
+###### Init Solver
+Solver.Mesh.Nx = 64
+Solver.Mesh.Ny = 64
+Solver.Mesh.Nz = 64
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (12,0,false)
+
+# .voronoi = (phi_index_begin, phi_index_end)
+Preprocess.Microstructure.voronoi = (0,11)
+Preprocess.Microstructure.Voronoi.rand_seed = 10
+Preprocess.Microstructure.Voronoi.const_distance = 30
+Preprocess.Microstructure.Voronoi.VTS.debug = true
+
+Solver.Output.VTS.frequence = 1000
+Solver.Output.VTS.with_boundary = false
+Solver.Output.VTS.phi_index = true

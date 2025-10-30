@@ -1,0 +1,16 @@
+###### Init Solver
+Solver.Mesh.Nx = 100
+Solver.Mesh.Ny = 100
+Solver.Mesh.Nz = 1
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (2,0,false)
+
+# .matrix_phi = ( phi_index, phi_value ) 
+Preprocess.Microstructure.matrix_phi = (0, 1.0)
+
+# Preprocess.Microstructure.porous = (first_phi_index, second_phi_index, porosity, noise_level) 
+Preprocess.Microstructure.porous = (0,1,0.5,0.1)
+
+Solver.Output.VTS.frequence = 1000
+Solver.Output.VTS.with_boundary = false
+Solver.Output.VTS.phi_index = true
