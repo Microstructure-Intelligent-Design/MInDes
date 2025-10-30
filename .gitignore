@@ -9,3 +9,4 @@ libmindes-init/
 *.in
 MInDes/MInDes/_init
 MInDes/MInDes/*.dll
+!LICENSE.txt
