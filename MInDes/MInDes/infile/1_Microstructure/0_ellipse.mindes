@@ -23,6 +23,6 @@ Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(33,33,1),\\
 Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
 Preprocess.Microstructure.geometry_layer_0.is_normalized = true
 
-Solver.Output.VTS.frequence = 1000
 Solver.Output.VTS.with_boundary = false
 Solver.Output.VTS.phi_index = true
+Preprocess.Microstructure.Output.frequence = 1000
