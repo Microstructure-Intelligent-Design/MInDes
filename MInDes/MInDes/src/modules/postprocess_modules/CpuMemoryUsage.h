@@ -205,7 +205,7 @@ namespace pf {
             report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
 		}
-        inline void exec_post_iii() {
+        inline void exec_post_ii() {
             if (main_iterator::Current_ITE_step % show_loop_information::screen_output_step == 0) {
                 std::stringstream report;
                 int current_pid = GetCurrentPid(); // or you can set a outside program pid
@@ -233,7 +233,7 @@ namespace pf {
             WriteLog(report.str());
             load_a_new_module(default_module_function, default_module_function, exec_pre_iii,
                 default_module_function, default_module_function, default_module_function,
-                default_module_function, default_module_function, exec_post_iii, deinit);
+                default_module_function, exec_post_ii, default_module_function, deinit);
         }
 	}
 }

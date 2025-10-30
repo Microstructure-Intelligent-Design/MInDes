@@ -50,9 +50,9 @@ namespace pf {
 				log << timer::return_cunrrent_time_by_string();
 				log.setf(ios::fixed);
 				log << "# Simulation step " << main_iterator::Current_ITE_step << " has been finished!" << endl;
+				log << "# Real time is " << setprecision(3) << time_parameters::Real_Time << endl;
 				log << "# This " << screen_output_step << " steps used " << setprecision(3) << timer::interval_end(main_iterator::t_interval_begin) << "(secs.), " << endl;
-				log << "# Total " << main_iterator::Current_ITE_step << " steps used " << setprecision(3) << timer::total_duration_sec(main_iterator::t_total_begin) << "(secs.)." << endl;
-				log << "# Real simulation time is " << setprecision(3) << time_parameters::Real_Time << " (secs.)" << endl;
+				log << "# Total simulation used " << setprecision(3) << timer::total_duration_sec(main_iterator::t_total_begin) << "(secs.)." << endl;
 				log << "#----------------------------------------------------------------------------------------------------" << endl;
 				if (main_field::is_phi_field_on)
 					for (int index = 0; index < main_field::phi_number; index++)
