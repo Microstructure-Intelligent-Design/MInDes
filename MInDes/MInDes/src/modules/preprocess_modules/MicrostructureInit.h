@@ -42,7 +42,6 @@ namespace pf {
 							    << ", Ny - " << report.PNy - 2 << ", Nz - " << report.PNz - 2
 							    << ", phi number - " << report.phi_number << " (" << bool_type[line_valid] << ")" << std::endl;
 					}
-					_report << ">" << std::endl;
 					if (report.is_con_mesh) {
 						bool line_valid = true;
 						if (report.CNx == main_field::concentration_field.Nx()
@@ -59,7 +58,6 @@ namespace pf {
 							<< ", Ny - " << report.CNy - 2 << ", Nz - " << report.CNz - 2
 							<< ", con number - " << report.con_number << " (" << bool_type[line_valid] << ")" << std::endl;
 					}
-					_report << ">" << std::endl;
 					if (report.is_temp_mesh) {
 						bool line_valid = true;
 						if (report.TNx == main_field::temperature_field.Nx()
@@ -74,11 +72,11 @@ namespace pf {
 						_report << "> | temperature-field size               : Nx - " << report.PNx - 2
 							<< ", Ny - " << report.PNy - 2 << ", Nz - " << report.PNz - 2 << " (" << bool_type[line_valid] << ")" << std::endl;
 					}
-					_report << ">" << std::endl;
 					// if (report.is_fluid_mesh) {
 					// 	
 					// }
 					// _report << ">" << std::endl;
+					_report << std::endl;
 					WriteLog(_report.str());
 					if (all_valid == false) {
 						string error_report = "> Wainning : mesh data structure from datafile and inputfile mismatch ! \n";
@@ -580,16 +578,14 @@ namespace pf {
 		}
 		// - 
 		void write_data_pre_iii() {
-			if (write_mesh_data::output_frequence == 0)
-				return;
-			write_mesh_data::write_dataFile("_init");
+			write_mesh_data::write_dataFile(input_output_files_parameters::WorkingFolder_Path + dirSeparator + write_mesh_data::mainName + "_step0" + write_mesh_data::format);
 		}
 		void write_data_pos_iii() {
 			if (write_mesh_data::output_frequence == 0)
 				return;
 			if (main_iterator::Current_ITE_step % write_mesh_data::output_frequence != 0)
 				return;
-			write_mesh_data::write_dataFile("_step" + to_string(main_iterator::Current_ITE_step));
+			write_mesh_data::write_dataFile(input_output_files_parameters::WorkingFolder_Path + dirSeparator + write_mesh_data::mainName + "_step" + to_string(main_iterator::Current_ITE_step) + write_mesh_data::format);
 		}
 		inline void dinit() {
 			geometry_structure::nucleation_box.geometry_box.clear();
@@ -604,7 +600,7 @@ namespace pf {
 					WriteDebugFile("# Preprocess.Microstructure.datafile_path : relative path from infile folder.\n");
 					if (InputFileReader::get_instance()->read_string_value("Preprocess.Microstructure.datafile_path", write_mesh_data::datafile_path, true))
 						write_mesh_data::is_read_datafile_by_path = true;
-					write_mesh_data::datafile_path = input_output_files_parameters::InFile_Path + dirSeparator + write_mesh_data::datafile_path;
+					write_mesh_data::datafile_path = input_output_files_parameters::InFileFolder_Path + dirSeparator + write_mesh_data::datafile_path;
 #ifdef _WIN32
 					if (!write_mesh_data::is_read_datafile_by_path) {
 						WriteLog("> Please select a datafile (in .dat format) to initialize the simulation mesh ...");
@@ -616,8 +612,6 @@ namespace pf {
 						std::exit(0);
 					}
 #endif
-					pf::Data_MeshInfo mesh_info;
-					functions::init_mesh_with_datafile(mesh_info, write_mesh_data::datafile_path);
 				}
 				else {
 					// - init matrix 
@@ -1069,16 +1063,17 @@ namespace pf {
 					default_module_function, default_module_function, default_module_function,
 					default_module_function, default_module_function, default_module_function, default_module_function);
 				// - 
-				infile_reader::read_int_value("Preprocess.Microstructure.Output.frequence", write_mesh_data::output_frequence, true);
-				if (write_mesh_data::output_frequence == 0) {
-					load_a_new_module(default_module_function, default_module_function, write_data_pre_iii,
-						default_module_function, default_module_function, default_module_function,
-						default_module_function, default_module_function, default_module_function, default_module_function);
-				}
-				else if (write_mesh_data::output_frequence > 0) {
-					load_a_new_module(default_module_function, default_module_function, write_data_pre_iii,
-						default_module_function, default_module_function, default_module_function,
-						default_module_function, default_module_function, write_data_pos_iii, default_module_function);
+				if (infile_reader::read_int_value("Preprocess.Microstructure.Output.frequence", write_mesh_data::output_frequence, true)) {
+					if (write_mesh_data::output_frequence == 0) {
+						load_a_new_module(default_module_function, default_module_function, write_data_pre_iii,
+							default_module_function, default_module_function, default_module_function,
+							default_module_function, default_module_function, default_module_function, default_module_function);
+					}
+					else if (write_mesh_data::output_frequence > 0) {
+						load_a_new_module(default_module_function, default_module_function, write_data_pre_iii,
+							default_module_function, default_module_function, default_module_function,
+							default_module_function, default_module_function, write_data_pos_iii, default_module_function);
+					}
 				}
 			}
 		}
