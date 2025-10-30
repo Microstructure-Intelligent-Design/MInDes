@@ -2,6 +2,8 @@
 namespace pf {
 
 	namespace main_iterator {
+		inline bool main_solver_on = true;
+
 		inline size_t ITE_Begin_Step = 0;
 		inline size_t ITE_End_Step = 0;
 		inline int OpenMP_Thread_Counts = 1;

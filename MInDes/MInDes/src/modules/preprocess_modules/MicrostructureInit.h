@@ -516,11 +516,7 @@ namespace pf {
 				if (bmp24_structure::is_read_bmp24file) {
 					bmp24_structure::generate_structure_from_BMP_pic(
 						mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
-						main_field::is_phi_field_on, main_field::is_con_field_on, main_field::is_temp_field_on,
-						bmp24_structure::bmp24file_path, bmp24_structure::bmp24_layer, 
-						bmp24_structure::bmp24_threshold, bmp24_structure::bmp24_phi_index, bmp24_structure::bmp24_phi_value, 
-						bmp24_structure::bmp24_phi_normalized, bmp24_structure::bmp24_con, bmp24_structure::bmp24_temperature,
-						geometry_structure::nucleation_box);
+						main_field::is_phi_field_on, main_field::is_con_field_on, main_field::is_temp_field_on);
 					functions::definiteNucleation(main_iterator::Current_ITE_step);
 				}
 				// - porous
@@ -544,16 +540,10 @@ namespace pf {
 								}
 							}
 						}
-						porous_structure::quartet_structure_generation_in_phis(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, aim_phi,
-							porous_structure::is_porous_rand, porous_structure::porous_rand_seed, porous_structure::porosity, porous_structure::porous_init_noise, porous_structure::porous_first_phi_index, porous_structure::porous_second_phi_index,
-							porous_structure::porous_first_con, porous_structure::porous_second_con, porous_structure::porous_first_temperature,
-							porous_structure::porous_second_temperature, porous_structure::is_porous_normalized, geometry_structure::nucleation_box);
+						porous_structure::quartet_structure_generation_in_phis(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, aim_phi);
 					}
 					else {
-						porous_structure::quartet_structure_generation(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
-							porous_structure::is_porous_rand, porous_structure::porous_rand_seed, porous_structure::porosity, porous_structure::porous_init_noise, porous_structure::porous_first_phi_index, porous_structure::porous_second_phi_index,
-							porous_structure::porous_first_con, porous_structure::porous_second_con, porous_structure::porous_first_temperature,
-							porous_structure::porous_second_temperature, porous_structure::is_porous_normalized, geometry_structure::nucleation_box);
+						porous_structure::quartet_structure_generation(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ);
 					}
 					functions::definiteNucleation(main_iterator::Current_ITE_step);
 				}
@@ -578,22 +568,10 @@ namespace pf {
 								}
 							}
 						}
-						voronoi_structure::generate_voronoi_structure_in_phis(aim_phi, voronoi_structure::is_voronoi_mirror_generation, voronoi_structure::is_voronoi_rand, voronoi_structure::voronoi_rand_seed,
-							voronoi_structure::voronoi_box_position, voronoi_structure::voronoi_box_size, voronoi_structure::voronoi_phi_index_range,
-							voronoi_structure::voronoi_con, voronoi_structure::voronoi_temperature, voronoi_structure::voronoi_type, voronoi_structure::voronoi_points,
-							voronoi_structure::voronoi_const_pointsDistance, voronoi_structure::voronoi_reference_dot, voronoi_structure::voronoi_reference_dot_distance,
-							voronoi_structure::voronoi_reference_dot_min_pointsDistance, voronoi_structure::voronoi_reference_dot_max_pointsDistance, voronoi_structure::voronoi_reference_surface,
-							voronoi_structure::voronoi_reference_surface_distance, voronoi_structure::voronoi_reference_surface_min_pointsDistance, voronoi_structure::voronoi_reference_surface_max_pointsDistance,
-							voronoi_structure::voronoi_matrix_dots, voronoi_structure::voronoi_matrix_dots_pointsDistance, geometry_structure::nucleation_box);
+						voronoi_structure::generate_voronoi_structure_in_phis(aim_phi);
 					}
 					else {
-						voronoi_structure::generate_voronoi_structure(voronoi_structure::is_voronoi_mirror_generation, voronoi_structure::is_voronoi_rand, voronoi_structure::voronoi_rand_seed,
-							voronoi_structure::voronoi_box_position, voronoi_structure::voronoi_box_size, voronoi_structure::voronoi_phi_index_range,
-							voronoi_structure::voronoi_con, voronoi_structure::voronoi_temperature, voronoi_structure::voronoi_type, voronoi_structure::voronoi_points,
-							voronoi_structure::voronoi_const_pointsDistance, voronoi_structure::voronoi_reference_dot, voronoi_structure::voronoi_reference_dot_distance,
-							voronoi_structure::voronoi_reference_dot_min_pointsDistance, voronoi_structure::voronoi_reference_dot_max_pointsDistance, voronoi_structure::voronoi_reference_surface,
-							voronoi_structure::voronoi_reference_surface_distance, voronoi_structure::voronoi_reference_surface_min_pointsDistance, voronoi_structure::voronoi_reference_surface_max_pointsDistance,
-							voronoi_structure::voronoi_matrix_dots, voronoi_structure::voronoi_matrix_dots_pointsDistance, geometry_structure::nucleation_box);
+						voronoi_structure::generate_voronoi_structure();
 					}
 					functions::definiteNucleation(main_iterator::Current_ITE_step);
 				}

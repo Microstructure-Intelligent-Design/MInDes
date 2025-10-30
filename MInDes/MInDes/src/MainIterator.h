@@ -46,7 +46,7 @@ namespace pf {
 
 		inline void init_modules(int argc, char* argv[]) {
 			// get the infile path
-			if (!Quick_StartUp(input_output_files_parameters::InFile_Path)) {
+			if (!Quick_StartUp(input_output_files_parameters::InFile_Path, main_iterator::main_solver_on)) {
 				SimuInfo simu_info{ User_StartUp(argc,argv) };
 				input_output_files_parameters::InFile_Path = simu_info.simu_path;
 			}
@@ -91,58 +91,59 @@ namespace pf {
 
 			timer::init(main_iterator::t_total_begin);
 
-			timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_pre_exec);
-			modules_output << endl;
-			modules_output << timer::return_cunrrent_time_by_string();
-			modules_output << ">----------------------------------------- " << "Modules Pre-Exec" << " -----------------------------------------" << endl;
-			WriteLog(modules_output.str());
-			for (auto _module = modules.begin(); _module < modules.end(); _module++)
-				_module->exec_pre_i();
-			for (auto _module = modules.begin(); _module < modules.end(); _module++)
-				_module->exec_pre_ii();
-			for (auto _module = modules.begin(); _module < modules.end(); _module++)
-				_module->exec_pre_iii();
-			modules_output.str("");
-			modules_output << ">-------------------------------------------" << "----------------" << "-----------------------------------------" << endl << endl;
-			WriteLog(modules_output.str());
-			timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_pre_exec);
+			if (main_solver_on) {
+				timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_pre_exec);
+				modules_output << endl;
+				modules_output << timer::return_cunrrent_time_by_string();
+				modules_output << ">----------------------------------------- " << "Modules Pre-Exec" << " -----------------------------------------" << endl;
+				WriteLog(modules_output.str());
+				for (auto _module = modules.begin(); _module < modules.end(); _module++)
+					_module->exec_pre_i();
+				for (auto _module = modules.begin(); _module < modules.end(); _module++)
+					_module->exec_pre_ii();
+				for (auto _module = modules.begin(); _module < modules.end(); _module++)
+					_module->exec_pre_iii();
+				modules_output.str("");
+				modules_output << ">-------------------------------------------" << "----------------" << "-----------------------------------------" << endl << endl;
+				WriteLog(modules_output.str());
+				timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_pre_exec);
 
-			// main loop;
-			main_iterator::t_interval_modules_exec = 0.0;
-			main_iterator::t_interval_modules_pos_exec = 0.0;
-			for (size_t istep = ITE_Begin_Step + 1; istep <= ITE_End_Step; istep++) {
-				main_iterator::Current_ITE_step = istep;
-				// - license
-				if (main_iterator::OpenMP_Thread_Counts >= omp_get_num_procs())
-					main_iterator::OpenMP_Thread_Counts = omp_get_num_procs() - 1;
-				else if (main_iterator::OpenMP_Thread_Counts < 1)
-					main_iterator::OpenMP_Thread_Counts = 1;
-				omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
-				// - license
+				// main loop;
+				main_iterator::t_interval_modules_exec = 0.0;
+				main_iterator::t_interval_modules_pos_exec = 0.0;
+				for (size_t istep = ITE_Begin_Step + 1; istep <= ITE_End_Step; istep++) {
+					main_iterator::Current_ITE_step = istep;
+					// - license
+					if (main_iterator::OpenMP_Thread_Counts >= omp_get_num_procs())
+						main_iterator::OpenMP_Thread_Counts = omp_get_num_procs() - 1;
+					else if (main_iterator::OpenMP_Thread_Counts < 1)
+						main_iterator::OpenMP_Thread_Counts = 1;
+					omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
+					// - license
 
-				double cal_times = 0.0;
+					double cal_times = 0.0;
 
-				timer::time_interval_precision_secs_begin(cal_times);
-				for (auto _module = modules.begin(); _module < modules.end(); _module++)
-					_module->exec_i();
-				for (auto _module = modules.begin(); _module < modules.end(); _module++)
-					_module->exec_ii();
-				for (auto _module = modules.begin(); _module < modules.end(); _module++)
-					_module->exec_iii();
-				timer::time_interval_precision_secs_end(cal_times);
-				main_iterator::t_interval_modules_exec += cal_times;
+					timer::time_interval_precision_secs_begin(cal_times);
+					for (auto _module = modules.begin(); _module < modules.end(); _module++)
+						_module->exec_i();
+					for (auto _module = modules.begin(); _module < modules.end(); _module++)
+						_module->exec_ii();
+					for (auto _module = modules.begin(); _module < modules.end(); _module++)
+						_module->exec_iii();
+					timer::time_interval_precision_secs_end(cal_times);
+					main_iterator::t_interval_modules_exec += cal_times;
 
-				timer::time_interval_precision_secs_begin(cal_times);
-				for (auto _module = modules.begin(); _module < modules.end(); _module++)
-					_module->exec_pos_i();
-				for (auto _module = modules.begin(); _module < modules.end(); _module++)
-					_module->exec_pos_ii();
-				for (auto _module = modules.begin(); _module < modules.end(); _module++)
-					_module->exec_pos_iii();
-				timer::time_interval_precision_secs_end(cal_times);
-				main_iterator::t_interval_modules_pos_exec += cal_times;
+					timer::time_interval_precision_secs_begin(cal_times);
+					for (auto _module = modules.begin(); _module < modules.end(); _module++)
+						_module->exec_pos_i();
+					for (auto _module = modules.begin(); _module < modules.end(); _module++)
+						_module->exec_pos_ii();
+					for (auto _module = modules.begin(); _module < modules.end(); _module++)
+						_module->exec_pos_iii();
+					timer::time_interval_precision_secs_end(cal_times);
+					main_iterator::t_interval_modules_pos_exec += cal_times;
+				}
 			}
-
 			timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_deinit);
 			modules_output.str("");
 			modules_output << endl;

@@ -5,12 +5,6 @@
 #include <random>
 #include <sstream>
 #define SYS_EPSILON (0.000001f)
-// #define MINDES_INIT_EXPORTS
-#ifdef MINDES_INIT_EXPORTS
-#define MINDES_INIT_API __declspec(dllexport)
-#else
-#define MINDES_INIT_API __declspec(dllimport)
-#endif
 namespace pf {
 	namespace geometry_structure {
 		enum Geometry { Geo_None, Geo_Ellipsoid, Geo_Polyhedron, Geo_SegmentedCylinder, Geo_RectangularCuboid };

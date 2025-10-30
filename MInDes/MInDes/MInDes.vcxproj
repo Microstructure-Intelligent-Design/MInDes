@@ -83,7 +83,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -107,7 +107,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Debug\libmindes-init.dll" "$(SolutionDir)MIn
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -129,7 +129,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Release\libmindes-init.dll" "$(SolutionDir)M
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -153,7 +153,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Debug\libmindes-init.dll" "$(SolutionDir)MIn
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libmindes-init.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmindes-init.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -165,6 +165,9 @@ xcopy "$(SolutionDir)MInDes\lib\x64\Release\libmindes-init.dll" "$(SolutionDir)M
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\modules\base\whereami.c" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h" />
