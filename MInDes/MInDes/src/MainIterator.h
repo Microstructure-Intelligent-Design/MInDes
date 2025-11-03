@@ -93,7 +93,6 @@ namespace pf {
 			stringstream modules_output;
 
 			timer::init(main_iterator::t_total_begin);
-
 			if (main_solver_on) {
 				timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_pre_exec);
 				modules_output << endl;
@@ -114,6 +113,7 @@ namespace pf {
 				// main loop;
 				main_iterator::t_interval_modules_exec = 0.0;
 				main_iterator::t_interval_modules_pos_exec = 0.0;
+				timer::interval_begin(main_iterator::t_interval_begin);
 				for (size_t istep = ITE_Begin_Step + 1; istep <= ITE_End_Step; istep++) {
 					main_iterator::Current_ITE_step = istep;
 					// - license

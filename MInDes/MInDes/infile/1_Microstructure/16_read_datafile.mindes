@@ -1,0 +1,14 @@
+###### Init Solver
+Solver.Mesh.Nx = 64
+Solver.Mesh.Ny = 64
+Solver.Mesh.Nz = 64
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (12,0,false)
+
+Preprocess.Microstructure.is_datafile_init = true
+# Preprocess.Microstructure.datafile_path : relative path from infile folder.
+Preprocess.Microstructure.datafile_path = 9_voronoi3d\MeshData_step0.dat
+
+Solver.Output.VTS.frequence = 1000
+Solver.Output.VTS.with_boundary = false
+Solver.Output.VTS.phi_index = true

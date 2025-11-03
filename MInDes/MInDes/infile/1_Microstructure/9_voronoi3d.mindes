@@ -14,3 +14,5 @@ Preprocess.Microstructure.Voronoi.VTS.debug = true
 Solver.Output.VTS.frequence = 1000
 Solver.Output.VTS.with_boundary = false
 Solver.Output.VTS.phi_index = true
+
+Preprocess.Microstructure.Output.frequence = 1000
