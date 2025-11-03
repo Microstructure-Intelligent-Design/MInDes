@@ -161,6 +161,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\modules\base\whereami.c" />
+    <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.cpp" />
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.cpp" />
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp" />
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.cpp" />
@@ -183,6 +184,9 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
     <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
     <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Params.h" />
     <ClInclude Include="src\modules\model_modules\ModelModulesManager.h" />
     <ClInclude Include="src\modules\model_modules\Model_Params.h" />
     <ClInclude Include="src\modules\Module.h" />

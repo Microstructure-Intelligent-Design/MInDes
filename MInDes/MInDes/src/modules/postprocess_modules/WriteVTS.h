@@ -6,7 +6,7 @@
 namespace pf {
 
 	namespace write_vts {
-		inline int output_frequence = -1;
+		inline size_t output_frequence = 0;
 		inline bool is_show_with_boundary = false;
 		inline size_t x_begin = 0;
 		inline size_t y_begin = 0;
@@ -153,8 +153,6 @@ namespace pf {
 		}
 
 		inline void write_vts_pos_iii() {
-			if (main_iterator::Current_ITE_step % output_frequence != 0)
-				return;
 			ofstream fout;
 			// - 
 			default_functions::open_vts_scalar_file(fout, "step" + to_string(main_iterator::Current_ITE_step));
@@ -169,33 +167,64 @@ namespace pf {
 		}
 
 		inline void init() {
-			InputFileReader::get_instance()->read_int_value("Solver.Output.VTS.frequence", output_frequence, true);
-			if (output_frequence == 0) {
-				load_a_new_module(default_module_function, default_module_function, write_vts_pre_iii,
-					default_module_function, default_module_function, default_module_function,
-					default_module_function, default_module_function, default_module_function, default_module_function);
-			}
-			else if (output_frequence > 0) {
-				load_a_new_module(default_module_function, default_module_function, write_vts_pre_iii,
-					default_module_function, default_module_function, default_module_function,
-					default_module_function, default_module_function, write_vts_pos_iii, default_module_function);
+			if (infile_reader::read_int_value("Solver.Output.VTS.frequence", output_frequence, true)) {
+				if (output_frequence == 0) {
+					load_a_new_module(default_module_function, default_module_function, write_vts_pre_iii,
+						default_module_function, default_module_function, default_module_function,
+						default_module_function, default_module_function, default_module_function, default_module_function);
+				}
+				else if (output_frequence > 0) {
+					load_a_new_module(default_module_function, default_module_function, write_vts_pre_iii,
+						default_module_function, default_module_function, default_module_function,
+						default_module_function, default_module_function, write_vts_pos_iii, default_module_function);
+				}
 			}
 			InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.with_boundary", is_show_with_boundary, true);
 			if (is_show_with_boundary) {
 				x_begin = 0;
 				y_begin = 0;
 				z_begin = 0;
-				x_end = main_field::phase_field.Nx() - 1;
-				y_end = main_field::phase_field.Ny() - 1;
-				z_end = main_field::phase_field.Nz() - 1;
+				if (main_field::is_phi_field_on) {
+					x_end = main_field::phase_field.Nx() - 1;
+					y_end = main_field::phase_field.Ny() - 1;
+					z_end = main_field::phase_field.Nz() - 1;
+				}
+				else if (main_field::is_con_field_on) {
+					x_end = main_field::concentration_field.Nx() - 1;
+					y_end = main_field::concentration_field.Ny() - 1;
+					z_end = main_field::concentration_field.Nz() - 1;
+				}
+				else if (main_field::is_temp_field_on) {
+					x_end = main_field::temperature_field.Nx() - 1;
+					y_end = main_field::temperature_field.Ny() - 1;
+					z_end = main_field::temperature_field.Nz() - 1;
+				}
 			}
 			else {
-				x_begin = main_field::phase_field.COMP_X_BGN();
-				y_begin = main_field::phase_field.COMP_Y_BGN();
-				z_begin = main_field::phase_field.COMP_Z_BGN();
-				x_end = main_field::phase_field.COMP_X_END();
-				y_end = main_field::phase_field.COMP_Y_END();
-				z_end = main_field::phase_field.COMP_Z_END();
+				if (main_field::is_phi_field_on) {
+					x_begin = main_field::phase_field.COMP_X_BGN();
+					y_begin = main_field::phase_field.COMP_Y_BGN();
+					z_begin = main_field::phase_field.COMP_Z_BGN();
+					x_end = main_field::phase_field.COMP_X_END();
+					y_end = main_field::phase_field.COMP_Y_END();
+					z_end = main_field::phase_field.COMP_Z_END();
+				}
+				else if (main_field::is_con_field_on) {
+					x_begin = main_field::concentration_field.COMP_X_BGN();
+					y_begin = main_field::concentration_field.COMP_Y_BGN();
+					z_begin = main_field::concentration_field.COMP_Z_BGN();
+					x_end = main_field::concentration_field.COMP_X_END();
+					y_end = main_field::concentration_field.COMP_Y_END();
+					z_end = main_field::concentration_field.COMP_Z_END();
+				}
+				else if (main_field::is_temp_field_on) {
+					x_begin = main_field::temperature_field.COMP_X_BGN();
+					y_begin = main_field::temperature_field.COMP_Y_BGN();
+					z_begin = main_field::temperature_field.COMP_Z_BGN();
+					x_end = main_field::temperature_field.COMP_X_END();
+					y_end = main_field::temperature_field.COMP_Y_END();
+					z_end = main_field::temperature_field.COMP_Z_END();
+				}
 			}
 			bool buff = false;
 			if (main_field::is_phi_field_on) {

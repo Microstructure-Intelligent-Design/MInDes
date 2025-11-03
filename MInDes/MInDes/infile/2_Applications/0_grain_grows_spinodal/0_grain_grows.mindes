@@ -1,0 +1,16 @@
+Solver.Mesh.Nx = 64
+Solver.Mesh.Ny = 64
+Solver.Mesh.Nz = 1
+
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (0,1,false)
+
+# SimulationModels.model =  0 - None 
+#                           1 - Grain Grows Spinodal , PCT = (N,1,false) 
+SimulationModels.model = 1
+
+# .matrix_con = ( con_0_value, con_1_value, ... ) 
+Preprocess.Microstructure.matrix_con = (0.3)
+
+Solver.Output.VTS.frequence = 100
+Solver.Output.VTS.con_all = true

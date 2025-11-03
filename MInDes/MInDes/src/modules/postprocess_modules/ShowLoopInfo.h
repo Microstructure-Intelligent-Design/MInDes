@@ -22,14 +22,14 @@ namespace pf {
 			log << "> PHI CON TEMP information :" << endl;
 			if (main_field::is_phi_field_on)
 				for (int index = 0; index < main_field::phi_number; index++)
-					log << "#  Phi " << index << " = "
+					log << ">  Phi " << index << " = "
 					<< setprecision(5) << phi_info[index] << endl;
 			if (main_field::is_con_field_on)
 				for (int index = 0; index < main_field::con_number; index++)
-					log << "#  Con " << index << " = "
+					log << ">  Con " << index << " = "
 					<< setprecision(5) << con_info[index] << endl;
 			if (main_field::is_temp_field_on)
-				log << "#  Temp " << " = "
+				log << ">  Temp " << " = "
 				<< setprecision(5) << temp_info << endl;
 			WriteLog(log.str());
 		}

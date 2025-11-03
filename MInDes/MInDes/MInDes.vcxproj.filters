@@ -35,6 +35,9 @@
     <Filter Include="lib">
       <UniqueIdentifier>{ccb93bdc-12f1-4348-94b0-e916807a4f53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\modules\models\GrainGrowsSpinodal">
+      <UniqueIdentifier>{980ef4bb-8f32-4dea-8177-306d74c218c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -51,6 +54,9 @@
     </ClCompile>
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp">
       <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.cpp">
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +164,15 @@
     </ClInclude>
     <ClInclude Include="src\modules\preprocess_modules\WriteMeshData.h">
       <Filter>src\modules\preprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Params.h">
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Manager.h">
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.h">
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

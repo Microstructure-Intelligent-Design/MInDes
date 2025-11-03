@@ -1,16 +1,34 @@
 #pragma once
 #include "../Module.h"
 #include "Model_Params.h"
+#include "grain_grows_spinodal/Model_Manager.h"
 #include "../../MainIterator_Params.h"
-// This library file is used to keep the model details confidential
-// #pragma comment(lib, "lib/PMLib.lib")
 namespace pf {
+	enum SimulationModels { SM_None, SM_GrainGrowsSpinodal };
 	inline void init_basic_time_mesh_parameters();
 	inline void init_model_modules() {
 		// parallel
 		infile_reader::read_int_value("Solver.Loop.OpenMP_Thread", main_iterator::OpenMP_Thread_Counts, true);
 		// - mesh and time parameters
 		init_basic_time_mesh_parameters();
+		// - init models
+		WriteDebugFile("# SimulationModels.model =  0 - None \n");
+		WriteDebugFile("#                           1 - Grain Grows Spinodal , PCT = (N,1,false) \n");
+		int sm_model = SimulationModels::SM_None;
+		infile_reader::read_int_value("SimulationModels.model", sm_model, true);
+		switch (SimulationModels(sm_model)) {
+		case SimulationModels::SM_GrainGrowsSpinodal: {
+			// - model settings
+			if (main_field::phi_number == 0 || main_field::con_number != 1 || main_field::is_temp_field_on != false) {
+				string error_report = "> ERROR, the PCT command line settings do not meet the requirements : PCT = (N,1,false) !\n";
+				WriteLog(error_report);
+				std::exit(0);
+			}
+			grain_grows_spinodal_model::init_model_modules();
+			break;
+		}
+		}
+		// - 
 		WriteLog("> MODULE INIT : Models Ready !\n");
 	}
 
@@ -46,7 +64,7 @@ namespace pf {
 		else
 			mesh_parameters::dimention = Dimension::Three_Dimension;
 		InputFileReader::get_instance()->read_REAL_value("Solver.Mesh.dr", mesh_parameters::delt_r, true);
-		WriteDebugFile("# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ADIABATIC\n");
+		WriteDebugFile("# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ZEROFLUX\n");
 		int boundary_condition = 0;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_up", boundary_condition, true);
 		mesh_parameters::x_up = BoundaryCondition(boundary_condition);
