@@ -1,5 +1,7 @@
 #pragma once
 #include "../../Module.h"
+#include "../Model_Params.h"
+#include "../../input_modules/inputfiles/InputFileReader.h"
 #include "Model_Params.h"
 #include "Model_Functions.h"
 namespace pf {
@@ -16,8 +18,8 @@ namespace pf {
 			WriteLog("> DOI: 10.7498/aps.71.20211973 \n");
 			WriteLog("> \n");
 			WriteDebugFile("# Funcs.phi : d eta_i / d t = - L * (m(c) * (eta_i^3 - eta_i + 2 * eta_i * epsilon * \\sum_{j != i}{eta_j^2}) - 2 * kappa_eta * \\nabla^2 eta_i) \n");
-			WriteDebugFile("# Funcs.con : d c / d t     = \\nabla \\cdot M(eta) \\nabla (c - 5 * c * (1 - c) * (1 - 2 * c)) * f(eta) + 2 * A * c * (1 - c) * (1 - 2 * c) - 2 * kappa_con * \\nabla^2 c \n");
-			WriteDebugFile("#             m(c)          = 1 + 0.5 * c^2 - 2.5 * c * (1 - c)^2 \n");
+			WriteDebugFile("# Funcs.con : d c / d t     = \\nabla \\cdot M(eta) \\nabla (c - 5 * c * (1 - c^2) * (3 * c^2 - 1)) * f(eta) + 2 * A * c * (1 - c) * (1 - 2 * c) - 2 * kappa_con * \\nabla^2 c \n");
+			WriteDebugFile("#             m(c)          = 1 + 0.5 * c^2 - 2.5 * c^2 * (1 - c^2)^2 \n");
 			WriteDebugFile("#             f(eta)        = 0.25 + \\sum_i {eta_i^4 / 4 - eta_i^2 / 2} + epsilon * \\sum_i \\sum_{j>i} {eta_i^2 * eta_j^2} \n");
 			WriteDebugFile("#             M(eta)        = Mb + Mg * (\\sum_i \\sum_{j>i} {eta_i^2 * eta_j^2})^0.5 \n");
 			infile_reader::read_real_value("SimulationModels.GrainGrowsSpinodal.L", parameters::L, true);
