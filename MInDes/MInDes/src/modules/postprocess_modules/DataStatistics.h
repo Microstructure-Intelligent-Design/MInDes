@@ -14,8 +14,10 @@ namespace pf {
 					for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
 						std::vector<REAL>& phi = main_field::phase_field(x, y, z);
 						for (size_t index = 0; index < main_field::phi_number; index++)
-							phi_info[index] += phi[index] / SIZE;
+							phi_info[index] += phi[index];
 					}
+			for (size_t index = 0; index < main_field::phi_number; index++)
+				phi_info[index] /= SIZE;
 			return phi_info;
 		}
 
@@ -27,8 +29,10 @@ namespace pf {
 					for (long long z = main_field::concentration_field.COMP_Z_BGN(); z <= main_field::concentration_field.COMP_Z_END(); z++) {
 						std::vector<REAL>& con = main_field::concentration_field(x, y, z);
 						for (size_t index = 0; index < main_field::con_number; index++)
-							con_info[index] += con[index] / SIZE;
+							con_info[index] += con[index];
 					}
+			for (size_t index = 0; index < main_field::con_number; index++)
+				con_info[index] /= SIZE;
 			return con_info;
 		}
 
@@ -38,9 +42,9 @@ namespace pf {
 			for (long long x = main_field::temperature_field.COMP_X_BGN(); x <= main_field::temperature_field.COMP_X_END(); x++)
 				for (long long y = main_field::temperature_field.COMP_Y_BGN(); y <= main_field::temperature_field.COMP_Y_END(); y++)
 					for (long long z = main_field::temperature_field.COMP_Z_BGN(); z <= main_field::temperature_field.COMP_Z_END(); z++) {
-						temp += main_field::temperature_field(x, y, z) / SIZE;
+						temp += main_field::temperature_field(x, y, z);
 					}
-			return temp;
+			return temp / SIZE;
 		}
 
 

@@ -24,6 +24,23 @@ namespace pf {
 				WriteLog(error_report);
 				std::exit(0);
 			}
+			grain_grows_spinodal_model::parameters::phase_field = &main_field::phase_field;
+			grain_grows_spinodal_model::parameters::concentration_field = &main_field::concentration_field;
+			grain_grows_spinodal_model::parameters::MESH_NX = mesh_parameters::MESH_NX;
+			grain_grows_spinodal_model::parameters::MESH_NY = mesh_parameters::MESH_NY;
+			grain_grows_spinodal_model::parameters::MESH_NZ = mesh_parameters::MESH_NZ;
+			grain_grows_spinodal_model::parameters::x_down = mesh_parameters::x_down;
+			grain_grows_spinodal_model::parameters::y_down = mesh_parameters::y_down;
+			grain_grows_spinodal_model::parameters::z_down = mesh_parameters::z_down;
+			grain_grows_spinodal_model::parameters::x_up   = mesh_parameters::x_up  ;
+			grain_grows_spinodal_model::parameters::y_up   = mesh_parameters::y_up  ;
+			grain_grows_spinodal_model::parameters::z_up   = mesh_parameters::z_up  ;
+			grain_grows_spinodal_model::parameters::delt_r = mesh_parameters::delt_r;
+			grain_grows_spinodal_model::parameters::delt_t = &time_parameters::delt_t;
+			grain_grows_spinodal_model::parameters::phi_number = main_field::phi_number;
+			grain_grows_spinodal_model::parameters::PHI_MAX_VARIATION = &main_field::PHI_MAX_VARIATION;
+			grain_grows_spinodal_model::parameters::con_number = main_field::con_number;
+			grain_grows_spinodal_model::parameters::CON_MAX_VARIATION = &main_field::CON_MAX_VARIATION;
 			grain_grows_spinodal_model::init_model_modules();
 			break;
 		}
@@ -65,17 +82,22 @@ namespace pf {
 			mesh_parameters::dimention = Dimension::Three_Dimension;
 		InputFileReader::get_instance()->read_REAL_value("Solver.Mesh.dr", mesh_parameters::delt_r, true);
 		WriteDebugFile("# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ZEROFLUX\n");
-		int boundary_condition = 0;
+		int boundary_condition = 1;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_up", boundary_condition, true);
 		mesh_parameters::x_up = BoundaryCondition(boundary_condition);
+		boundary_condition = 1;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_down", boundary_condition, true);
 		mesh_parameters::x_down = BoundaryCondition(boundary_condition);
+		boundary_condition = 1;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.y_up", boundary_condition, true);
 		mesh_parameters::y_up = BoundaryCondition(boundary_condition);
+		boundary_condition = 1;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.y_down", boundary_condition, true);
 		mesh_parameters::y_down = BoundaryCondition(boundary_condition);
+		boundary_condition = 1;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.z_up", boundary_condition, true);
 		mesh_parameters::z_up = BoundaryCondition(boundary_condition);
+		boundary_condition = 1;
 		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.z_dowm", boundary_condition, true);
 		mesh_parameters::z_down = BoundaryCondition(boundary_condition);
 		// - 

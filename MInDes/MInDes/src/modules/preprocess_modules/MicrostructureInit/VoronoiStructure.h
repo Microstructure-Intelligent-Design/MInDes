@@ -9,7 +9,12 @@ namespace pf {
 		enum VoronoiType { VDT_CONST, VDT_REF_DOT, VDT_REF_SURFACE, VDT_DOTS_MATRIX };
 		inline bool is_voronoi = false;
 		// -
-		inline bool is_voronoi_mirror_generation = true;
+		inline bool is_x_down_periodic = true;
+		inline bool is_y_down_periodic = true;
+		inline bool is_z_down_periodic = true;
+		inline bool is_x_up_periodic = true;
+		inline bool is_y_up_periodic = true;
+		inline bool is_z_up_periodic = true;
 		inline bool is_voronoi_rand = true;
 		inline int voronoi_rand_seed = 0;
 		inline std::vector<int> voronoi_box_position = { 0, 0, 0 };

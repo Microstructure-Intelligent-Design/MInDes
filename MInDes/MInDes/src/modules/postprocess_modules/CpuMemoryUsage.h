@@ -247,16 +247,18 @@ namespace pf {
 			int current_pid = GetCurrentPid(); // or you can set a outside program pid
 			//float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
             double memory_usage = GetMemoryUsage(current_pid);
-            report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+            report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
 		}
         inline void exec_post_ii() {
+            if (show_loop_information::screen_output_step == 0)
+                return;
             if (main_iterator::Current_ITE_step % show_loop_information::screen_output_step == 0) {
                 std::stringstream report;
                 int current_pid = GetCurrentPid(); // or you can set a outside program pid
                 //float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
                 double memory_usage = GetMemoryUsage(current_pid);
-                report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+                report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
                 WriteLog(report.str());
             }
 		}
@@ -265,7 +267,7 @@ namespace pf {
             int current_pid = GetCurrentPid(); // or you can set a outside program pid
             //float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
             double memory_usage = GetMemoryUsage(current_pid);
-            report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+            report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
         }
 
@@ -274,7 +276,7 @@ namespace pf {
             int current_pid = GetCurrentPid(); // or you can set a outside program pid
             //float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
             double memory_usage = GetMemoryUsage(current_pid);
-            report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+            report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
             load_a_new_module(default_module_function, default_module_function, exec_pre_iii,
                 default_module_function, default_module_function, default_module_function,

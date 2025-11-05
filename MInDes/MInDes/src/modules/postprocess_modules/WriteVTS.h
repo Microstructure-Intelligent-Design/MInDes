@@ -153,17 +153,21 @@ namespace pf {
 		}
 
 		inline void write_vts_pos_iii() {
-			ofstream fout;
-			// - 
-			default_functions::open_vts_scalar_file(fout, "step" + to_string(main_iterator::Current_ITE_step));
-			for (auto writer = write_vts_scalar_list.begin(); writer < write_vts_scalar_list.end(); writer++)
-				(*writer)(fout);
-			default_functions::close_vts_file(fout);
-			// - 
-			default_functions::open_vts_vec3_file(fout, "step" + to_string(main_iterator::Current_ITE_step));
-			for (auto writer = write_vts_vector_list.begin(); writer < write_vts_vector_list.end(); writer++)
-				(*writer)(fout);
-			default_functions::close_vts_file(fout);
+			if (output_frequence == 0)
+				return;
+			if (main_iterator::Current_ITE_step % output_frequence == 0) {
+				ofstream fout;
+				// - 
+				default_functions::open_vts_scalar_file(fout, "step" + to_string(main_iterator::Current_ITE_step));
+				for (auto writer = write_vts_scalar_list.begin(); writer < write_vts_scalar_list.end(); writer++)
+					(*writer)(fout);
+				default_functions::close_vts_file(fout);
+				// - 
+				default_functions::open_vts_vec3_file(fout, "step" + to_string(main_iterator::Current_ITE_step));
+				for (auto writer = write_vts_vector_list.begin(); writer < write_vts_vector_list.end(); writer++)
+					(*writer)(fout);
+				default_functions::close_vts_file(fout);
+			}
 		}
 
 		inline void init() {

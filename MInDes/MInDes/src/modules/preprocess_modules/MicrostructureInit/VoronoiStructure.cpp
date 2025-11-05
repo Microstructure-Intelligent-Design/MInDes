@@ -99,51 +99,83 @@ namespace pf {
 				region_number = 27;
 			else
 				region_number = 9;
-			if (not is_voronoi_mirror_generation)
-				region_number = 1;
 			mirror_points.resize(region_number);
 			for (auto region = mirror_points.begin(); region < mirror_points.end(); region++)
 				region->resize(grain_number);
 #pragma omp parallel for
 			for (int grain = 0; grain < grain_number; grain++) {
 				mirror_points[0][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, 0);
-				if (is_voronoi_mirror_generation) {
-					mirror_points[1][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, 0);
-					mirror_points[2][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, 0);
-					mirror_points[3][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), 0);
-					mirror_points[4][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), 0);
-					mirror_points[5][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
-					mirror_points[6][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
-					mirror_points[7][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
-					mirror_points[8][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
-					if (dimention == 3) {
-						mirror_points[9][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(voronoi_box_size[2]));
-						mirror_points[10][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(-voronoi_box_size[2]));
-						mirror_points[11][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
-						mirror_points[12][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
-						mirror_points[13][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
-						mirror_points[14][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
-						mirror_points[15][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[16][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[17][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[18][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[19][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[20][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[23][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[24][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[26][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[21][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[22][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[25][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-					}
+				mirror_points[1][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, 0);
+				mirror_points[2][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, 0);
+				mirror_points[3][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), 0);
+				mirror_points[4][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), 0);
+				mirror_points[5][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
+				mirror_points[6][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
+				mirror_points[7][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
+				mirror_points[8][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
+				if (dimention == 3) {
+					mirror_points[9][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(voronoi_box_size[2]));
+					mirror_points[10][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(-voronoi_box_size[2]));
+					mirror_points[11][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
+					mirror_points[12][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
+					mirror_points[13][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
+					mirror_points[14][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
+					mirror_points[15][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[16][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[17][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[18][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[19][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[20][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[23][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[24][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[26][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[21][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[22][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[25][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
 				}
 			}
-			for (size_t region = 0; region < region_number; region++)
+			for (size_t region = 0; region < region_number; region++) {
+				if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
+					|| region == 20 || region == 23 || region == 24 || region == 26))
+					continue;
+				if (!is_x_up_periodic && (region == 1 || region == 5 || region == 7 || region == 11 || region == 13
+					|| region == 19 || region == 21 || region == 22 || region == 25))
+					continue;
+				if (!is_y_down_periodic && (region == 4 || region == 7 || region == 8 || region == 16 || region == 18
+					|| region == 21 || region == 23 || region == 25 || region == 26))
+					continue;
+				if (!is_y_up_periodic && (region == 3 || region == 5 || region == 6 || region == 15 || region == 17
+					|| region == 19 || region == 20 || region == 22 || region == 24))
+					continue;
+				if (!is_z_down_periodic && (region == 10 || region == 13 || region == 14 || region == 17 || region == 18
+					|| region == 22 || region == 24 || region == 25 || region == 26))
+					continue;
+				if (!is_z_up_periodic && (region == 9 || region == 11 || region == 12 || region == 15 || region == 16
+					|| region == 19 || region == 20 || region == 21 || region == 23))
+					continue;
 				for (size_t grain = 0; grain < grain_number; grain++) {
 					geometry_structure::Polyhedron poly(mirror_points[region][grain]);
 					std::vector<geometry_structure::point_in_region_index> record_points;
 					record_points.push_back(geometry_structure::point_in_region_index(region, grain));
-					for (size_t region_index = 0; region_index < mirror_points.size(); region_index++)
+					for (size_t region_index = 0; region_index < mirror_points.size(); region_index++) {
+						if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
+							|| region == 20 || region == 23 || region == 24 || region == 26))
+							continue;
+						if (!is_x_up_periodic && (region == 1 || region == 5 || region == 7 || region == 11 || region == 13
+							|| region == 19 || region == 21 || region == 22 || region == 25))
+							continue;
+						if (!is_y_down_periodic && (region == 4 || region == 7 || region == 8 || region == 16 || region == 18
+							|| region == 21 || region == 23 || region == 25 || region == 26))
+							continue;
+						if (!is_y_up_periodic && (region == 3 || region == 5 || region == 6 || region == 15 || region == 17
+							|| region == 19 || region == 20 || region == 22 || region == 24))
+							continue;
+						if (!is_z_down_periodic && (region == 10 || region == 13 || region == 14 || region == 17 || region == 18
+							|| region == 22 || region == 24 || region == 25 || region == 26))
+							continue;
+						if (!is_z_up_periodic && (region == 9 || region == 11 || region == 12 || region == 15 || region == 16
+							|| region == 19 || region == 20 || region == 21 || region == 23))
+							continue;
 						for (size_t grain_index = 0; grain_index < mirror_points[region_index].size(); grain_index++) {
 							// Avoid inclusion points
 							bool is_point_contained = false;
@@ -172,6 +204,7 @@ namespace pf {
 								}
 							}
 						}
+					}
 					std::string str_report = "> Voronoi: One polyhedron in region : " + std::to_string(region) + ", grain : "
 						+ std::to_string(grain) + " has been generated ! \n";
 					std::cout << str_report;
@@ -186,7 +219,7 @@ namespace pf {
 					geo.isNormalized = true;
 					geometry_structure::nucleation_box.geometry_box.push_back(geo);
 				}
-
+			}
 		}
 
 		void generate_voronoi_structure_new_method() {
@@ -238,46 +271,60 @@ namespace pf {
 				region_number = 27;
 			else
 				region_number = 9;
-			if (not is_voronoi_mirror_generation)
-				region_number = 1;
 			mirror_points.resize(region_number);
 			for (auto region = mirror_points.begin(); region < mirror_points.end(); region++)
 				region->resize(grain_number);
 #pragma omp parallel for
 			for (int grain = 0; grain < grain_number; grain++) {
 				mirror_points[0][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, 0);
-				if (is_voronoi_mirror_generation) {
-					mirror_points[1][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, 0);
-					mirror_points[2][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, 0);
-					mirror_points[3][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), 0);
-					mirror_points[4][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), 0);
-					mirror_points[5][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
-					mirror_points[6][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
-					mirror_points[7][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
-					mirror_points[8][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
-					if (dimention == 3) {
-						mirror_points[9][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(voronoi_box_size[2]));
-						mirror_points[10][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(-voronoi_box_size[2]));
-						mirror_points[11][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
-						mirror_points[12][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
-						mirror_points[13][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
-						mirror_points[14][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
-						mirror_points[15][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[16][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[17][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[18][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[19][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[20][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[23][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[24][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[26][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[21][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[22][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[25][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-					}
+				mirror_points[1][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, 0);
+				mirror_points[2][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, 0);
+				mirror_points[3][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), 0);
+				mirror_points[4][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), 0);
+				mirror_points[5][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
+				mirror_points[6][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
+				mirror_points[7][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
+				mirror_points[8][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
+				if (dimention == 3) {
+					mirror_points[9][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(voronoi_box_size[2]));
+					mirror_points[10][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(-voronoi_box_size[2]));
+					mirror_points[11][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
+					mirror_points[12][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
+					mirror_points[13][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
+					mirror_points[14][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
+					mirror_points[15][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[16][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[17][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[18][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[19][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[20][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[23][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[24][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[26][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[21][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[22][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[25][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
 				}
 			}
-			for (size_t region = 0; region < region_number; region++)
+			for (size_t region = 0; region < region_number; region++) {
+				if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
+					|| region == 20 || region == 23 || region == 24 || region == 26))
+					continue;
+				if (!is_x_up_periodic && (region == 1 || region == 5 || region == 7 || region == 11 || region == 13
+					|| region == 19 || region == 21 || region == 22 || region == 25))
+					continue;
+				if (!is_y_down_periodic && (region == 4 || region == 7 || region == 8 || region == 16 || region == 18
+					|| region == 21 || region == 23 || region == 25 || region == 26))
+					continue;
+				if (!is_y_up_periodic && (region == 3 || region == 5 || region == 6 || region == 15 || region == 17
+					|| region == 19 || region == 20 || region == 22 || region == 24))
+					continue;
+				if (!is_z_down_periodic && (region == 10 || region == 13 || region == 14 || region == 17 || region == 18
+					|| region == 22 || region == 24 || region == 25 || region == 26))
+					continue;
+				if (!is_z_up_periodic && (region == 9 || region == 11 || region == 12 || region == 15 || region == 16
+					|| region == 19 || region == 20 || region == 21 || region == 23))
+					continue;
 				for (size_t grain = 0; grain < grain_number; grain++) {
 					geometry_structure::Polyhedron poly(mirror_points[region][grain]);
 					std::vector<geometry_structure::point_in_region_index> record_points;
@@ -288,7 +335,25 @@ namespace pf {
 						find_new_point = false;
 						float point_distance2 = std::numeric_limits<float>::max();;
 						size_t buff_region = 0, buff_grain = 0;
-						for (size_t region_index = 0; region_index < mirror_points.size(); region_index++)
+						for (size_t region_index = 0; region_index < mirror_points.size(); region_index++) {
+							if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
+								|| region == 20 || region == 23 || region == 24 || region == 26))
+								continue;
+							if (!is_x_up_periodic && (region == 1 || region == 5 || region == 7 || region == 11 || region == 13
+								|| region == 19 || region == 21 || region == 22 || region == 25))
+								continue;
+							if (!is_y_down_periodic && (region == 4 || region == 7 || region == 8 || region == 16 || region == 18
+								|| region == 21 || region == 23 || region == 25 || region == 26))
+								continue;
+							if (!is_y_up_periodic && (region == 3 || region == 5 || region == 6 || region == 15 || region == 17
+								|| region == 19 || region == 20 || region == 22 || region == 24))
+								continue;
+							if (!is_z_down_periodic && (region == 10 || region == 13 || region == 14 || region == 17 || region == 18
+								|| region == 22 || region == 24 || region == 25 || region == 26))
+								continue;
+							if (!is_z_up_periodic && (region == 9 || region == 11 || region == 12 || region == 15 || region == 16
+								|| region == 19 || region == 20 || region == 21 || region == 23))
+								continue;
 							for (size_t grain_index = 0; grain_index < mirror_points[region_index].size(); grain_index++) {
 								// Avoid inclusion points
 								bool is_point_contained = false;
@@ -312,6 +377,7 @@ namespace pf {
 									buff_grain = grain_index;
 								}
 							}
+						}
 						if (find_new_point) {
 							geometry_structure::Point mid_point = (poly.point_inside_polyhedron + mirror_points[buff_region][buff_grain]) / 2;
 							geometry_structure::Vector3 norm = get_vector(mirror_points[buff_region][buff_grain], poly.point_inside_polyhedron);
@@ -333,7 +399,7 @@ namespace pf {
 					geo.isNormalized = true;
 					geometry_structure::nucleation_box.geometry_box.push_back(geo);
 				}
-
+			}
 		}
 
 		void generate_voronoi_structure_in_phis(std::vector<std::vector<std::vector<float>>>& aim_phi) {
@@ -386,52 +452,84 @@ namespace pf {
 				region_number = 27;
 			else
 				region_number = 9;
-			if (not is_voronoi_mirror_generation)
-				region_number = 1;
 			mirror_points.resize(region_number);
 			for (auto region = mirror_points.begin(); region < mirror_points.end(); region++)
 				region->resize(grain_number);
 #pragma omp parallel for
 			for (int grain = 0; grain < grain_number; grain++) {
 				mirror_points[0][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, 0);
-				if (is_voronoi_mirror_generation) {
-					mirror_points[1][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, 0);
-					mirror_points[2][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, 0);
-					mirror_points[3][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), 0);
-					mirror_points[4][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), 0);
-					mirror_points[5][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
-					mirror_points[6][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
-					mirror_points[7][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
-					mirror_points[8][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
-					if (dimention == 3) {
-						mirror_points[9][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(voronoi_box_size[2]));
-						mirror_points[10][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(-voronoi_box_size[2]));
-						mirror_points[11][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
-						mirror_points[12][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
-						mirror_points[13][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
-						mirror_points[14][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
-						mirror_points[15][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[16][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[17][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[18][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[19][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[20][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[23][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[24][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[26][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[21][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
-						mirror_points[22][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
-						mirror_points[25][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
-					}
+				mirror_points[1][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, 0);
+				mirror_points[2][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, 0);
+				mirror_points[3][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), 0);
+				mirror_points[4][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), 0);
+				mirror_points[5][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
+				mirror_points[6][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), 0);
+				mirror_points[7][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
+				mirror_points[8][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), 0);
+				if (dimention == 3) {
+					mirror_points[9][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(voronoi_box_size[2]));
+					mirror_points[10][grain] = voronoi_points[grain] + geometry_structure::Point(0, 0, int(-voronoi_box_size[2]));
+					mirror_points[11][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
+					mirror_points[12][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(voronoi_box_size[2]));
+					mirror_points[13][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
+					mirror_points[14][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), 0, int(-voronoi_box_size[2]));
+					mirror_points[15][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[16][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[17][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[18][grain] = voronoi_points[grain] + geometry_structure::Point(0, int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[19][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[20][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[23][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[24][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[26][grain] = voronoi_points[grain] + geometry_structure::Point(int(-voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[21][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(voronoi_box_size[2]));
+					mirror_points[22][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(voronoi_box_size[1]), int(-voronoi_box_size[2]));
+					mirror_points[25][grain] = voronoi_points[grain] + geometry_structure::Point(int(voronoi_box_size[0]), int(-voronoi_box_size[1]), int(-voronoi_box_size[2]));
 				}
 			}
-			for (size_t region = 0; region < region_number; region++)
+			for (size_t region = 0; region < region_number; region++) {
+				if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
+					|| region == 20 || region == 23 || region == 24 || region == 26))
+					continue;
+				if (!is_x_up_periodic && (region == 1 || region == 5 || region == 7 || region == 11 || region == 13
+					|| region == 19 || region == 21 || region == 22 || region == 25))
+					continue;
+				if (!is_y_down_periodic && (region == 4 || region == 7 || region == 8 || region == 16 || region == 18
+					|| region == 21 || region == 23 || region == 25 || region == 26))
+					continue;
+				if (!is_y_up_periodic && (region == 3 || region == 5 || region == 6 || region == 15 || region == 17
+					|| region == 19 || region == 20 || region == 22 || region == 24))
+					continue;
+				if (!is_z_down_periodic && (region == 10 || region == 13 || region == 14 || region == 17 || region == 18
+					|| region == 22 || region == 24 || region == 25 || region == 26))
+					continue;
+				if (!is_z_up_periodic && (region == 9 || region == 11 || region == 12 || region == 15 || region == 16
+					|| region == 19 || region == 20 || region == 21 || region == 23))
+					continue;
 				for (size_t grain = 0; grain < grain_number; grain++) {
 					geometry_structure::Polyhedron poly(mirror_points[region][grain]);
 					std::vector<geometry_structure::point_in_region_index> record_points;
 					geometry_structure::point_in_region_index rp(region, grain);
 					record_points.push_back(rp);
-					for (size_t region_index = 0; region_index < mirror_points.size(); region_index++)
+					for (size_t region_index = 0; region_index < mirror_points.size(); region_index++) {
+						if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
+							|| region == 20 || region == 23 || region == 24 || region == 26))
+							continue;
+						if (!is_x_up_periodic && (region == 1 || region == 5 || region == 7 || region == 11 || region == 13
+							|| region == 19 || region == 21 || region == 22 || region == 25))
+							continue;
+						if (!is_y_down_periodic && (region == 4 || region == 7 || region == 8 || region == 16 || region == 18
+							|| region == 21 || region == 23 || region == 25 || region == 26))
+							continue;
+						if (!is_y_up_periodic && (region == 3 || region == 5 || region == 6 || region == 15 || region == 17
+							|| region == 19 || region == 20 || region == 22 || region == 24))
+							continue;
+						if (!is_z_down_periodic && (region == 10 || region == 13 || region == 14 || region == 17 || region == 18
+							|| region == 22 || region == 24 || region == 25 || region == 26))
+							continue;
+						if (!is_z_up_periodic && (region == 9 || region == 11 || region == 12 || region == 15 || region == 16
+							|| region == 19 || region == 20 || region == 21 || region == 23))
+							continue;
 						for (size_t grain_index = 0; grain_index < mirror_points[region_index].size(); grain_index++) {
 							// Avoid inclusion points
 							bool is_point_contained = false;
@@ -460,6 +558,7 @@ namespace pf {
 								}
 							}
 						}
+					}
 					geometry_structure::PointSet set;
 					float sum_sum_phi = 0;
 					for (size_t z = 0; z <= voronoi_box_size[2]; z++)
@@ -472,7 +571,7 @@ namespace pf {
 									}
 								}
 							}
-					std::string str_report = "> Voronoi: One polyhedron in region : " + std::to_string(region) + ", grain : " 
+					std::string str_report = "> Voronoi: One polyhedron in region : " + std::to_string(region) + ", grain : "
 						+ std::to_string(grain) + " could been generated ! \n";
 					std::cout << str_report;
 					set.generate_step = 0;
@@ -484,6 +583,7 @@ namespace pf {
 						geometry_structure::nucleation_box.point_set_box.push_back(set);
 					}
 				}
+			}
 		}
 
 	}
