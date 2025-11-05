@@ -1,5 +1,7 @@
 #pragma once
 #include "../../Module.h"
+#include "../Model_Params.h"
+#include "../../input_modules/inputfiles/InputFileReader.h"
 #include "Model_Params.h"
 #include "Model_Functions.h"
 namespace pf {
