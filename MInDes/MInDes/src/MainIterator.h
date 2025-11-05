@@ -45,6 +45,9 @@ namespace pf {
 	namespace main_iterator {
 
 		inline void init_modules(int argc, char* argv[]) {
+			// - for UTF-8 output win/linux & screen/file
+			std::locale::global(std::locale(""));  // 使用系统本地化
+			std::wcout.imbue(std::locale(""));
 			// get the infile path
 			if (!Quick_StartUp(input_output_files_parameters::InFile_Path, main_iterator::main_solver_on)) {
 				SimuInfo simu_info{ User_StartUp(argc,argv) };

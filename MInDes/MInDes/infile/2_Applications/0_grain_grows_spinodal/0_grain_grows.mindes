@@ -1,0 +1,54 @@
+Solver.Mesh.Nx = 400
+Solver.Mesh.Ny = 128
+Solver.Mesh.Nz = 1
+Solver.Loop.begin_step = 0
+Solver.Loop.end_step = 10000
+Solver.Loop.dt = 0.001
+# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ZEROFLUX
+Solver.Mesh.BoundaryCondition.x_up   = 1
+Solver.Mesh.BoundaryCondition.x_down = 1
+Solver.Mesh.BoundaryCondition.y_up   = 1
+Solver.Mesh.BoundaryCondition.y_down = 1
+
+# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) 
+Solver.Mesh.PCT = (2,1,false)
+
+# SimulationModels.model =  0 - None 
+#                           1 - Grain Grows Spinodal , PCT = (N,1,false) 
+SimulationModels.model = 1
+SimulationModels.GrainGrowsSpinodal.Mb = 1.0
+SimulationModels.GrainGrowsSpinodal.Mg = 500.0
+SimulationModels.GrainGrowsSpinodal.noise_amplitude = 0.01
+SimulationModels.GrainGrowsSpinodal.noise_seed = 0
+
+# .matrix_phi = ( phi_index, phi_value ) 
+Preprocess.Microstructure.matrix_phi = (0,1)
+# .matrix_con = ( con_0_value, con_1_value, ... ) 
+Preprocess.Microstructure.matrix_con = (0.5)
+
+Preprocess.Microstructure.geometry_layer_number = 1
+# .property = (phi_index, geometry_type, rotation_gauge, reverse_region) 
+#              geometry_type  : 0 - None, 1 - Ellipsoid, 2 - Polyhedron, 3 - Geo_SegmentedCylinder, 4 - RectangularCuboid 
+#              rotation_gauge : 0 - XYX, 1 - XZX, 2 - YXY, 3 - YZY, 4  - ZXZ, 5  - ZYZ 
+#                               6 - XYZ, 7 - XZY, 8 - YXZ, 9 - YZX, 10 - ZXY, 11 - ZYX 
+#  The compute box of the simulation mesh is [( 1 , 1 , 1 ) , ( 400 , 128 , 1 )] 
+#  The boundary of the simulation mesh is x = 0 and 401 , y = 0 and 129 , z = 0 and 2 
+Preprocess.Microstructure.geometry_layer_0.property = (1,1,1,false)
+# .ellipsoid = [(core_x,core_y,core_z),(radius_x,radius_y,radius_z),(rotation_angle_1,rotation_angle_2,rotation_angle_3)] 
+Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(200,64,1),(50,50,0),(0,0,0)]
+Preprocess.Microstructure.geometry_layer_0.phi = 1.0
+Preprocess.Microstructure.geometry_layer_0.is_normalized = true
+
+Postprocess.PCT.AutoTimeInterval.frequence = 10
+Postprocess.PCT.AutoTimeInterval.phi_increment_limit = 0.001
+Postprocess.PCT.AutoTimeInterval.con_increment_limit = 0.001
+Postprocess.PCT.AutoTimeInterval.large_scale = 1000.0
+Postprocess.PCT.AutoTimeInterval.small_scale = 0.1
+
+Solver.Output.VTS.frequence = 100
+Solver.Output.VTS.with_boundary = false
+Solver.Output.VTS.con_all = true
+Solver.Output.VTS.phi_index = true
+Solver.Output.VTS.grains = true
+
+Solver.Output.LOG.screen_output_step = 100

@@ -986,14 +986,25 @@ namespace pf {
 					voronoi_structure::voronoi_phi_index_range[1] = voronoi_value[1].int_value;
 					check_phi_index(voronoi_structure::voronoi_phi_index_range[0]);
 					check_phi_index(voronoi_structure::voronoi_phi_index_range[1]);
-					voronoi_structure::voronoi_box_position[0] = 0;
-					voronoi_structure::voronoi_box_position[1] = 0;
-					voronoi_structure::voronoi_box_position[2] = 0;
-					voronoi_structure::voronoi_box_size[0] = int(main_field::phase_field.Nx() - 1);
-					voronoi_structure::voronoi_box_size[1] = int(main_field::phase_field.Ny() - 1);
-					voronoi_structure::voronoi_box_size[2] = int(main_field::phase_field.Nz() - 1);
+					voronoi_structure::voronoi_box_position[0] = 1;
+					voronoi_structure::voronoi_box_position[1] = 1;
+					voronoi_structure::voronoi_box_position[2] = 1;
+					voronoi_structure::voronoi_box_size[0] = int(mesh_parameters::MESH_NX - 1);
+					voronoi_structure::voronoi_box_size[1] = int(mesh_parameters::MESH_NY - 1);
+					voronoi_structure::voronoi_box_size[2] = int(mesh_parameters::MESH_NZ - 1);
 
-					InputFileReader::get_instance()->read_bool_value("Preprocess.Microstructure.Voronoi.is_periodic", voronoi_structure::is_voronoi_mirror_generation, true);
+					if (mesh_parameters::x_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NX <= 1)
+						voronoi_structure::is_x_down_periodic = false;
+					if (mesh_parameters::x_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NX <= 1)
+						voronoi_structure::is_x_up_periodic = false;
+					if (mesh_parameters::y_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NY <= 1)
+						voronoi_structure::is_y_down_periodic = false;
+					if (mesh_parameters::y_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NY <= 1)
+						voronoi_structure::is_y_up_periodic = false;
+					if (mesh_parameters::z_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NZ <= 1)
+						voronoi_structure::is_z_down_periodic = false;
+					if (mesh_parameters::z_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NZ <= 1)
+						voronoi_structure::is_z_up_periodic = false;
 
 					WriteDebugFile("# .con = (con_0_value, con_1_value, ... )] \n");
 					string voronoi_x_key = "Preprocess.Microstructure.Voronoi.con", voronoi_x_input = "()";

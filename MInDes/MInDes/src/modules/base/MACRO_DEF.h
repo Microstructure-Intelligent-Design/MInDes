@@ -3,6 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
 #include <conio.h>
+#include <Windows.h>
 #endif
 #include <iostream>
 #include <fstream>
@@ -210,9 +211,23 @@ namespace pf {
 			fout.close();
 			return;
 		}
-		std::cout << content;
 		fout << content;
 		fout.close();
+#ifdef _WIN32
+		int len = MultiByteToWideChar(CP_UTF8, 0, content.data(), (int)content.size(), nullptr, 0);
+		if (len > 0) {
+			std::wstring wstr;
+			wstr.resize(len);
+			MultiByteToWideChar(CP_UTF8, 0, content.data(), (int)content.size(), &wstr[0], len);
+			std::wcout << wstr;
+		}
+		else {
+			// UTF-8 failed
+			std::cout << content;
+		}
+#else
+		// Linux/macOS
+		std::cout << content;
+#endif
 	}
-
 }

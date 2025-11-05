@@ -10,6 +10,7 @@ namespace pf {
 		inline REAL dt_scale = 1;
 		inline size_t delt_step = 0;
 		inline REAL max_scale = REAL(1e3);
+		inline REAL small_scale = REAL(1e-6);
 		inline bool is_reduce_output = true;
 		inline REAL phi_increment_limit = REAL(1e-3);
 		inline REAL con_increment_limit = REAL(1e-3);
@@ -18,40 +19,45 @@ namespace pf {
 			REAL MAX_dphi_versus_limitPhi = main_field::PHI_MAX_VARIATION / phi_increment_limit;
 			REAL MAX_dcon_versus_limitCon = main_field::CON_MAX_VARIATION / con_increment_limit;
 			REAL MAX_dT_versus_limitT = main_field::TEMP_MAX_VARIATION / temp_increment_limit;
-			REAL delt_scale = REAL(0.05);
 
 			if (MAX_dcon_versus_limitCon > 1) {
-				dt_scale /= MAX_dcon_versus_limitCon + delt_scale;
+				dt_scale /= MAX_dcon_versus_limitCon + REAL(0.05);
 				MAX_dcon_versus_limitCon = 1;
+				if (dt_scale < small_scale)
+					dt_scale = small_scale;
 				if (!is_reduce_output) {
 					string log = "> Adjust time interval for concentration evolving stability, dt_scale = " + to_string(dt_scale) + "\n";
 					WriteLog(log);
 				}
 			}
 			else if (MAX_dphi_versus_limitPhi > 1) {
-				dt_scale /= MAX_dphi_versus_limitPhi + delt_scale;
+				dt_scale /= MAX_dphi_versus_limitPhi + REAL(0.05);
 				MAX_dphi_versus_limitPhi = 1;
+				if (dt_scale < small_scale)
+					dt_scale = small_scale;
 				if (!is_reduce_output) {
 					string log = "> Adjust time interval for phi evolving stability, dt_scale = " + to_string(dt_scale) + "\n";
 					WriteLog(log);
 				}
 			}
 			else if (MAX_dT_versus_limitT > 1) {
-				dt_scale /= MAX_dT_versus_limitT + delt_scale;
+				dt_scale /= MAX_dT_versus_limitT + REAL(0.05);
 				MAX_dT_versus_limitT = 1.0;
+				if (dt_scale < small_scale)
+					dt_scale = small_scale;
 				if (!is_reduce_output) {
 					string log = "> Adjust time interval for temperature evolving stability, dt_scale = " + to_string(dt_scale) + "\n";
 					WriteLog(log);
 				}
 			}
-			else if (main_iterator::Current_ITE_step % delt_step == 0 && (dt_scale * 1.1) <= max_scale) {
-				dt_scale *= REAL(1.1);
+			else if (main_iterator::Current_ITE_step % delt_step == 0 && (dt_scale * REAL(1.05)) <= max_scale) {
+				dt_scale *= REAL(1.05);
 				if (!is_reduce_output) {
 					string log = "> Adjust time interval for fields evolving quickly, dt_scale = " + to_string(dt_scale) + "\n";
 					WriteLog(log);
 				}
 			}
-			else if (main_iterator::Current_ITE_step % delt_step == 0 && (dt_scale * 1.1) > max_scale) {
+			else if (main_iterator::Current_ITE_step % delt_step == 0 && (dt_scale * REAL(1.05)) > max_scale) {
 				dt_scale = max_scale;
 				if (!is_reduce_output) {
 					string log = "> Adjust time interval for fields evolving quickly, dt_scale = " + to_string(dt_scale) + "\n";
@@ -70,10 +76,14 @@ namespace pf {
 			if (delt_step > 0) {
 				time_interval = time_parameters::delt_t;
 				InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.large_scale", max_scale, true);
+				InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.small_scale", small_scale, true);
 				InputFileReader::get_instance()->read_bool_value("Postprocess.PCT.AutoTimeInterval.is_reduce_output", is_reduce_output, true);
-				InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.phi_increment_limit", phi_increment_limit, true);
-				InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.con_increment_limit", con_increment_limit, true);
-				InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.temp_increment_limit", temp_increment_limit, true);
+				if (main_field::is_phi_field_on)
+					InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.phi_increment_limit", phi_increment_limit, true);
+				if (main_field::is_con_field_on)
+					InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.con_increment_limit", con_increment_limit, true);
+				if (main_field::is_temp_field_on)
+					InputFileReader::get_instance()->read_REAL_value("Postprocess.PCT.AutoTimeInterval.temp_increment_limit", temp_increment_limit, true);
 				load_a_new_module(default_module_function, default_module_function, default_module_function,
 					default_module_function, default_module_function, default_module_function,
 					default_module_function, default_module_function, exec_post_iii, default_module_function);

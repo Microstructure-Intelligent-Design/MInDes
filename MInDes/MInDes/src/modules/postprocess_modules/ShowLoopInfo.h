@@ -22,19 +22,20 @@ namespace pf {
 			log << "> PHI CON TEMP information :" << endl;
 			if (main_field::is_phi_field_on)
 				for (int index = 0; index < main_field::phi_number; index++)
-					log << "#  Phi " << index << " = "
+					log << ">  Phi " << index << " = "
 					<< setprecision(5) << phi_info[index] << endl;
 			if (main_field::is_con_field_on)
 				for (int index = 0; index < main_field::con_number; index++)
-					log << "#  Con " << index << " = "
+					log << ">  Con " << index << " = "
 					<< setprecision(5) << con_info[index] << endl;
 			if (main_field::is_temp_field_on)
-				log << "#  Temp " << " = "
+				log << ">  Temp " << " = "
 				<< setprecision(5) << temp_info << endl;
 			WriteLog(log.str());
 		}
 
 		inline void exec_pos_i() {
+			time_parameters::Real_Time += time_parameters::delt_t;
 			if (screen_output_step == 0)
 				return;
 			if (main_iterator::Current_ITE_step % screen_output_step == 0) {
@@ -89,6 +90,9 @@ namespace pf {
 				if (main_field::is_temp_field_on)
 					log << "# MAX TEMP INCREMENT = " << setprecision(5) << main_field::TEMP_MAX_VARIATION << endl;
 				log << "#----------------------------------------------------------------------------------------------------" << endl;
+				main_field::PHI_MAX_VARIATION = 0;
+				main_field::CON_MAX_VARIATION = 0;
+				main_field::TEMP_MAX_VARIATION = 0;
 				if (screen_output_step != 0)
 					if (main_iterator::Current_ITE_step % screen_output_step != 0)
 						log << endl << endl;
