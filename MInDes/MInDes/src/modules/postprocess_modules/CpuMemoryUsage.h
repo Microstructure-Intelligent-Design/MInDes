@@ -164,37 +164,82 @@ namespace pf {
 #endif
         }
         // get specific process physical memeory occupation size by pid (MB)
+//        inline double GetMemoryUsage(int pid) {
+//#ifdef WIN32
+//            uint64_t mem = 0, vmem = 0;
+//            PROCESS_MEMORY_COUNTERS pmc;
+//            // get process hanlde by pid
+//            HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+//            if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
+//                mem = pmc.WorkingSetSize;
+//                vmem = pmc.PagefileUsage;
+//            }
+//            CloseHandle(process);
+//            // use GetCurrentProcess() can get current process and no need to close handle
+//            // convert mem from B to MB
+//            return mem / 1024.0 / 1024.0;
+//#else
+//            char file_name[64] = { 0 };
+//            FILE* fd;
+//            char line_buff[512] = { 0 };
+//            sprintf(file_name, "/proc/%d/status", pid);
+//            fd = fopen(file_name, "r");
+//            if (nullptr == fd)
+//                return 0;
+//            char name[64];
+//            int vmrss = 0;
+//            for (int i = 0; i < VMRSS_LINE - 1; i++)
+//                fgets(line_buff, sizeof(line_buff), fd);
+//            fgets(line_buff, sizeof(line_buff), fd);
+//            sscanf(line_buff, "%s %d", name, &vmrss);
+//            fclose(fd);
+//            // cnvert VmRSS from KB to MB
+//            return vmrss / 1024.0;
+//#endif
+//        }
         inline double GetMemoryUsage(int pid) {
-#ifdef WIN32
-            uint64_t mem = 0, vmem = 0;
+#ifdef _WIN32
+            uint64_t mem = 0;
             PROCESS_MEMORY_COUNTERS pmc;
-            // get process hanlde by pid
-            HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-            if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
-                mem = pmc.WorkingSetSize;
-                vmem = pmc.PagefileUsage;
+
+            // 使用最小必要权限
+            HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+            if (process == nullptr) {
+                return 0.0; // 无法打开进程（权限不足、进程不存在等）
             }
+
+            if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
+                mem = pmc.WorkingSetSize; // 物理内存使用量（字节）
+            }
+
             CloseHandle(process);
-            // use GetCurrentProcess() can get current process and no need to close handle
-            // convert mem from B to MB
-            return mem / 1024.0 / 1024.0;
+            return static_cast<double>(mem) / 1024.0 / 1024.0; // B → MB
+
 #else
-            char file_name[64] = { 0 };
+            char file_name[256];
             FILE* fd;
-            char line_buff[512] = { 0 };
-            sprintf(file_name, "/proc/%d/status", pid);
-            fd = fopen(file_name, "r");
-            if (nullptr == fd)
-                return 0;
-            char name[64];
+            char line[512];
             int vmrss = 0;
-            for (int i = 0; i < VMRSS_LINE - 1; i++)
-                fgets(line_buff, sizeof(line_buff), fd);
-            fgets(line_buff, sizeof(line_buff), fd);
-            sscanf(line_buff, "%s %d", name, &vmrss);
+
+            // 使用 snprintf 防止溢出
+            snprintf(file_name, sizeof(file_name), "/proc/%d/status", pid);
+            fd = fopen(file_name, "r");
+            if (!fd) {
+                return 0.0; // 无法打开 /proc/<pid>/status
+            }
+
+            // 逐行查找 VmRSS
+            while (fgets(line, sizeof(line), fd)) {
+                if (strncmp(line, "VmRSS:", 6) == 0) {
+                    // 成功找到 VmRSS 行
+                    char* value_str = line + 6;
+                    vmrss = std::atoi(value_str); // 自动跳过空白并解析数字
+                    break;
+                }
+            }
             fclose(fd);
-            // cnvert VmRSS from KB to MB
-            return vmrss / 1024.0;
+
+            return static_cast<double>(vmrss) / 1024.0; // KB → MB
 #endif
         }
         inline void exec_pre_iii() {
@@ -202,16 +247,18 @@ namespace pf {
 			int current_pid = GetCurrentPid(); // or you can set a outside program pid
 			//float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
             double memory_usage = GetMemoryUsage(current_pid);
-            report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+            report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
 		}
         inline void exec_post_ii() {
+            if (show_loop_information::screen_output_step == 0)
+                return;
             if (main_iterator::Current_ITE_step % show_loop_information::screen_output_step == 0) {
                 std::stringstream report;
                 int current_pid = GetCurrentPid(); // or you can set a outside program pid
                 //float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
                 double memory_usage = GetMemoryUsage(current_pid);
-                report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+                report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
                 WriteLog(report.str());
             }
 		}
@@ -220,7 +267,7 @@ namespace pf {
             int current_pid = GetCurrentPid(); // or you can set a outside program pid
             //float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
             double memory_usage = GetMemoryUsage(current_pid);
-            report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+            report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
         }
 
@@ -229,7 +276,7 @@ namespace pf {
             int current_pid = GetCurrentPid(); // or you can set a outside program pid
             //float cpu_usage_ratio = GetCpuUsageRatio(current_pid);
             double memory_usage = GetMemoryUsage(current_pid);
-            report << "> current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
+            report << "# current memory usage: " << memory_usage << " MB ( " << memory_usage / 1024.0 << " GB )" << std::endl;
             WriteLog(report.str());
             load_a_new_module(default_module_function, default_module_function, exec_pre_iii,
                 default_module_function, default_module_function, default_module_function,
