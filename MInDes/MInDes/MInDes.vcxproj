@@ -161,7 +161,6 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\modules\base\whereami.c" />
-    <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h" />

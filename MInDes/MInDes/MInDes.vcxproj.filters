@@ -49,9 +49,6 @@
     <ClCompile Include="src\modules\base\whereami.c">
       <Filter>src\modules\base</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.cpp">
-      <Filter>develop</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h">
@@ -160,13 +157,13 @@
       <Filter>src\modules\preprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.h">
-      <Filter>develop</Filter>
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Manager.h">
-      <Filter>develop</Filter>
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Params.h">
-      <Filter>develop</Filter>
+      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
