@@ -193,7 +193,7 @@ namespace pf {
 		inline bool read_int_value(string value_name, long long& int_value, bool debug = false) {
 			int val = int(int_value);
 			bool result = InputFileReader::get_instance()->read_int_value(value_name, val, debug);
-			int_value = long long(val);
+			int_value = static_cast<long long>(val);
 			return result;
 		}
 		inline bool read_real_value(string value_name, double& REAL_value, bool debug = false) {
