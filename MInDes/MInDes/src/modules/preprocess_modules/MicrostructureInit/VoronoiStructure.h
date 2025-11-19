@@ -37,7 +37,7 @@ namespace pf {
 		inline std::vector<float> voronoi_matrix_dots_pointsDistance;
 		// -
 		void generate_voronoi_structure();
-		void generate_voronoi_structure_new_method();
+		// void generate_voronoi_structure_new_method();
 		// -
 		void generate_voronoi_structure_in_phis(std::vector<std::vector<std::vector<float>>>& aim_phi);
 	}
