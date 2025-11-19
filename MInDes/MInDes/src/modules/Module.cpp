@@ -5,18 +5,24 @@
 #include "postprocess_modules/WriteVTS.h"
 #include "postprocess_modules/CpuMemoryUsage.h"
 // - simlulation models
-
+#include "model_modules/grain_grows_spinodal/GGS_Manager.h"
 namespace pf {
-	enum SimulationModels { SM_None };
+	enum SimulationModels { SM_None, SM_GGS_MODEL };
 	void register_all_modules() {
 		// - models
 		// - init models
 		WriteDebugFile("# SimulationModels.model =  0 - None \n");
+		WriteDebugFile("#                           1 - Grain Grows Spinodal , PCT = (N,1,false) \n");
 		int sm_model = SimulationModels::SM_None;
 		infile_reader::read_int_value("SimulationModels.model", sm_model, true);
 		switch (SimulationModels(sm_model)) {
 		case SimulationModels::SM_None: {
 			// - model settings
+			break;
+		}
+		case SimulationModels::SM_GGS_MODEL: {
+			// - model settings
+			grain_grows_spinodal_model::init_model_modules();
 			break;
 		}
 		}
