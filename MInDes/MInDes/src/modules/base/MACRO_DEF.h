@@ -1,5 +1,6 @@
 #pragma once
 #include <limits>
+#include <cstddef>
 #define _CRT_SECURE_NO_WARNINGS
 #ifdef _WIN32
 #include <conio.h>

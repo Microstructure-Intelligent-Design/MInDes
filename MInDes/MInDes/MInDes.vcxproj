@@ -192,6 +192,9 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
     <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
     <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Params.h" />
     <ClInclude Include="src\modules\Module.h" />
     <ClInclude Include="src\modules\Modules_Params.h" />
     <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h" />
@@ -209,6 +212,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp" />
     <ClCompile Include="src\modules\Module.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

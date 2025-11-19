@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iomanip>
 #include <omp.h>
+#include <climits>
 #include "MainIterator_Params.h"
 #include "modules/Module.h"
 #include "modules/base/MACRO_DEF.h"
