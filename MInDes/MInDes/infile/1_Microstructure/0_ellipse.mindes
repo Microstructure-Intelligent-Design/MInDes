@@ -26,3 +26,4 @@ Preprocess.Microstructure.geometry_layer_0.is_normalized = true
 Solver.Output.VTS.with_boundary = false
 Solver.Output.VTS.phi_index = true
 Preprocess.Microstructure.Output.frequence = 1000
+Solver.Output.VTS.frequence = 1000

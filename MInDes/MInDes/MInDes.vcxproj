@@ -70,6 +70,22 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(ProjectDir)MInDes\lib\x64\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\x64\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)MInDes\lib\x64\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\x64\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>$(ProjectDir)lib\x64\Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <LibraryPath>$(ProjectDir)lib\x64\Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -82,8 +98,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;D:\program\GITHUB\MInDes\MInDes\MInDes\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;GrainGrowsSpinodalLib.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -105,8 +121,8 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;D:\program\GITHUB\MInDes\MInDes\MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;GrainGrowsSpinodalLib.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -126,8 +142,8 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;D:\program\GITHUB\MInDes\MInDes\MInDes\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;GrainGrowsSpinodalLib.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -149,8 +165,8 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;D:\program\GITHUB\MInDes\MInDes\MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;GrainGrowsSpinodalLib.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;MInDesLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
@@ -158,10 +174,6 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /
 xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\modules\base\whereami.c" />
-  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h" />
     <ClInclude Include="src\MainIterator_Params.h" />
@@ -180,16 +192,11 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
     <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
     <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
-    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.h" />
-    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Manager.h" />
-    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Params.h" />
-    <ClInclude Include="src\modules\model_modules\ModelModulesManager.h" />
-    <ClInclude Include="src\modules\model_modules\Model_Params.h" />
     <ClInclude Include="src\modules\Module.h" />
+    <ClInclude Include="src\modules\Modules_Params.h" />
     <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h" />
     <ClInclude Include="src\modules\postprocess_modules\CpuMemoryUsage.h" />
     <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h" />
-    <ClInclude Include="src\modules\postprocess_modules\PostprocessModulesManager.h" />
     <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h" />
     <ClInclude Include="src\modules\postprocess_modules\WriteVTS.h" />
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h" />
@@ -198,9 +205,11 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.h" />
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h" />
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.h" />
-    <ClInclude Include="src\modules\preprocess_modules\PreprocessModulesManager.h" />
-    <ClInclude Include="src\modules\preprocess_modules\WriteMeshData.h" />
-    <ClInclude Include="src\tools\timer.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\modules\Module.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

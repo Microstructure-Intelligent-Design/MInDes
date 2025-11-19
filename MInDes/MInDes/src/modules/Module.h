@@ -4,27 +4,26 @@ namespace pf {
 	struct Solver_Module
 	{
 		// executes in the preprocess
-		void(*exec_pre_i)();
-		void(*exec_pre_ii)();
-		void(*exec_pre_iii)();
+		void(*exec_pre_i)() = nullptr;
+		void(*exec_pre_ii)() = nullptr;
+		void(*exec_pre_iii)() = nullptr;
 		// executes in the model scheme
-		void(*exec_i)();
-		void(*exec_ii)();
-		void(*exec_iii)();
+		void(*exec_i)() = nullptr;
+		void(*exec_ii)() = nullptr;
+		void(*exec_iii)() = nullptr;
 		// executes in the postprocess
-		void(*exec_pos_i)();
-		void(*exec_pos_ii)();
-		void(*exec_pos_iii)();
+		void(*exec_pos_i)() = nullptr;
+		void(*exec_pos_ii)() = nullptr;
+		void(*exec_pos_iii)() = nullptr;
 		// delete module
-		void(*deinit)();
+		void(*deinit)() = nullptr;
 	};
 
-	// module list
 	inline std::vector<Solver_Module> module_list;
 
 	// to creat a new module
 	inline void load_a_new_module(void(*exec_pre_i)(), void(*exec_pre_ii)(), void(*exec_pre_iii)(),
-		void(*exec_i)(), void(*exec_ii)(), void(*exec_iii)(), 
+		void(*exec_i)(), void(*exec_ii)(), void(*exec_iii)(),
 		void(*exec_pos_i)(), void(*exec_pos_ii)(), void(*exec_pos_iii)(), void(*deinit)()) {
 		Solver_Module _module;
 		_module.exec_pre_i = exec_pre_i;
@@ -40,8 +39,7 @@ namespace pf {
 		module_list.push_back(_module);
 	}
 
-	inline void default_module_function() {
-		return;
-	}
+	void register_all_modules();
 
 }
+

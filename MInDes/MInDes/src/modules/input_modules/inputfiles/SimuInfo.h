@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include "../../base/MACRO_DEF.h"
 #include "../ProgramPath.h"
 // Stores the path of the execution. Powered by "whereami.c" & whereami.h, by Gregory Pakosz
 // Packaged with lambda expression.

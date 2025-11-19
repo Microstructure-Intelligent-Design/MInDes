@@ -8,9 +8,6 @@
     <Filter Include="src\modules">
       <UniqueIdentifier>{10d571cc-037f-4f29-8eed-2c642c455014}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\tools">
-      <UniqueIdentifier>{72fc964c-47c0-47c4-8031-947f0441264c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\modules\base">
       <UniqueIdentifier>{0099d930-cd47-4503-abcd-8dc558286744}</UniqueIdentifier>
     </Filter>
@@ -35,20 +32,6 @@
     <Filter Include="lib">
       <UniqueIdentifier>{ccb93bdc-12f1-4348-94b0-e916807a4f53}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\modules\models\GrainGrowsSpinodal">
-      <UniqueIdentifier>{980ef4bb-8f32-4dea-8177-306d74c218c1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="develop">
-      <UniqueIdentifier>{306d39e5-26ae-4ec5-97a7-41dc35d86cd7}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\base\whereami.c">
-      <Filter>src\modules\base</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h">
@@ -56,9 +39,6 @@
     </ClInclude>
     <ClInclude Include="src\MainIterator_Params.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\tools\timer.h">
-      <Filter>src\tools</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\base\MACRO_DEF.h">
       <Filter>src\modules\base</Filter>
@@ -102,12 +82,6 @@
     <ClInclude Include="src\modules\input_modules\ProgramPath.h">
       <Filter>src\modules\input</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\model_modules\Model_Params.h">
-      <Filter>src\modules\models</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\model_modules\ModelModulesManager.h">
-      <Filter>src\modules\models</Filter>
-    </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h">
       <Filter>src\modules\postprocess</Filter>
     </ClInclude>
@@ -115,9 +89,6 @@
       <Filter>src\modules\postprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h">
-      <Filter>src\modules\postprocess</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\postprocess_modules\PostprocessModulesManager.h">
       <Filter>src\modules\postprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h">
@@ -141,9 +112,6 @@
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h">
       <Filter>src\modules\preprocess</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\preprocess_modules\PreprocessModulesManager.h">
-      <Filter>src\modules\preprocess</Filter>
-    </ClInclude>
     <ClInclude Include="src\modules\base\whereami.h">
       <Filter>src\modules\base</Filter>
     </ClInclude>
@@ -153,17 +121,19 @@
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h">
       <Filter>src\modules\preprocess\microstructure_init</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\preprocess_modules\WriteMeshData.h">
-      <Filter>src\modules\preprocess</Filter>
+    <ClInclude Include="src\modules\Modules_Params.h">
+      <Filter>src\modules</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Functions.h">
-      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Manager.h">
-      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\Model_Params.h">
-      <Filter>src\modules\models\GrainGrowsSpinodal</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\Module.cpp">
+      <Filter>src\modules</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
