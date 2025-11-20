@@ -33,7 +33,7 @@ namespace pf {
 			parameters::phase_field->do_boundary_condition();
 			parameters::concentration_field->do_boundary_condition();
 			// - init boundary
-#pragma omp parallel for
+#pragma omp parallel for collapse(3)
 			for (long long x = parameters::phase_field->COMP_X_BGN(); x <= parameters::phase_field->COMP_X_END(); x++)
 				for (long long y = parameters::phase_field->COMP_Y_BGN(); y <= parameters::phase_field->COMP_Y_END(); y++)
 					for (long long z = parameters::phase_field->COMP_Z_BGN(); z <= parameters::phase_field->COMP_Z_END(); z++) {
@@ -76,7 +76,7 @@ namespace pf {
 			parameters::phase_field->do_boundary_condition();
 			parameters::concentration_field->do_boundary_condition();
 			// - phi increment + dFdcon + Mob
-#pragma omp parallel for
+#pragma omp parallel for collapse(3)
 			for (long long x = parameters::phase_field->COMP_X_BGN(); x <= parameters::phase_field->COMP_X_END(); x++)
 				for (long long y = parameters::phase_field->COMP_Y_BGN(); y <= parameters::phase_field->COMP_Y_END(); y++)
 					for (long long z = parameters::phase_field->COMP_Z_BGN(); z <= parameters::phase_field->COMP_Z_END(); z++) {
@@ -112,7 +112,7 @@ namespace pf {
 					}
 			parameters::con_field_variavles.do_boundary_condition();
 			// - phi + con
-#pragma omp parallel for
+#pragma omp parallel for collapse(3)
 			for (long long x = parameters::phase_field->COMP_X_BGN(); x <= parameters::phase_field->COMP_X_END(); x++)
 				for (long long y = parameters::phase_field->COMP_Y_BGN(); y <= parameters::phase_field->COMP_Y_END(); y++)
 					for (long long z = parameters::phase_field->COMP_Z_BGN(); z <= parameters::phase_field->COMP_Z_END(); z++) {
