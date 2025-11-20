@@ -5,18 +5,24 @@
 #include "postprocess_modules/WriteVTS.h"
 #include "postprocess_modules/CpuMemoryUsage.h"
 // - simlulation models
-
+#include "model_modules/data_driven_complex/DDC_Manager.h"
 namespace pf {
-	enum SimulationModels { SM_None };
+	enum SimulationModels { SM_None , SM_DDC };
 	void register_all_modules() {
 		// - models
 		// - init models
 		WriteDebugFile("# SimulationModels.model =  0 - None \n");
+		WriteDebugFile("#                           1 - Data Driven Complex Model , PCT = (N, K, true/false) \n");
 		int sm_model = SimulationModels::SM_None;
 		infile_reader::read_int_value("SimulationModels.model", sm_model, true);
 		switch (SimulationModels(sm_model)) {
 		case SimulationModels::SM_None: {
 			// - model settings
+			break;
+		}
+		case SimulationModels::SM_DDC: {
+			// - model settings
+			data_driven_complex_model::init_model_modules();
 			break;
 		}
 		}
