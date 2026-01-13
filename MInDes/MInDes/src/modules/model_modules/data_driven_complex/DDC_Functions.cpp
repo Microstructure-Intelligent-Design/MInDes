@@ -672,10 +672,11 @@ namespace pf {
 			}
 		}
 		void exec_pre_iii() {
-
+			void init_phi_pair_wise();
 		}
 		void exec_i() {
-
+			void pre_calculation_phi_pair_wise();
+			REAL solve_phi_pair_wise();
 		}
 		void deinit() {
 
