@@ -14,7 +14,7 @@ Cooperation Contact:
 Dr. Qi Huang  - qihuang0908@163.com (e-mail) - hq5088028 (WeChat)
 
 ## Publications
-**If you use **MInDes** in your research, please cite the following publications:**
+**If you use **MInDes** solver in your research, please cite the following publications:**
 1. **Huang, Qi**, ..., Yong Du*, et al. Phase-field simulation for voltage profile of LixSn nanoparticle during lithiation/delithiation, *Computational Materials Science*, 220 (2023): 112047.
 
 2. **Huang, Qi***, et al. Multiphase transformation and mechanical analysis of polycrystalline CuxLiySn nanoparticle during lithiation via phase diagram-guided phase-field approach, *Electrochimica Acta*, 495 (2024): 144471.
@@ -23,3 +23,4 @@ Dr. Qi Huang  - qihuang0908@163.com (e-mail) - hq5088028 (WeChat)
 
 4. Xi Liu, **Huang, Qi***, et al. Phase-field simulation of grain coarsening and Mo-induced inhibition in NbC-Ni cermets during liquid phase sintering, *Journal of the American Ceramic Society* 108 (2025): e70075.
 
+5. Yiqi Guan, ..., **Qi Huang***, Weibin Zhang*, Yong Du*. Fracture mode and toughening mechanism induced by microstructure in binderless WC cemented carbides: A phase-field simulation integrating energy dissipation analysis. Acta Materialia, 2026, 305: 121834
