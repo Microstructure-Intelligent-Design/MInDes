@@ -21,6 +21,6 @@ Dr. Qi Huang  - qihuang0908@163.com (e-mail) - hq5088028 (WeChat)
 
 3. Zhixuan Zhang, ..., **Huang, Qi***, et al. Multiscale phase-field simulation framework for spinodal decomposition behavior in composite carbide ceramics, *Journal of Materials Science & Technology*, 246 (2025): 58-75.
 
-4. Xi Liu, **Huang, Qi***, et al. Phase-field simulation of grain coarsening and Mo-induced inhibition in NbC-Ni cermets during liquid phase sintering, *Journal of the American Ceramic Society* 108 (2025): e70075.
+4. Xi Liu, **Huang, Qi***, et al. Phase-field simulation of grain coarsening and Mo-induced inhibition in NbC-Ni cermets during liquid phase sintering, *Journal of the American Ceramic Society*, 108 (2025): e70075.
 
-5. Yiqi Guan, ..., **Qi Huang***, Weibin Zhang*, Yong Du*. Fracture mode and toughening mechanism induced by microstructure in binderless WC cemented carbides: A phase-field simulation integrating energy dissipation analysis. Acta Materialia, 2026, 305: 121834
+5. Yiqi Guan, ..., **Qi Huang***, Weibin Zhang*, Yong Du*. Fracture mode and toughening mechanism induced by microstructure in binderless WC cemented carbides: A phase-field simulation integrating energy dissipation analysis, *Acta Materialia*, 2026, 305: 121834
