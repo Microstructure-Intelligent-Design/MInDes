@@ -5,10 +5,12 @@
 #include "../../MainIterator_Params.h"
 #include "../Modules_Params.h"
 #include "../base/timer.h"
+#include "DataStatistics.h"
 namespace pf {
 	namespace show_loop_information {
 		inline size_t screen_loop_step   = 0;
 		inline size_t screen_output_step = 0;
+		inline std::string statistic_file_name = "Statistics.txt";
 
 		std::vector<REAL> statistical_phi();
 

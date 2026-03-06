@@ -433,6 +433,9 @@ namespace pf {
         Matrix6x6& do_rotate(const Matrix3x3& RotationMatrix);
         Matrix6x6 get_rotated_matrix(const Matrix3x3& RotationMatrix) const;
 
+        Matrix6x6& do_rotate_Voigt(const Matrix3x3& RotationMatrix);
+        Matrix6x6 get_rotated_matrix_Voigt(const Matrix3x3& RotationMatrix) const;
+
         std::string print(void) const;
         const REAL& tensor(const int i, const int j, const int k, const int l) const;
         REAL* data(void);

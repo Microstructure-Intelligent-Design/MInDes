@@ -20,13 +20,15 @@ namespace pf {
 		inline void load_vts_scalar_func(void(*buff)(std::ofstream& fout));
 		inline void load_vts_vector_func(void(*buff)(std::ofstream& fout));
 		namespace default_functions {
-			void open_vts_scalar_file(std::ofstream& fout, std::string tail);
-			void open_vts_vec3_file(std::ofstream& fout, std::string tail);
+			void open_vts_file(std::ofstream& fout, std::string tail);
 			void write_scalar_grains(std::ofstream& fout);
 			void write_scalar_phi_index(std::ofstream& fout);
 			void write_scalar_phi_all(std::ofstream& fout);
+			void write_scalar_grad_phi_all(std::ofstream& fout);
 			void write_scalar_con_all(std::ofstream& fout);
+			void write_scalar_grad_con_all(std::ofstream& fout);
 			void write_scalar_temperature(std::ofstream& fout);
+			void write_scalar_grad_temperature(std::ofstream& fout);
 			void close_vts_file(std::ofstream& fout);
 		}
 		void write_vts_pre_iii();
