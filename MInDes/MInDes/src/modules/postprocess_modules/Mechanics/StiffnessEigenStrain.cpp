@@ -1,9 +1,4 @@
 #include "StiffnessEigenStrain.h"
-#include "../../Modules_Params.h"
-#include "../../input_modules/inputfiles/InputFileReader.h"
-#include "../../input_modules/ioFiles_Params.h"
-#include "../../model_modules/GrainsOrientations.h"
-#include "../../model_modules/PhiProperties.h"
 namespace pf {
 	namespace stiffness_eigenstrain {
 		void do_phi_index_orientation(size_t phi_index, size_t phi_property) {
@@ -11,39 +6,23 @@ namespace pf {
 				get_rotated_matrix(GrainsOrientations::instance().get_phi_rotationMatrix(phi_index));
 		}
 		namespace default_functions {
-			inline void cal_eigenstrain_phi_dependent_norm(long long x, long long y, long long z, vStrain& eigenstrain) {
-				std::vector<REAL>& phi = phase_field->at(x, y, z);
+			static void cal_eigenstrain_phi_dependent_norm(long long x, long long y, long long z, vStrain& eigenstrain) {
+				std::vector<REAL>& phi = main_field::phase_field(x, y, z);
 				for (size_t index = 0; index < phi_number; index++) {
 					if (phi[index] < SYS_EPSILON)
 						continue;
 					eigenstrain += phi_index_eigen_strain[index] * phi[index];
 				}
 			}
-			inline void cal_stiffness_phi_dependent_norm(long long x, long long y, long long z, Matrix6x6& stiffness) {
-				std::vector<REAL>& phi = phase_field->at(x, y, z);
+			static void cal_stiffness_phi_dependent_norm(long long x, long long y, long long z, Matrix6x6& stiffness) {
+				std::vector<REAL>& phi = main_field::phase_field(x, y, z);
 				for (size_t index = 0; index < phi_number; index++) {
 					if (phi[index] < SYS_EPSILON)
 						continue;
 					stiffness += phi_index_stiffness[index] * phi[index];
 				}
 			}
-			inline void cal_stiffness_phi_dependent_with_crack_norm(long long x, long long y, long long z, Matrix6x6& stiffness) {
-				std::vector<REAL>& phi = phase_field->at(x, y, z);
-				REAL sum_phi = 0, crack_phi = 0;
-				for (size_t index = 0; index < phi_number; index++)
-					if (PhiProperties::instance().phi_property(index) != crack_phi_property) {
-						if (phi[index] > SYS_EPSILON) {
-							sum_phi += phi[index];
-							stiffness += phi_index_stiffness[index] * phi[index];
-						}
-					}
-					else {
-						crack_phi = phi[index];
-					}
-				if (sum_phi > SYS_EPSILON)
-					stiffness = stiffness / sum_phi * (1 - crack_phi) * (1 - crack_phi);
-			}
-			inline void cal_eigenstrain_normal(long long x, long long y, long long z, vStrain& eigenstrain) {
+			static void cal_eigenstrain_normal(long long x, long long y, long long z, vStrain& eigenstrain) {
 				for (auto func = eigenstrain_list.begin(); func < eigenstrain_list.end(); func++)
 					(*func)(x, y, z, eigenstrain);
 			}

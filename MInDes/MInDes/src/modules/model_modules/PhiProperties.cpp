@@ -1,6 +1,4 @@
 #include "PhiProperties.h"
-#include "../input_modules/inputfiles/InputFileReader.h"
-#include "../Modules_Params.h"
 namespace pf {
 
 	PhiProperties::PhiProperties()

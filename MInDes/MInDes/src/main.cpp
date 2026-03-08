@@ -1,4 +1,3 @@
-#pragma once
 #include "MainIterator.h"
 int main(int argc, char* argv[]) {
 	// run application

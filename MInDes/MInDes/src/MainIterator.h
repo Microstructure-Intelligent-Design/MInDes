@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "modules/base/MACRO_DEF.h"
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -11,13 +12,11 @@
 #include <climits>
 #include "MainIterator_Params.h"
 #include "modules/Module.h"
-#include "modules/base/MACRO_DEF.h"
 #include "modules/base/timer.h"
 #include "modules/input_modules/InputModulesManager.h"
 namespace pf {
-	using namespace std;
 	namespace iterator_times {
-		string print_time_interval();
+		std::string print_time_interval();
 	}
 
 	namespace main_iterator {

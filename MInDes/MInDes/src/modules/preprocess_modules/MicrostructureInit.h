@@ -1,4 +1,5 @@
 #pragma once
+#include "MicrostructureInit/WriteMeshData.h"
 #include "../input_modules/ioFiles_Params.h"
 #include "../input_modules/inputfiles/selectFile.h"
 #include "../input_modules/inputfiles/InputFileReader.h"
@@ -6,7 +7,6 @@
 #include "../../MainIterator_Params.h"
 #include "../Modules_Params.h"
 #include "../Module.h"
-#include "MicrostructureInit/WriteMeshData.h"
 #include "MicrostructureInit/GeometryStructure.h"
 #include "MicrostructureInit/Bmp24Structure.h"
 #include "MicrostructureInit/PorousStructure.h"

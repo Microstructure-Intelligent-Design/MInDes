@@ -1,5 +1,14 @@
 #pragma once
 #include <vector>
+// - modules
+#include "preprocess_modules/MicrostructureInit.h"
+#include "model_modules/PhiProperties.h"
+#include "model_modules/GrainsOrientations.h"
+#include "postprocess_modules/AutoDeltTime.h"
+#include "postprocess_modules/ShowLoopInfo.h"
+#include "postprocess_modules/WriteVTS.h"
+#include "postprocess_modules/CpuMemoryUsage.h"
+#include "postprocess_modules/MechanicalField.h"
 namespace pf {
 	struct Solver_Module
 	{

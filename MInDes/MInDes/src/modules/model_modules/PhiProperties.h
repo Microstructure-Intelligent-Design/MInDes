@@ -1,5 +1,7 @@
 #pragma once
 #include "../base/MACRO_DEF.h"
+#include "../input_modules/inputfiles/InputFileReader.h"
+#include "../Modules_Params.h"
 #include <vector>
 namespace pf {
 	class PhiProperties

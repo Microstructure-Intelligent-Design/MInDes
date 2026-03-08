@@ -5,32 +5,15 @@
 //x64
 #include "../../../../lib/x64/fftw3.h"
 #include <complex>
+#include "../../base/MechanicalPoint.h"
 const std::complex<double> I(0.0, 1.0);
 namespace pf {
 	enum VelocityDomainIndex { VDIndex_OLD, VDIndex_NOW, VDIndex_FUTURE };
-	class MechanicPoint {
-	public:
-		vStress       Stress;                                        ///< Storage for stress
-		vStrain       Strain;                                        ///< Storage for strain
-		vStrain       StrainIncrement;                               ///< Storage for strain increment
-		vStrain	      VirtualEigenStrain;                            ///< Storage for virtual eigenstrain
-		vStrain       EffectiveEigenStrain;                         ///< Storage for effective eigenstrain
-		Matrix6x6     EffectiveElasticConstant;                     ///< Storage for effective elastic constant
-		void operator=(const MechanicPoint& n) {
-			Stress = n.Stress;
-			Strain = n.Strain;
-			VirtualEigenStrain = n.VirtualEigenStrain;
-			StrainIncrement = n.StrainIncrement;
-			EffectiveEigenStrain = n.EffectiveEigenStrain;
-			EffectiveElasticConstant = n.EffectiveElasticConstant;
-		}
-		MechanicPoint() {};
-	};
 	namespace mechanical_boundary_condition_funcs {
-		static Matrix6x6 cal_stiffness(int Nx, int Ny, int Nz) {
+		inline Matrix6x6 cal_stiffness(int Nx, int Ny, int Nz) {
 			return Matrix6x6();
 		}
-		static vStrain cal_eigenstrain(int Nx, int Ny, int Nz) {
+		inline vStrain cal_eigenstrain(int Nx, int Ny, int Nz) {
 			return vStrain();
 		}
 	};
@@ -41,7 +24,7 @@ namespace pf {
 		~MechanicalField_Implicit() {
 			free();
 		}
-		void init(size_t _Nx, size_t _Ny, size_t _Nz, BoundaryCondition _x_bc, BoundaryCondition _y_bc, BoundaryCondition _z_bc) {
+		void init(int _Nx, int _Ny, int _Nz, BoundaryCondition _x_bc, BoundaryCondition _y_bc, BoundaryCondition _z_bc, Mesh<ElasticPoint>& _elastic_field) {
 			AvgStrainMask.resize(3);
 			LoadStressMask.resize(3);
 			AppStrainMask.resize(3);
@@ -59,7 +42,8 @@ namespace pf {
 				mech_Ny = _Ny * 2;
 			if (_z_bc != BoundaryCondition::PERIODIC)
 				mech_Nz = _Nz * 2;
-			mechanical_field.init(mech_Nx, mech_Ny, mech_Nz, 1);
+			elastic_field = &_elastic_field;
+			elastic_field->init(mech_Nx, mech_Ny, mech_Nz, 1);
 
 			Nz2 = (mech_Nz) / 2 + 1;
 			rlSIZE = mech_Nx * mech_Ny * mech_Nz;
@@ -141,7 +125,7 @@ namespace pf {
 			cal_eigenstrain = _cal_eigenstrain;
 		}
 		void free() {
-			mechanical_field.clear();
+			elastic_field->clear();
 			for (int n = 0; n < 6; n++)
 			{
 				fftw_destroy_plan(ForwardPlanRHS[n]);
@@ -169,9 +153,9 @@ namespace pf {
 		void recal_eigenstrain();
 		void SetMAXElasticConstants(std::vector<Matrix6x6> Cijs);
 
-		double get_u_main_node(int _x, int _y, int _z);
-		double get_v_main_node(int _x, int _y, int _z);
-		double get_w_main_node(int _x, int _y, int _z);
+		double get_u_main_node(size_t _x, size_t _y, size_t _z);
+		double get_v_main_node(size_t _x, size_t _y, size_t _z);
+		double get_w_main_node(size_t _x, size_t _y, size_t _z);
 
 		// Ingo Steinbach Method
 		void initStrainIncrements();
@@ -192,7 +176,6 @@ namespace pf {
 		Matrix6x6(*cal_stiffness)(int x, int y, int z);
 		vStrain(*cal_eigenstrain)(int x, int y, int z);
 		//----------------------------------------------------------------- settings
-		MechanicPoint& get_mechanical_point(int x, int y, int z);
 
 	private:
 		// Ingo Steinbach
@@ -207,7 +190,6 @@ namespace pf {
 		void CalculateRHS2(Matrix6x6& Cij);
 		void evaluate_virtualEigenstrain(Matrix6x6 Cij, Matrix6x6 Sij, double& MAXvStrainDifference, double iterate_rate);
 		void SetElasticBoundaryConditions2(Matrix6x6& Cij, Matrix6x6& Sij);
-		Mesh<MechanicPoint> mechanical_field;
 		int Nx;
 		int Ny;
 		int Nz;
@@ -216,7 +198,7 @@ namespace pf {
 		int mech_Nz;
 		vStrain average_strain;
 		vStrain average_virtual_strain;
-
+		Mesh<ElasticPoint>* elastic_field;
 		//Elasticity Tensors:
 		Matrix6x6   average_stiffness;
 		Matrix6x6   average_compliences;

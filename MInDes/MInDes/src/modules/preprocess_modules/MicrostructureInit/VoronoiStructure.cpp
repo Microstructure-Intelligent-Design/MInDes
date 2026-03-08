@@ -2,13 +2,13 @@
 namespace pf {
 	namespace voronoi_structure {
 
-		inline float voronoi_points_distance(geometry_structure::Point point) {
-			float points_distance = -1;
+		inline double voronoi_points_distance(geometry_structure::Point point) {
+			double points_distance = -1;
 			if (voronoi_type == VoronoiType::VDT_CONST) {
 				points_distance = voronoi_const_pointsDistance;
 			}
 			else if (voronoi_type == VoronoiType::VDT_REF_DOT) {
-				float pos = voronoi_reference_dot.to_length(point.x, point.y, point.z);
+				double pos = voronoi_reference_dot.to_length(point.x, point.y, point.z);
 				if (pos > voronoi_reference_dot_distance) {
 					points_distance = voronoi_reference_dot_max_pointsDistance;
 				}
@@ -17,7 +17,7 @@ namespace pf {
 				}
 			}
 			else if (voronoi_type == VoronoiType::VDT_REF_SURFACE) {
-				float pos = voronoi_reference_surface.distance(point.x, point.y, point.z);
+				double pos = voronoi_reference_surface.distance(point.x, point.y, point.z);
 				if (pos > voronoi_reference_surface_distance) {
 					points_distance = voronoi_reference_surface_max_pointsDistance;
 				}
@@ -26,20 +26,20 @@ namespace pf {
 				}
 			}
 			else if (voronoi_type == VoronoiType::VDT_DOTS_MATRIX) {
-				std::vector<float> dots_lenghts;
+				std::vector<double> dots_lenghts;
 				points_distance = 0;
-				float total_lenght = 0;
+				double total_lenght = 0;
 				for (auto dot = voronoi_matrix_dots.begin(); dot < voronoi_matrix_dots.end(); dot++) {
 					dots_lenghts.push_back(dot->to_length(point.x, point.y, point.z));
 					total_lenght += dot->to_length(point.x, point.y, point.z);
 				}
-				total_lenght = total_lenght * float(voronoi_matrix_dots.size() - 1);
+				total_lenght = total_lenght * double(voronoi_matrix_dots.size() - 1);
 				if (total_lenght < 1e-6f) {
 					std::cout << "ERROR: VDT_DOTS_MATRIX method need more than one dot ! \n";
 					exit(0);
 				}
 				for (auto index = 0; index < voronoi_matrix_dots.size(); index++) {
-					float potential = 0;
+					double potential = 0;
 					for (auto index2 = 0; index2 < voronoi_matrix_dots.size(); index2++)
 						if (index != index2)
 							potential += dots_lenghts[index2];
@@ -71,13 +71,13 @@ namespace pf {
 			size_t grain_index = 0;
 			while (grain_index < grain_number) {
 				bool is_point_add = true;
-				float rand_x = float(real_dist(gen)), rand_y = float(real_dist(gen)), rand_z = float(real_dist(gen));
+				double rand_x = double(real_dist(gen)), rand_y = double(real_dist(gen)), rand_z = double(real_dist(gen));
 				geometry_structure::Point p(rand_x * (voronoi_box_size[0] - 1) + voronoi_box_position[0],
 					rand_y * (voronoi_box_size[1] - 1) + voronoi_box_position[1],
 					rand_z * (voronoi_box_size[2] - 1) + voronoi_box_position[2]);
 				for (auto ip = voronoi_points.begin(); ip < voronoi_points.end(); ip++) {
-					float D2 = (p.x - ip->x) * (p.x - ip->x) + (p.y - ip->y) * (p.y - ip->y) + (p.z - ip->z) * (p.z - ip->z);
-					float distance = voronoi_points_distance(geometry_structure::Point((p.x + ip->x) / 2, (p.y + ip->y) / 2, (p.z + ip->z) / 2));
+					double D2 = (p.x - ip->x) * (p.x - ip->x) + (p.y - ip->y) * (p.y - ip->y) + (p.z - ip->z) * (p.z - ip->z);
+					double distance = voronoi_points_distance(geometry_structure::Point((p.x + ip->x) / 2, (p.y + ip->y) / 2, (p.z + ip->z) / 2));
 					if (distance < 0)
 						distance = 0;
 					if (D2 < (distance * distance)) {
@@ -243,13 +243,13 @@ namespace pf {
 //			size_t grain_index = 0;
 //			while (grain_index < grain_number) {
 //				bool is_point_add = true;
-//				float rand_x = float(real_dist(gen)), rand_y = float(real_dist(gen)), rand_z = float(real_dist(gen));
+//				double rand_x = double(real_dist(gen)), rand_y = double(real_dist(gen)), rand_z = double(real_dist(gen));
 //				geometry_structure::Point p(rand_x * voronoi_box_size[0] + voronoi_box_position[0],
 //					rand_y * voronoi_box_size[1] + voronoi_box_position[1],
 //					rand_z * voronoi_box_size[2] + voronoi_box_position[2]);
 //				for (auto ip = voronoi_points.begin(); ip < voronoi_points.end(); ip++) {
-//					float D2 = (p.x - ip->x) * (p.x - ip->x) + (p.y - ip->y) * (p.y - ip->y) + (p.z - ip->z) * (p.z - ip->z);
-//					float distance = voronoi_points_distance(geometry_structure::Point((p.x + ip->x) / 2, (p.y + ip->y) / 2, (p.z + ip->z) / 2));
+//					double D2 = (p.x - ip->x) * (p.x - ip->x) + (p.y - ip->y) * (p.y - ip->y) + (p.z - ip->z) * (p.z - ip->z);
+//					double distance = voronoi_points_distance(geometry_structure::Point((p.x + ip->x) / 2, (p.y + ip->y) / 2, (p.z + ip->z) / 2));
 //					if (distance < 0)
 //						distance = 0;
 //					if (D2 < (distance * distance)) {
@@ -333,7 +333,7 @@ namespace pf {
 //					do
 //					{
 //						find_new_point = false;
-//						float point_distance2 = std::numeric_limits<float>::max();;
+//						double point_distance2 = std::numeric_limits<double>::max();;
 //						size_t buff_region = 0, buff_grain = 0;
 //						for (size_t region_index = 0; region_index < mirror_points.size(); region_index++) {
 //							if (!is_x_down_periodic && (region == 2 || region == 6 || region == 8 || region == 12 || region == 14
@@ -368,7 +368,7 @@ namespace pf {
 //								if (poly.check_point_inside_polyhedron(mid_point) == false)
 //									continue;
 //								find_new_point = true;
-//								float distance2 = (poly.point_inside_polyhedron.x - mirror_points[region_index][grain_index].x) * (poly.point_inside_polyhedron.x - mirror_points[region_index][grain_index].x)
+//								double distance2 = (poly.point_inside_polyhedron.x - mirror_points[region_index][grain_index].x) * (poly.point_inside_polyhedron.x - mirror_points[region_index][grain_index].x)
 //									+ (poly.point_inside_polyhedron.y - mirror_points[region_index][grain_index].y) * (poly.point_inside_polyhedron.y - mirror_points[region_index][grain_index].y)
 //									+ (poly.point_inside_polyhedron.z - mirror_points[region_index][grain_index].z) * (poly.point_inside_polyhedron.z - mirror_points[region_index][grain_index].z);
 //								if (distance2 < point_distance2) {
@@ -402,7 +402,7 @@ namespace pf {
 //			}
 //		}
 
-		void generate_voronoi_structure_in_phis(std::vector<std::vector<std::vector<float>>>& aim_phi) {
+		void generate_voronoi_structure_in_phis(std::vector<std::vector<std::vector<double>>>& aim_phi) {
 			int dimention = 3;
 			if (voronoi_box_size[0] <= 1 && voronoi_box_size[1] <= 1 && voronoi_box_size[2] <= 1)
 				return;
@@ -423,21 +423,21 @@ namespace pf {
 			size_t grain = 0;
 			while (grain < grain_number) {
 				bool is_point_add = true;
-				float rand_x = float(real_dist(gen)), rand_y = float(real_dist(gen)), rand_z = float(real_dist(gen));
+				double rand_x = double(real_dist(gen)), rand_y = double(real_dist(gen)), rand_z = double(real_dist(gen));
 				geometry_structure::Point p(rand_x * (voronoi_box_size[0] - 1) + voronoi_box_position[0],
 					rand_y * (voronoi_box_size[1] - 1) + voronoi_box_position[1],
 					rand_z * (voronoi_box_size[2] - 1) + voronoi_box_position[2]);
 				for (auto ip = voronoi_points.begin(); ip < voronoi_points.end(); ip++) {
-					float D2 = (p.x - ip->x) * (p.x - ip->x) + (p.y - ip->y) * (p.y - ip->y) + (p.z - ip->z) * (p.z - ip->z);
-					float distance = voronoi_points_distance(geometry_structure::Point((p.x + ip->x) / 2, (p.y + ip->y) / 2, (p.z + ip->z) / 2));
+					double D2 = (p.x - ip->x) * (p.x - ip->x) + (p.y - ip->y) * (p.y - ip->y) + (p.z - ip->z) * (p.z - ip->z);
+					double distance = voronoi_points_distance(geometry_structure::Point((p.x + ip->x) / 2, (p.y + ip->y) / 2, (p.z + ip->z) / 2));
 					if (distance < 0)
 						distance = 0;
 					if (D2 < (distance * distance)) {
 						is_point_add = false;
 					}
 				}
-				if (is_point_add && aim_phi[geometry_structure::REAL_to_int(p.x)]
-					[geometry_structure::REAL_to_int(p.y)][geometry_structure::REAL_to_int(p.z)] > 0.5) {
+				if (is_point_add && aim_phi[geometry_structure::double_to_int(p.x)]
+					[geometry_structure::double_to_int(p.y)][geometry_structure::double_to_int(p.z)] > 0.5) {
 					grain++;
 					voronoi_points.push_back(p);
 					std::string str_report = "> Voronoi: generate point index : " + std::to_string(grain) + ",  at : (x, y, z) (" 
@@ -560,7 +560,7 @@ namespace pf {
 						}
 					}
 					geometry_structure::PointSet set;
-					float sum_sum_phi = 0;
+					double sum_sum_phi = 0;
 					size_t Nz = aim_phi[0][0].size(), Ny = aim_phi[0].size(), Nx = aim_phi.size();
 					for (size_t z = 0; z < Nz; z++)
 						for (size_t y = 0; y < Ny; y++)

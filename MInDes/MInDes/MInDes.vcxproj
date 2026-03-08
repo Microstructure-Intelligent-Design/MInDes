@@ -178,6 +178,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     <ClInclude Include="src\MainIterator.h" />
     <ClInclude Include="src\MainIterator_Params.h" />
     <ClInclude Include="src\modules\base\MACRO_DEF.h" />
+    <ClInclude Include="src\modules\base\MechanicalPoint.h" />
     <ClInclude Include="src\modules\base\Mesh_0.h" />
     <ClInclude Include="src\modules\base\RotationMatrix.h" />
     <ClInclude Include="src\modules\base\timer.h" />

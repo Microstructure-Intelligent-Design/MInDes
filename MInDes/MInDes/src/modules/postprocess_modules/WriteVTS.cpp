@@ -2,11 +2,8 @@
 namespace pf {
 
 	namespace write_vts {
-		void load_vts_scalar_func(void(*buff)(std::ofstream& fout)) {
-			write_vts::write_vts_scalar_list.push_back(buff);
-		}
-		void load_vts_vector_func(void(*buff)(std::ofstream& fout)) {
-			write_vts::write_vts_vector_list.push_back(buff);
+		void load_vts_func(void(*buff)(std::ofstream& fout)) {
+			write_vts::write_vts_list.push_back(buff);
 		}
 		namespace default_functions {
 			void open_vts_file(std::ofstream& fout, std::string tail) {
@@ -168,7 +165,7 @@ namespace pf {
 			std::ofstream fout;
 			// - 
 			default_functions::open_vts_file(fout, "step0");
-			for (auto writer = write_vts_scalar_list.begin(); writer < write_vts_scalar_list.end(); writer++)
+			for (auto writer = write_vts_list.begin(); writer < write_vts_list.end(); writer++)
 				(*writer)(fout);
 			default_functions::close_vts_file(fout);
 		}
@@ -180,7 +177,7 @@ namespace pf {
 				std::ofstream fout;
 				// - 
 				default_functions::open_vts_file(fout, "step" + std::to_string(main_iterator::Current_ITE_step));
-				for (auto writer = write_vts_scalar_list.begin(); writer < write_vts_scalar_list.end(); writer++)
+				for (auto writer = write_vts_list.begin(); writer < write_vts_list.end(); writer++)
 					(*writer)(fout);
 				default_functions::close_vts_file(fout);
 			}
@@ -251,39 +248,39 @@ namespace pf {
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.phi_all", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_phi_all);
+					load_vts_func(default_functions::write_scalar_phi_all);
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grad_phi_all", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_grad_phi_all);
+					load_vts_func(default_functions::write_scalar_grad_phi_all);
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.phi_index", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_phi_index);
+					load_vts_func(default_functions::write_scalar_phi_index);
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grains", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_grains);
+					load_vts_func(default_functions::write_scalar_grains);
 			}
 			if (main_field::is_con_field_on) {
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.con_all", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_con_all);
+					load_vts_func(default_functions::write_scalar_con_all);
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grad_con_all", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_grad_con_all);
+					load_vts_func(default_functions::write_scalar_grad_con_all);
 			}
 			if (main_field::is_temp_field_on) {
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.temp", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_temperature);
+					load_vts_func(default_functions::write_scalar_temperature);
 				buff = false;
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grad_temp", buff, true);
 				if (buff)
-					load_vts_scalar_func(default_functions::write_scalar_grad_temperature);
+					load_vts_func(default_functions::write_scalar_grad_temperature);
 			}
 		}
 	}

@@ -509,7 +509,7 @@ namespace pf {
 				// - porous
 				if (porous_structure::is_porous) {
 					if (porous_phis_indexs.size() != 0 && main_field::is_phi_field_on) {
-						std::vector<std::vector<std::vector<float>>> aim_phi;
+						std::vector<std::vector<std::vector<double>>> aim_phi;
 						aim_phi.resize(mesh_parameters::MESH_NX);
 						for (size_t x = 0; x < mesh_parameters::MESH_NX; x++) {
 							aim_phi[x].resize(mesh_parameters::MESH_NY);
@@ -537,7 +537,7 @@ namespace pf {
 				// - voronoi
 				if (voronoi_structure::is_voronoi) {
 					if (voronoi_phis_indexs.size() != 0 && main_field::is_phi_field_on) {
-						std::vector<std::vector<std::vector<float>>> aim_phi;
+						std::vector<std::vector<std::vector<double>>> aim_phi;
 						aim_phi.resize(main_field::phase_field.Nx());
 						for (int x = 0; x < main_field::phase_field.Nx(); x++) {
 							aim_phi[x].resize(main_field::phase_field.Ny());

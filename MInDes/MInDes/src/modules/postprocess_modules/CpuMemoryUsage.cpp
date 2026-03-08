@@ -1,5 +1,4 @@
 #include "CpuMemoryUsage.h"
-
 namespace pf {
     namespace cpu_memory_usage {
         // get current process pid

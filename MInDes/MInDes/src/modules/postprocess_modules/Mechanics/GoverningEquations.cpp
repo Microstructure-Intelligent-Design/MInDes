@@ -17,7 +17,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     int mirror_x = i, mirror_y = j, mirror_z = k;
                     if (i >= Nx)
                         mirror_x = mech_Nx - 1 - i;
@@ -49,7 +49,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     int mirror_x = i, mirror_y = j, mirror_z = k;
                     if (i >= Nx)
                         mirror_x = mech_Nx - 1 - i;
@@ -72,7 +72,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     for (int n = 0; n < 6; n++) {
                         mech.StrainIncrement[n] = 0.0;
                     }
@@ -215,7 +215,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     for (int n = 0; n < 6; n++) {
                         rlRHSide[n][k + mech_Nz * (j + mech_Ny * i)] = 0.0;
                         for (int m = 0; m < 6; m++) {
@@ -322,7 +322,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     // - OpenPhase.3999.Mar2018
                     vStrain locStrain;
                     for (int n = 0; n < 6; n++)
@@ -396,7 +396,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     // - OpenPhase.3999.Mar2018
                     vStrain locStrain;
                     for (int n = 0; n < 6; n++)
@@ -625,7 +625,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     mech.VirtualEigenStrain.set_to_zero();
                     //mech.VirtualEigenStrain = mech.EffectiveEigenStrain;
                 }
@@ -691,7 +691,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     for (int n = 0; n < 6; n++) {
                         rlRHSide[n][k + mech_Nz * (j + mech_Ny * i)] = 0.0;
                         for (int m = 0; m < 6; m++) {
@@ -720,7 +720,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    MechanicPoint& mech = mechanical_field(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i, j, k);
                     vStrain strain1, strain2, strain3, vStrain_increment;
                     Matrix6x6 deltS;
                     deltS = Cij - mech.EffectiveElasticConstant;
@@ -782,16 +782,13 @@ namespace pf {
         }
     }
 
-    double MechanicalField_Implicit::get_u_main_node(int _x, int _y, int _z) {
+    double MechanicalField_Implicit::get_u_main_node(size_t _x, size_t _y, size_t _z) {
         return rlU[0][_z + mech_Nz * (_y + mech_Ny * _x)];
     }
-    double MechanicalField_Implicit::get_v_main_node(int _x, int _y, int _z) {
+    double MechanicalField_Implicit::get_v_main_node(size_t _x, size_t _y, size_t _z) {
         return rlU[1][_z + mech_Nz * (_y + mech_Ny * _x)];
     }
-    double MechanicalField_Implicit::get_w_main_node(int _x, int _y, int _z) {
+    double MechanicalField_Implicit::get_w_main_node(size_t _x, size_t _y, size_t _z) {
         return rlU[2][_z + mech_Nz * (_y + mech_Ny * _x)];
-    }
-    MechanicPoint& MechanicalField_Implicit::get_mechanical_point(int x, int y, int z) {
-        return mechanical_field(x, y, z);
     }
 }

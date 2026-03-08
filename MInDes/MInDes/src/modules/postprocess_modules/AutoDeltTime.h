@@ -1,4 +1,5 @@
 #pragma once
+#include "../base/MACRO_DEF.h"
 #include "../Module.h"
 #include "../input_modules/inputfiles/InputFileReader.h"
 #include "../Modules_Params.h"

@@ -592,7 +592,7 @@ namespace pf {
 			}
 		}
 
-		void quartet_structure_generation_in_phis(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ, std::vector<std::vector<std::vector<float>>>& aim_phi) {
+		void quartet_structure_generation_in_phis(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ, std::vector<std::vector<std::vector<double>>>& aim_phi) {
 			// > generate points
 			std::random_device rd; // 高质量随机数种子生成器
 			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // 时间戳种子：static_cast<unsigned int>(std::time(nullptr))，或固定的值 int

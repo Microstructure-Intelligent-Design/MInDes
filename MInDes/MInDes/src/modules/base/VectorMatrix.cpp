@@ -42,6 +42,34 @@ namespace pf {
 #endif
         return storage[i][j];
     };
+    REAL& Matrix3x3::operator()(const size_t i, const size_t j)
+    {
+#ifdef DEBUG
+        if (i > 2 or j > 2 or i < 0 or j < 0)
+        {
+            std::cout << "Error in dMatrix3x3::operator()\n"
+                << "Access beyond storage range. (i, j) = "
+                << i << ", " << j << " > (2, 2)"
+                << "\nTerminating!!!" << std::endl;
+            SYS_PROGRAM_STOP;
+        }
+#endif
+        return storage[i][j];
+    };
+    REAL const& Matrix3x3::operator()(const size_t i, const size_t j) const
+    {
+#ifdef DEBUG
+        if (i > 2 or j > 2 or i < 0 or j < 0)
+        {
+            std::cout << "Error in dMatrix3x3::operator()\n"
+                << "Access beyond storage range. (i, j) = "
+                << i << ", " << j << " > (2, 2)"
+                << "\nTerminating!!!" << std::endl;
+            SYS_PROGRAM_STOP;
+        }
+#endif
+        return storage[i][j];
+    };
     void Matrix3x3::set_to_zero(void)
     {
         for (int i = 0; i < 3; i++)
@@ -423,6 +451,35 @@ namespace pf {
         return storage[i];
     };
 
+    REAL& Vector3::operator[](const size_t i)
+    {
+#ifdef DEBUG
+        if (i > 2)
+        {
+            std::cout << "Error in dVector3::operator[]\n"
+                << "Access beyond storage range. i = "
+                << i << " > 2"
+                << "\nTerminating!!!" << std::endl;
+            exit(13);
+        }
+#endif
+        return storage[i];
+    };
+    REAL const& Vector3::operator[](const size_t i) const
+    {
+#ifdef DEBUG
+        if (i > 2)
+        {
+            std::cout << "Error in dVector3::operator[]\n"
+                << "Access beyond storage range. i = "
+                << i << " > 2"
+                << "\nTerminating!!!" << std::endl;
+            exit(13);
+        }
+#endif
+        return storage[i];
+    };
+
     REAL Vector3::getX(void) const
     {
         return storage[0];
@@ -753,6 +810,34 @@ namespace pf {
         return storage[i];
     }
     REAL const& Vector6::operator[](const int i) const
+    {
+#ifdef DEBUG
+        if (i > 5)
+        {
+            std::cout << "Error in dVector6::operator[]\n"
+                << "Access beyond storage range. i = "
+                << i << " > 5"
+                << "\nTerminating!!!" << std::endl;
+            exit(13);
+        }
+#endif
+        return storage[i];
+    };
+    REAL& Vector6::operator[](const size_t i)
+    {
+#ifdef DEBUG
+        if (i > 5)
+        {
+            std::cout << "Error in Vector6::operator[]\n"
+                << "Access beyond storage range. i = "
+                << i << " > 5"
+                << "\nTerminating!!!" << std::endl;
+            exit(13);
+        }
+#endif
+        return storage[i];
+    }
+    REAL const& Vector6::operator[](const size_t i) const
     {
 #ifdef DEBUG
         if (i > 5)
@@ -1098,6 +1183,13 @@ namespace pf {
             for (int j = 0; j < 6; j++)
                 storage[i][j] = 0.0;
     }
+    bool Matrix6x6::is_nan_val_exist() {
+        for (int i = 0; i < 6; i++)
+            for (int j = 0; j < 6; j++)
+                if (std::isnan(storage[i][j]))
+                    return true;
+        return false;
+    }
     REAL& Matrix6x6::operator()(const int i, const int j)
     {
 #ifdef DEBUG
@@ -1112,14 +1204,35 @@ namespace pf {
 #endif
         return storage[i][j];
     };
-    bool Matrix6x6::is_nan_val_exist() {
-        for (int i = 0; i < 6; i++)
-            for (int j = 0; j < 6; j++)
-                if (std::isnan(storage[i][j]))
-                    return true;
-        return false;
-    }
     REAL const& Matrix6x6::operator()(const int i, const int j) const
+    {
+#ifdef DEBUG
+        if (i > 5 or j > 5)
+        {
+            std::cout << "Error in Matrix6x6::operator()\n"
+                << "Access beyond storage range. (i, j) = "
+                << i << ", " << j << " > (5, 5)"
+                << "\nTerminating!!!" << std::endl;
+            exit(13);
+        }
+#endif
+        return storage[i][j];
+    };
+    REAL& Matrix6x6::operator()(const size_t i, const size_t j)
+    {
+#ifdef DEBUG
+        if (i > 5 or j > 5)
+        {
+            std::cout << "Error in Matrix6x6::operator()\n"
+                << "Access beyond storage range. (i, j) = "
+                << i << ", " << j << " > (5, 5)"
+                << "\nTerminating!!!" << std::endl;
+            exit(13);
+        }
+#endif
+        return storage[i][j];
+    };
+    REAL const& Matrix6x6::operator()(const size_t i, const size_t j) const
     {
 #ifdef DEBUG
         if (i > 5 or j > 5)
@@ -1705,6 +1818,10 @@ namespace pf {
     {
         return storage[(i == j) ? (i) : (6 - (i + j))][(k == l) ? (k) : (6 - (k + l))];
     };
+    const REAL& Matrix6x6::tensor(const size_t i, const size_t j, const size_t k, const size_t l) const
+    {
+        return storage[(i == j) ? (i) : (6 - (i + j))][(k == l) ? (k) : (6 - (k + l))];
+    };
     REAL* Matrix6x6::data(void)
     {
         return &storage[0][0];
@@ -1887,22 +2004,22 @@ namespace pf {
         return tmp;
     };
 
-    inline REAL vStress::Pressure() const
+    REAL vStress::Pressure() const
     {
         return -(storage[0] + storage[1] + storage[2]) / 3;
     };
 
-    inline REAL vStress::J1() const
+    REAL vStress::J1() const
     {
         return storage[0] + storage[1] + storage[2];
     };
 
-    inline REAL vStress::Trace() const
+    REAL vStress::Trace() const
     {
         return storage[0] + storage[1] + storage[2];
     };
 
-    inline REAL vStress::Determinant() const
+    REAL vStress::Determinant() const
     {
         return storage[0] * storage[1] * storage[2] -
             storage[0] * storage[3] * storage[3] -
@@ -2010,6 +2127,10 @@ namespace pf {
     };
 
     REAL vStress::get_tensor(const int i, const int j) const
+    {
+        return storage[(i == j) ? (i) : (6 - (i + j))];
+    };
+    REAL vStress::get_tensor(const size_t i, const size_t j) const
     {
         return storage[(i == j) ? (i) : (6 - (i + j))];
     };
@@ -2187,6 +2308,14 @@ namespace pf {
     };
 
     REAL vStrain::get_tensor(const int i, const int j) const
+    {
+        /*
+         * multiplication by 0.5 of the off diagonal elements during translating
+         * to a 3x3 matrix
+         */
+        return (storage[(i == j) ? (i) : (6 - (i + j))] * ((i == j) ? REAL(1.0) : REAL(0.5)));
+    };
+    REAL vStrain::get_tensor(const size_t i, const size_t j) const
     {
         /*
          * multiplication by 0.5 of the off diagonal elements during translating

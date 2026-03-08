@@ -1,12 +1,4 @@
-#include "../input_modules/ioFiles_Params.h"
-#include "../Modules_Params.h"
-#include "WriteVTS.h"
 #include "MechanicalField.h"
-#include "Mechanics/StiffnessEigenStrain.h"
-#include "Mechanics/ElasticSolver.h"
-#include "Mechanics/PlasticSolver.h"
-#include "../model_modules/GrainsOrientations.h"
-#include "../model_modules/PhiProperties.h"
 namespace pf {
 	namespace mechanical_field {
 		void init() {
@@ -21,7 +13,7 @@ namespace pf {
 
 		}
 		std::string exec_loop_iii() {
-			string mech_report = "";
+			std::string mech_report = "";
 
 			return mech_report;
 		}

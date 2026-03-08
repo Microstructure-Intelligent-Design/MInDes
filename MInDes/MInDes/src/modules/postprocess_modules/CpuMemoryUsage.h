@@ -8,10 +8,12 @@
 #include <sys/types.h>
 #include <unistd.h>  // getpid(), fork(), etc.
 #endif
+#include <sstream>
+#include "../base/MACRO_DEF.h"
+#include "../../MainIterator_Params.h"
 #include "../input_modules/ioFiles_Params.h"
 #include "../postprocess_modules/ShowLoopInfo.h"
 #include "../Module.h"
-#include <cstring>
 namespace pf {
 	namespace cpu_memory_usage {
         inline int64_t last_time = 0;

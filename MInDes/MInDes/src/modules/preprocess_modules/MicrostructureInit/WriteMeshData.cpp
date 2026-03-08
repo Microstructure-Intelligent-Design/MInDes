@@ -37,7 +37,7 @@ namespace pf {
 							for (size_t z = 0; z < mesh_info.PNz; z++) {
 								std::vector<REAL>& point = main_field::phase_field(x, y, z);
 								for (size_t index = 0; index < mesh_info.phi_number; index++) {
-									float phi = point[index];
+									float phi = float(point[index]);
 									fout.write((const char*)&phi, sizeof(float));
 								}
 							}
@@ -48,7 +48,7 @@ namespace pf {
 							for (size_t z = 0; z < mesh_info.CNz; z++) {
 								std::vector<REAL>& point = main_field::concentration_field(x, y, z);
 								for (size_t index = 0; index < mesh_info.con_number; index++) {
-									float con = point[index];
+									float con = float(point[index]);
 									fout.write((const char*)&con, sizeof(float));
 								}
 							}
@@ -57,7 +57,7 @@ namespace pf {
 					for (size_t x = 0; x < mesh_info.TNx; x++)
 						for (size_t y = 0; y < mesh_info.TNy; y++)
 							for (size_t z = 0; z < mesh_info.TNz; z++) {
-								float temp = main_field::temperature_field(x, y, z);
+								float temp = float(main_field::temperature_field(x, y, z));
 								fout.write((const char*)&temp, sizeof(float));
 							}
 				}
@@ -94,7 +94,7 @@ namespace pf {
 								for (size_t index = 0; index < mesh_info.phi_number; index++) {
 									fin.read((char*)&data_buff, sizeof(float));
 									if (index < main_field::phi_number)
-										point[index] = data_buff;
+										point[index] = REAL(data_buff);
 								}
 							}
 							else {
@@ -114,7 +114,7 @@ namespace pf {
 								for (size_t index = 0; index < mesh_info.con_number; index++) {
 									fin.read((char*)&data_buff, sizeof(float));
 									if (index < main_field::con_number)
-										point[index] = data_buff;
+										point[index] = REAL(data_buff);
 								}
 							}
 							else {
@@ -131,7 +131,7 @@ namespace pf {
 						for (size_t z = 0; z < mesh_info.TNz; z++) {
 							if (x < tNx && y < tNy && z < tNz) {
 								fin.read((char*)&data_buff, sizeof(float));
-								main_field::temperature_field(x, y, z) = data_buff;
+								main_field::temperature_field(x, y, z) = REAL(data_buff);
 							}
 							else {
 								fin.read((char*)&data_buff, sizeof(float));
