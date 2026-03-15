@@ -101,6 +101,7 @@ namespace pf {
 				phi_shear_modulus[index] = phase_shear_modulus[PhiProperties::instance().phi_property(index)];
 			}
 			main_field::init_plastic_field();
+			main_field::is_mech_field_plas_on = true;
 			stiffness_eigenstrain::eigenstrain_list.push_back(default_functions::cal_plasticstrain);
 			WriteLog("> MODULE INIT : Plastic Explicit \n");
 		}

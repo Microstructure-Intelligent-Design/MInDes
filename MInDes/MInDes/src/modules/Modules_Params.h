@@ -1,6 +1,7 @@
 #pragma once
 #include "base/Mesh_0.h"
-#include "base/MechanicalPoint.h"
+#include "postprocess_modules/Mechanics/MechanicalPoint.h"
+#include "postprocess_modules/FluidDynamics/FluidDynamicsPoint.h"
 namespace pf {
 	enum Dimension { One_Dimension, Two_Dimension, Three_Dimension };
 	namespace mesh_parameters {
@@ -81,6 +82,8 @@ namespace pf {
 		}
 
 		// main mesh for fluid field
+		inline bool is_fluid_field_on = false;
+		inline Mesh_Boundry<LBMPoint> lbm_field;
 
 	}
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "GoverningEquations.h"
+#include "GoverningEquationsM.h"
 #include "StiffnessEigenStrain.h"
 #include "PlasticSolver.h"
 #include "../../input_modules/inputfiles/InputFileReader.h"
@@ -53,7 +53,7 @@ namespace pf {
 
 		void deinit();
 
-		void write_field(std::ofstream& fout);
+		void write_vts(std::ofstream& fout);
 
 	}
 }

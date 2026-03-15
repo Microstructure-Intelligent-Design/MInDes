@@ -1,5 +1,5 @@
 #pragma once
-#include "VectorMatrix.h"
+#include "../../base/VectorMatrix.h"
 namespace pf {
 	class ElasticPoint {
 	public:

@@ -5,7 +5,7 @@
 //x64
 #include "../../../../lib/x64/fftw3.h"
 #include <complex>
-#include "../../base/MechanicalPoint.h"
+#include "MechanicalPoint.h"
 const std::complex<double> I(0.0, 1.0);
 namespace pf {
 	enum VelocityDomainIndex { VDIndex_OLD, VDIndex_NOW, VDIndex_FUTURE };

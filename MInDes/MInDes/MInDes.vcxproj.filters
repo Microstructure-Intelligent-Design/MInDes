@@ -35,6 +35,9 @@
     <Filter Include="src\modules\postprocess\mechanics">
       <UniqueIdentifier>{786d967a-1ef0-415f-b0c6-ebf12c9b59fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\modules\postprocess\fluiddynamics">
+      <UniqueIdentifier>{4464bd04-41d9-4e17-978a-467309cc0a71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h">
@@ -106,7 +109,7 @@
     <ClInclude Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.h">
       <Filter>src\modules\postprocess\mechanics</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\postprocess_modules\Mechanics\GoverningEquations.h">
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.h">
       <Filter>src\modules\postprocess\mechanics</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.h">
@@ -154,8 +157,32 @@
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h">
       <Filter>src\modules\preprocess</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\base\MechanicalPoint.h">
-      <Filter>src\modules\base</Filter>
+    <ClInclude Include="src\modules\postprocess_modules\FluidField.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\SourceF.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\MechanicalPoint.h">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\FluidDynamicsPoint.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -207,7 +234,7 @@
     <ClCompile Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.cpp">
       <Filter>src\modules\postprocess\mechanics</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\postprocess_modules\Mechanics\GoverningEquations.cpp">
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.cpp">
       <Filter>src\modules\postprocess\mechanics</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.cpp">
@@ -245,6 +272,27 @@
     </ClCompile>
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit.cpp">
       <Filter>src\modules\preprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidField.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\SourceF.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

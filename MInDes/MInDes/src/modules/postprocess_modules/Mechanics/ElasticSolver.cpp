@@ -206,6 +206,7 @@ namespace pf {
 					bc_z = pf::BoundaryCondition::ZEROFLUX;
 				mechanical_field_solver_im.init(int(mesh_parameters::MESH_NX), int(mesh_parameters::MESH_NY), int(mesh_parameters::MESH_NZ), 
 					bc_x, bc_y, bc_z, main_field::elastic_field);
+				main_field::is_mech_field_elas_on = true;
 				mechanical_field_solver_im.cal_stiffness = cal_stiffness;
 				mechanical_field_solver_im.cal_eigenstrain = cal_eigenstrain;
 				if (infile_reader::read_bool_value("Postprocess.SolidMechanics.restart_iterator_in_loop", restart_iterator_in_loop, true))
@@ -326,6 +327,7 @@ namespace pf {
 					bc_z = pf::BoundaryCondition::ZEROFLUX;
 				mechanical_field_solver_im.init(int(mesh_parameters::MESH_NX), int(mesh_parameters::MESH_NY), int(mesh_parameters::MESH_NZ)
 					, bc_x, bc_y, bc_z, main_field::elastic_field);
+				main_field::is_mech_field_elas_on = true;
 				mechanical_field_solver_im.cal_stiffness = cal_stiffness;
 				mechanical_field_solver_im.cal_eigenstrain = cal_eigenstrain;
 				infile_reader::read_real_value("Postprocess.SolidMechanics.VisualStrain.L_ijkl", virtual_strain_iterate_rate, true);
@@ -469,7 +471,7 @@ namespace pf {
 			mechanical_field_solver_im.free();
 		}
 
-		void write_field(std::ofstream& fout) {
+		void write_vts(std::ofstream& fout) {
 			vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
 			for (int ele_index = 0; ele_index < 6; ele_index++)
 			{
