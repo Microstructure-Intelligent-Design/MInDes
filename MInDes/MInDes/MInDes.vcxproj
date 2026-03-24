@@ -18,6 +18,98 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MainIterator.cpp" />
+    <ClCompile Include="src\modules\base\MACRO_DEF.cpp" />
+    <ClCompile Include="src\modules\base\RotationMatrix.cpp" />
+    <ClCompile Include="src\modules\base\VectorMatrix.cpp" />
+    <ClCompile Include="src\modules\base\whereami.c" />
+    <ClCompile Include="src\modules\input_modules\inputfiles\infile_selector.cpp" />
+    <ClCompile Include="src\modules\input_modules\inputfiles\InputFileMath.cpp" />
+    <ClCompile Include="src\modules\input_modules\inputfiles\InputFileReader.cpp" />
+    <ClCompile Include="src\modules\input_modules\inputfiles\QuickStartUp.cpp" />
+    <ClCompile Include="src\modules\input_modules\inputfiles\selectFile.cpp" />
+    <ClCompile Include="src\modules\input_modules\inputfiles\UserStartUp.cpp" />
+    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
+    <ClCompile Include="src\modules\model_modules\PhiProperties.cpp" />
+    <ClCompile Include="src\modules\Module.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\AutoDeltTime.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\CpuMemoryUsage.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\SourceF.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\FluidField.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\MechanicalField.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\StiffnessEigenStrain.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\ShowLoopInfo.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\WriteVTS.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\MainIterator.h" />
+    <ClInclude Include="src\MainIterator_Params.h" />
+    <ClInclude Include="src\modules\base\MACRO_DEF.h" />
+    <ClInclude Include="src\modules\base\Mesh_0.h" />
+    <ClInclude Include="src\modules\base\RotationMatrix.h" />
+    <ClInclude Include="src\modules\base\timer.h" />
+    <ClInclude Include="src\modules\base\VectorMatrix.h" />
+    <ClInclude Include="src\modules\base\whereami.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\infile_selector.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\InputFileMath.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\InputFileReader.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\QuickStartUp.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\selectFile.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\SimuInfo.h" />
+    <ClInclude Include="src\modules\input_modules\inputfiles\UserStartUp.h" />
+    <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
+    <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
+    <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
+    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Params.h" />
+    <ClInclude Include="src\modules\model_modules\GrainsOrientations.h" />
+    <ClInclude Include="src\modules\model_modules\PhiProperties.h" />
+    <ClInclude Include="src\modules\Module.h" />
+    <ClInclude Include="src\modules\Modules_Params.h" />
+    <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h" />
+    <ClInclude Include="src\modules\postprocess_modules\CpuMemoryUsage.h" />
+    <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\FluidDynamicsPoint.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\SourceF.h" />
+    <ClInclude Include="src\modules\postprocess_modules\FluidField.h" />
+    <ClInclude Include="src\modules\postprocess_modules\MechanicalField.h" />
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.h" />
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.h" />
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\MechanicalPoint.h" />
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.h" />
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\StiffnessEigenStrain.h" />
+    <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h" />
+    <ClInclude Include="src\modules\postprocess_modules\WriteVTS.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\GeometryStructure.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.h" />
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -174,98 +266,6 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /
 xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="src\MainIterator.h" />
-    <ClInclude Include="src\MainIterator_Params.h" />
-    <ClInclude Include="src\modules\base\MACRO_DEF.h" />
-    <ClInclude Include="src\modules\base\Mesh_0.h" />
-    <ClInclude Include="src\modules\base\RotationMatrix.h" />
-    <ClInclude Include="src\modules\base\timer.h" />
-    <ClInclude Include="src\modules\base\VectorMatrix.h" />
-    <ClInclude Include="src\modules\base\whereami.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\infile_selector.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\InputFileMath.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\InputFileReader.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\QuickStartUp.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\selectFile.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\SimuInfo.h" />
-    <ClInclude Include="src\modules\input_modules\inputfiles\UserStartUp.h" />
-    <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
-    <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
-    <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Functions.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Manager.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Params.h" />
-    <ClInclude Include="src\modules\model_modules\GrainsOrientations.h" />
-    <ClInclude Include="src\modules\model_modules\PhiProperties.h" />
-    <ClInclude Include="src\modules\Module.h" />
-    <ClInclude Include="src\modules\Modules_Params.h" />
-    <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h" />
-    <ClInclude Include="src\modules\postprocess_modules\CpuMemoryUsage.h" />
-    <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\FluidDynamicsPoint.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\SourceF.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidField.h" />
-    <ClInclude Include="src\modules\postprocess_modules\MechanicalField.h" />
-    <ClInclude Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.h" />
-    <ClInclude Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.h" />
-    <ClInclude Include="src\modules\postprocess_modules\Mechanics\MechanicalPoint.h" />
-    <ClInclude Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.h" />
-    <ClInclude Include="src\modules\postprocess_modules\Mechanics\StiffnessEigenStrain.h" />
-    <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h" />
-    <ClInclude Include="src\modules\postprocess_modules\WriteVTS.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\GeometryStructure.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.h" />
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Functions.cpp" />
-    <ClCompile Include="src\MainIterator.cpp" />
-    <ClCompile Include="src\modules\base\MACRO_DEF.cpp" />
-    <ClCompile Include="src\modules\base\RotationMatrix.cpp" />
-    <ClCompile Include="src\modules\base\VectorMatrix.cpp" />
-    <ClCompile Include="src\modules\base\whereami.c" />
-    <ClCompile Include="src\modules\input_modules\inputfiles\infile_selector.cpp" />
-    <ClCompile Include="src\modules\input_modules\inputfiles\InputFileMath.cpp" />
-    <ClCompile Include="src\modules\input_modules\inputfiles\InputFileReader.cpp" />
-    <ClCompile Include="src\modules\input_modules\inputfiles\QuickStartUp.cpp" />
-    <ClCompile Include="src\modules\input_modules\inputfiles\selectFile.cpp" />
-    <ClCompile Include="src\modules\input_modules\inputfiles\UserStartUp.cpp" />
-    <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
-    <ClCompile Include="src\modules\model_modules\PhiProperties.cpp" />
-    <ClCompile Include="src\modules\Module.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\AutoDeltTime.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\CpuMemoryUsage.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\SourceF.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidField.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\MechanicalField.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\Mechanics\StiffnessEigenStrain.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\ShowLoopInfo.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\WriteVTS.cpp" />
-    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit.cpp" />
-    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.cpp" />
-    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp" />
-    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.cpp" />
-    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

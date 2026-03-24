@@ -26,9 +26,9 @@ namespace pf {
 			break;
 		}
 		// - preprocess
-		automatic_change_delt_time::init_auto_time();
 		microstructure_init::init_microstructure();
 		// - posprocess
+		automatic_change_delt_time::init_auto_time();
 		show_loop_information::init_show_loop_information();
 		write_vts::init_write_vts();
 		cpu_memory_usage::init_cpu_memory_usage();
