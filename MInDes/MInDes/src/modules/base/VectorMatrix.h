@@ -23,6 +23,8 @@ namespace pf {
 
         REAL& operator()(const int i, const int j);
         REAL const& operator()(const int i, const int j) const;
+        REAL& operator()(const size_t i, const size_t j);
+        REAL const& operator()(const size_t i, const size_t j) const;
         void set_to_zero(void);
         void set_to_unity(void);
         Matrix3x3& operator=(const Matrix3x3& rhs);
@@ -78,6 +80,9 @@ namespace pf {
         REAL& operator[](const int i);
         REAL const& operator[](const int i) const;
 
+        REAL& operator[](const size_t i);
+        REAL const& operator[](const size_t i) const;
+
         REAL getX(void) const;
 
         void setX(const REAL newX);
@@ -125,105 +130,6 @@ namespace pf {
         REAL storage[3];
     };
 
-
-    struct vec3_elem {
-        int index;
-        Vector3 vec;
-        vec3_elem() {
-            index = 0;
-            vec[0] = 0.0;
-            vec[1] = 0.0;
-            vec[2] = 0.0;
-        }
-        vec3_elem& operator=(const vec3_elem& n) {
-            index = n.index;
-            vec[0] = n.vec[0];
-            vec[1] = n.vec[1];
-            vec[2] = n.vec[2];
-            return *this;
-        }
-    };
-
-    class vec3_box {
-    public:
-        vec3_box() {
-            _vec_box.reserve(0);
-        }
-        ~vec3_box() {
-            clear();
-        }
-        std::vector<vec3_elem> _vec_box;
-        typedef std::vector<vec3_elem>::iterator iterator;
-        typedef std::vector<vec3_elem>::const_iterator citerator;
-        iterator  begin() { return _vec_box.begin(); };
-        iterator  end() { return _vec_box.end(); };
-        Vector3& operator[](const int index) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i) {
-                if (i->index == index) return i->vec;
-            }
-            std::cout << "vec3_box error, can't find the vec index : " << index << std::endl;
-            SYS_PROGRAM_STOP;
-        }
-        REAL& operator()(const int index, const int index2) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i) {
-                if (i->index == index) return i->vec[index2];
-            }
-            std::cout << "vec3_box error, can't find the vec index : " << index << std::endl;
-            SYS_PROGRAM_STOP;
-        }
-        vec3_box& operator=(const vec3_box& n) {
-            _vec_box = n._vec_box;
-            return *this;
-        }
-        void add_vec(int _index, REAL* vec) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i)
-                if (i->index == _index) {
-                    i->vec[0] = vec[0];
-                    i->vec[1] = vec[1];
-                    i->vec[2] = vec[2];
-                    return;
-                }
-            _vec_box.reserve(_vec_box.size() + 1);
-            vec3_elem elem;
-            elem.index = _index;
-            elem.vec[0] = vec[0];
-            elem.vec[1] = vec[1];
-            elem.vec[2] = vec[2];
-            _vec_box.push_back(elem);
-        }
-        void add_vec(int _index, Vector3 vec) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i)
-                if (i->index == _index) {
-                    i->vec[0] = vec[0];
-                    i->vec[1] = vec[1];
-                    i->vec[2] = vec[2];
-                    return;
-                }
-            _vec_box.reserve(_vec_box.size() + 1);
-            vec3_elem elem;
-            elem.index = _index;
-            elem.vec[0] = vec[0];
-            elem.vec[1] = vec[1];
-            elem.vec[2] = vec[2];
-            _vec_box.push_back(elem);
-        }
-        void erase(int index) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end();) {
-                if (i->index == index) {
-                    i = _vec_box.erase(i);
-                }
-                else
-                    ++i;
-            }
-        }
-        void clear() {
-            _vec_box.clear();
-        }
-        int size() const {
-            return int(_vec_box.size());
-        }
-    };
-
     class Vector6
     {
     public:
@@ -236,6 +142,8 @@ namespace pf {
 
         REAL& operator[](const int i);
         REAL const& operator[](const int i) const;
+        REAL& operator[](const size_t i);
+        REAL const& operator[](const size_t i) const;
         bool is_nan_val_exist();
         void set_to_zero(void);
         void set_to_unity(void);
@@ -275,129 +183,15 @@ namespace pf {
     private:
     };
 
-    struct vec6_elem {
-        int index;
-        Vector6 vec;
-        vec6_elem() {
-            index = 0;
-            vec[0] = 0.0;
-            vec[1] = 0.0;
-            vec[2] = 0.0;
-            vec[3] = 0.0;
-            vec[4] = 0.0;
-            vec[5] = 0.0;
-        }
-        vec6_elem& operator=(const vec6_elem& n) {
-            index = n.index;
-            vec[0] = n.vec[0];
-            vec[1] = n.vec[1];
-            vec[2] = n.vec[2];
-            vec[3] = n.vec[3];
-            vec[4] = n.vec[4];
-            vec[5] = n.vec[5];
-            return *this;
-        }
-    };
-
-    class vec6_box {
-    public:
-        vec6_box() {
-            _vec_box.reserve(0);
-        }
-        ~vec6_box() {
-            clear();
-        }
-        std::vector<vec6_elem> _vec_box;
-        typedef std::vector<vec6_elem>::iterator iterator;
-        typedef std::vector<vec6_elem>::const_iterator citerator;
-        iterator  begin() { return _vec_box.begin(); };
-        iterator  end() { return _vec_box.end(); };
-        Vector6& operator[](const int index) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i) {
-                if (i->index == index) return i->vec;
-            }
-            std::cout << "vec6_box error, can't find the vec index : " << index << std::endl;
-            SYS_PROGRAM_STOP;
-        }
-        REAL& operator()(const int index, const int index2) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i) {
-                if (i->index == index) return i->vec[index2];
-            }
-            std::cout << "vec6_box error, can't find the vec index : " << index << std::endl;
-            SYS_PROGRAM_STOP;
-        }
-        vec6_box& operator=(const vec6_box& n) {
-            _vec_box = n._vec_box;
-            return *this;
-        }
-        void add_vec(int _index, REAL* vec) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i)
-                if (i->index == _index) {
-                    i->vec[0] = vec[0];
-                    i->vec[1] = vec[1];
-                    i->vec[2] = vec[2];
-                    i->vec[3] = vec[3];
-                    i->vec[4] = vec[4];
-                    i->vec[5] = vec[5];
-                    return;
-                }
-            _vec_box.reserve(_vec_box.size() + 1);
-            vec6_elem elem;
-            elem.index = _index;
-            elem.vec[0] = vec[0];
-            elem.vec[1] = vec[1];
-            elem.vec[2] = vec[2];
-            elem.vec[3] = vec[3];
-            elem.vec[4] = vec[4];
-            elem.vec[5] = vec[5];
-            _vec_box.push_back(elem);
-        }
-        void add_vec(int _index, Vector6 vec) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end(); ++i)
-                if (i->index == _index) {
-                    i->vec[0] = vec[0];
-                    i->vec[1] = vec[1];
-                    i->vec[2] = vec[2];
-                    i->vec[3] = vec[3];
-                    i->vec[4] = vec[4];
-                    i->vec[5] = vec[5];
-                    return;
-                }
-            _vec_box.reserve(_vec_box.size() + 1);
-            vec6_elem elem;
-            elem.index = _index;
-            elem.vec[0] = vec[0];
-            elem.vec[1] = vec[1];
-            elem.vec[2] = vec[2];
-            elem.vec[3] = vec[3];
-            elem.vec[4] = vec[4];
-            elem.vec[5] = vec[5];
-            _vec_box.push_back(elem);
-        }
-        void erase(int index) {
-            for (auto i = _vec_box.begin(); i < _vec_box.end();) {
-                if (i->index == index) {
-                    i = _vec_box.erase(i);
-                }
-                else
-                    ++i;
-            }
-        }
-        void clear() {
-            _vec_box.clear();
-        }
-        int size() const {
-            return int(_vec_box.size());
-        }
-    };
-
     class Matrix6x6
     {
     public:
         Matrix6x6();
         REAL& operator()(const int i, const int j);
-        bool is_nan_val_exist();
         REAL const& operator()(const int i, const int j) const;
+        REAL& operator()(const size_t i, const size_t j);
+        REAL const& operator()(const size_t i, const size_t j) const;
+        bool is_nan_val_exist();
         void set_to_zero(void);
         void set_to_unity(void);
 
@@ -433,102 +227,18 @@ namespace pf {
         Matrix6x6& do_rotate(const Matrix3x3& RotationMatrix);
         Matrix6x6 get_rotated_matrix(const Matrix3x3& RotationMatrix) const;
 
+        Matrix6x6& do_rotate_Voigt(const Matrix3x3& RotationMatrix);
+        Matrix6x6 get_rotated_matrix_Voigt(const Matrix3x3& RotationMatrix) const;
+
         std::string print(void) const;
         const REAL& tensor(const int i, const int j, const int k, const int l) const;
+        const REAL& tensor(const size_t i, const size_t j, const size_t k, const size_t l) const;
         REAL* data(void);
         const REAL* const_data(void) const;
     protected:
     private:
 
         REAL storage[6][6];
-    };
-
-    struct matrix6x6_elem {
-        int index;
-        Matrix6x6 matrix;
-        matrix6x6_elem() {
-            index = 0;
-            matrix(0, 0) = 0.0; matrix(0, 1) = 0.0; matrix(0, 2) = 0.0; matrix(0, 3) = 0.0; matrix(0, 4) = 0.0; matrix(0, 5) = 0.0;
-            matrix(1, 0) = 0.0; matrix(1, 1) = 0.0; matrix(1, 2) = 0.0; matrix(1, 3) = 0.0; matrix(1, 4) = 0.0; matrix(1, 5) = 0.0;
-            matrix(2, 0) = 0.0; matrix(2, 1) = 0.0; matrix(2, 2) = 0.0; matrix(2, 3) = 0.0; matrix(2, 4) = 0.0; matrix(2, 5) = 0.0;
-            matrix(3, 0) = 0.0; matrix(3, 1) = 0.0; matrix(3, 2) = 0.0; matrix(3, 3) = 0.0; matrix(3, 4) = 0.0; matrix(3, 5) = 0.0;
-            matrix(4, 0) = 0.0; matrix(4, 1) = 0.0; matrix(4, 2) = 0.0; matrix(4, 3) = 0.0; matrix(4, 4) = 0.0; matrix(4, 5) = 0.0;
-            matrix(5, 0) = 0.0; matrix(5, 1) = 0.0; matrix(5, 2) = 0.0; matrix(5, 3) = 0.0; matrix(5, 4) = 0.0; matrix(5, 5) = 0.0;
-        }
-        matrix6x6_elem& operator=(const matrix6x6_elem& n) {
-            index = n.index;
-            matrix(0, 0) = n.matrix(0, 0); matrix(0, 1) = n.matrix(0, 1); matrix(0, 2) = n.matrix(0, 2); matrix(0, 3) = n.matrix(0, 3); matrix(0, 4) = n.matrix(0, 4); matrix(0, 5) = n.matrix(0, 5);
-            matrix(1, 0) = n.matrix(1, 0); matrix(1, 1) = n.matrix(1, 1); matrix(1, 2) = n.matrix(1, 2); matrix(1, 3) = n.matrix(1, 3); matrix(1, 4) = n.matrix(1, 4); matrix(1, 5) = n.matrix(1, 5);
-            matrix(2, 0) = n.matrix(2, 0); matrix(2, 1) = n.matrix(2, 1); matrix(2, 2) = n.matrix(2, 2); matrix(2, 3) = n.matrix(2, 3); matrix(2, 4) = n.matrix(2, 4); matrix(2, 5) = n.matrix(2, 5);
-            matrix(3, 0) = n.matrix(3, 0); matrix(3, 1) = n.matrix(3, 1); matrix(3, 2) = n.matrix(3, 2); matrix(3, 3) = n.matrix(3, 3); matrix(3, 4) = n.matrix(3, 4); matrix(3, 5) = n.matrix(3, 5);
-            matrix(4, 0) = n.matrix(4, 0); matrix(4, 1) = n.matrix(4, 1); matrix(4, 2) = n.matrix(4, 2); matrix(4, 3) = n.matrix(4, 3); matrix(4, 4) = n.matrix(4, 4); matrix(4, 5) = n.matrix(4, 5);
-            matrix(5, 0) = n.matrix(5, 0); matrix(5, 1) = n.matrix(5, 1); matrix(5, 2) = n.matrix(5, 2); matrix(5, 3) = n.matrix(5, 3); matrix(5, 4) = n.matrix(5, 4); matrix(5, 5) = n.matrix(5, 5);
-            return *this;
-        }
-    };
-
-    class matrix6x6_box {
-    public:
-        matrix6x6_box() {
-            _matrix_box.reserve(0);
-        }
-        ~matrix6x6_box() {
-            clear();
-        }
-        std::vector<matrix6x6_elem> _matrix_box;
-        typedef std::vector<matrix6x6_elem>::iterator iterator;
-        typedef std::vector<matrix6x6_elem>::const_iterator citerator;
-        iterator  begin() { return _matrix_box.begin(); };
-        iterator  end() { return _matrix_box.end(); };
-        Matrix6x6& operator[](const int index) {
-            for (auto i = _matrix_box.begin(); i < _matrix_box.end(); ++i) {
-                if (i->index == index) return i->matrix;
-            }
-            std::cout << "Matrix6x6 error, can't find the vec index : " << index << std::endl;
-            SYS_PROGRAM_STOP;
-        }
-        REAL& operator()(const int index, const int index_i, const int index_j) {
-            for (auto i = _matrix_box.begin(); i < _matrix_box.end(); ++i) {
-                if (i->index == index) return i->matrix(index_i, index_j);
-            }
-            std::cout << "Matrix6x6 error, can't find the vec index : " << index << std::endl;
-            SYS_PROGRAM_STOP;
-        }
-        matrix6x6_box& operator=(const matrix6x6_box& n) {
-            _matrix_box = n._matrix_box;
-            return *this;
-        }
-        void add_matrix(int _index, Matrix6x6 _matrix) {
-            for (auto i = _matrix_box.begin(); i < _matrix_box.end(); ++i)
-                if (i->index == _index) {
-                    for (int ii = 0; ii < 6; ii++)
-                        for (int jj = 0; jj < 6; jj++)
-                            i->matrix(ii, jj) = _matrix(ii, jj);
-                    return;
-                }
-            _matrix_box.reserve(_matrix_box.size() + 1);
-            matrix6x6_elem elem;
-            elem.index = _index;
-            for (int ii = 0; ii < 6; ii++)
-                for (int jj = 0; jj < 6; jj++)
-                    elem.matrix(ii, jj) = _matrix(ii, jj);
-            _matrix_box.push_back(elem);
-        }
-        void erase(int index) {
-            for (auto i = _matrix_box.begin(); i < _matrix_box.end();) {
-                if (i->index == index) {
-                    i = _matrix_box.erase(i);
-                }
-                else
-                    ++i;
-            }
-        }
-        void clear() {
-            _matrix_box.clear();
-        }
-        int size() const {
-            return int(_matrix_box.size());
-        }
     };
 
     class vStress : public Vector6
@@ -547,13 +257,13 @@ namespace pf {
 
         REAL REALcontract(const Vector6& symTensorV) const;
 
-        inline REAL Pressure() const;
+        REAL Pressure() const;
 
-        inline REAL J1() const;
+        REAL J1() const;
 
-        inline REAL Trace() const;
+        REAL Trace() const;
 
-        inline REAL Determinant() const;
+        REAL Determinant() const;
 
         Vector3 Invariants(void) const;
 
@@ -563,6 +273,7 @@ namespace pf {
         vStress& do_rotate(const Matrix3x3& RotationMatrix);
 
         REAL get_tensor(const int i, const int j) const;
+        REAL get_tensor(const size_t i, const size_t j) const;
 
         Matrix3x3 tensor(void) const;
     protected:
@@ -595,6 +306,7 @@ namespace pf {
         vStrain& do_rotate(const Matrix3x3& RotationMatrix);
 
         REAL get_tensor(const int i, const int j) const;
+        REAL get_tensor(const size_t i, const size_t j) const;
 
         Matrix3x3 tensor(void) const;
     };

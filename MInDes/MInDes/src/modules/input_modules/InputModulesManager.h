@@ -21,8 +21,9 @@ namespace pf {
 		out << "Define.Func = FuncName@{[VarName*pow(VarName,2)]}@" << endl;
 		out << "default functions      : \"pow(val, ord)\", \"sqrt(val)\", \"abs(val)\", \"exp(val)\", \"ln(val)\"," << endl;
 		out << "                         \"log(base_val, val)\", \"sin(val)\", \"cos(val)\", \"tan(val)\"," << endl;
-		out << "                         \"asin(val)\", \"acos(val)\", \"atan(val)\", \"cos(val)\", " << endl;
-		out << "                         \"tan(val)\", \"asin(val)\", \"acos(val)\", \"atan(val)\"" << endl;
+		out << "                         \"asin(val)\", \"acos(val)\", \"atan(val)\", \"cos(val)\", \"tan(val)\"," << endl;
+		out << "                         \"asin(val)\", \"acos(val)\", \"atan(val)\", \"rand_int(min_val, max_val)\"," << endl;
+		out << "                         \"rand_real(min_val, max_val)\"" << endl;
 		out << "=========================================================================================" << endl;
 		add_string_to_file(out.str(), input_output_files_parameters::DebugFile_Path);
 		InputFileReader::get_instance()->debug_infile_and_valid_words();
@@ -88,7 +89,7 @@ namespace pf {
 		string pct_field_key = "Solver.Mesh.PCT", pct_field_string = "(0,0,false)";
 		WriteDebugFile("# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) \n");
 		if (InputFileReader::get_instance()->read_string_value(pct_field_key, pct_field_string, true)) {
-			vector<input_value> pct_field_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(
+			std::vector<input_value> pct_field_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(
 				{ InputValueType::IVType_INT ,InputValueType::IVType_INT ,InputValueType::IVType_BOOL },
 				pct_field_key, pct_field_string, true);
 			main_field::phi_number = pct_field_value[0].int_value;

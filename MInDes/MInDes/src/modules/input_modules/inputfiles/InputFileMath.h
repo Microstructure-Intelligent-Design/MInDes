@@ -35,7 +35,9 @@ namespace pf {
 		FType_asin,
 		FType_acos,
 		FType_atan,
-		FType_top
+		FType_rand_int,
+		FType_rand_real,
+		FType_top,
 	};
 	const vector<std::string> FuncType_Keys = { "", 
 		"", 
@@ -53,6 +55,8 @@ namespace pf {
 		"asin",
 		"acos",
 		"atan",
+		"rand_int",
+		"rand_real",
 		"" 
 	};
 	inline std::string get_FuncType_Keys(int FT_index) {
@@ -175,6 +179,12 @@ namespace pf {
 			, vector<vector<vector<vector<vector<int>>>>>& _func_structure, Operators_4d& _operators, FuncIndexes_4d& _terms_type
 			, vector<InFileVar>& infile_vars, vector<InFileFunc>& infile_funcs);
 		REAL atan(vector<int>& para_index, vector<REAL>& para_vals
+			, vector<vector<vector<vector<vector<int>>>>>& _func_structure, Operators_4d& _operators, FuncIndexes_4d& _terms_type
+			, vector<InFileVar>& infile_vars, vector<InFileFunc>& infile_funcs);
+		REAL rand_int(vector<int>& para_index, vector<REAL>& para_vals
+			, vector<vector<vector<vector<vector<int>>>>>& _func_structure, Operators_4d& _operators, FuncIndexes_4d& _terms_type
+			, vector<InFileVar>& infile_vars, vector<InFileFunc>& infile_funcs);
+		REAL rand_real(vector<int>& para_index, vector<REAL>& para_vals
 			, vector<vector<vector<vector<vector<int>>>>>& _func_structure, Operators_4d& _operators, FuncIndexes_4d& _terms_type
 			, vector<InFileVar>& infile_vars, vector<InFileFunc>& infile_funcs);
 		vector<REAL> formula(vector<REAL> terms, vector<CalculationOperator> operators);

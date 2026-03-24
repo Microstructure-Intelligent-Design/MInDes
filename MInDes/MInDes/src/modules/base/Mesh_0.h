@@ -60,18 +60,23 @@ namespace pf {
 		T& operator()(size_t x, size_t y, size_t z) {
 			return data[MESH_INDEX(x, y, z, nx, ny)];
 		}
+		// - find element directly
 		T& at(size_t x, size_t y, size_t z) {
 			return data[MESH_INDEX(x, y, z, nx, ny)];
 		}
+		// - find element directly
 		T& operator()(long long x, long long y, long long z) {
 			return data[MESH_INDEX(x, y, z, nx, ny)];
 		}
+		// - find element directly
 		T& at(long long x, long long y, long long z) {
 			return data[MESH_INDEX(x, y, z, nx, ny)];
 		}
+		// - find element directly
 		T& operator()(int x, int y, int z) {
 			return data[MESH_INDEX(x, y, z, nx, ny)];
 		}
+		// - find element directly
 		T& at(int x, int y, int z) {
 			return data[MESH_INDEX(x, y, z, nx, ny)];
 		}
@@ -189,6 +194,138 @@ namespace pf {
 		BoundaryCondition BC_X_UP() { return bc_x_up; };
 		BoundaryCondition BC_Y_UP() { return bc_y_up; };
 		BoundaryCondition BC_Z_UP() { return bc_z_up; };
+
+		// - find element with boundary condition
+		T& at2(size_t x, size_t y, size_t z) {
+			if (x >= 0 && x < Mesh<T>::nx && y >= 0 && y < Mesh<T>::ny && z >= 0 && z < Mesh<T>::nz) {
+				return Mesh<T>::data[MESH_INDEX(x, y, z, Mesh<T>::nx, Mesh<T>::ny)];
+			}
+			if (x < 0) {
+				if (bc_x_down == BoundaryCondition::PERIODIC)
+					x = x + Mesh<T>::nx;
+				else
+					x = 0;
+			}
+			if (x >= Mesh<T>::nx) {
+				if (bc_x_up == BoundaryCondition::PERIODIC)
+					x = x - Mesh<T>::nx;
+				else
+					x = Mesh<T>::nx - 1;
+			}
+			if (y < 0) {
+				if (bc_y_down == BoundaryCondition::PERIODIC)
+					y = y + Mesh<T>::ny;
+				else
+					y = 0;
+			}
+			if (y >= Mesh<T>::ny) {
+				if (bc_y_up == BoundaryCondition::PERIODIC)
+					y = y - Mesh<T>::ny;
+				else
+					y = Mesh<T>::ny - 1;
+			}
+			if (z < 0) {
+				if (bc_z_down == BoundaryCondition::PERIODIC)
+					z = z + Mesh<T>::nz;
+				else
+					z = 0;
+			}
+			if (z >= Mesh<T>::nz) {
+				if (bc_z_up == BoundaryCondition::PERIODIC)
+					z = z - Mesh<T>::nz;
+				else
+					z = Mesh<T>::nz - 1;
+			}
+			return (*this)(x, y, z);
+		}
+		// - find element with boundary condition
+		T& at2(long long x, long long y, long long z) {
+			size_t _x = size_t(x), _y = size_t(y), _z = size_t(z);
+			if (_x >= 0 && _x < Mesh<T>::nx && _y >= 0 && _y < Mesh<T>::ny && _z >= 0 && _z < Mesh<T>::nz) {
+				return Mesh<T>::data[MESH_INDEX(_x, _y, _z, Mesh<T>::nx, Mesh<T>::ny)];
+			}
+			if (_x < 0) {
+				if (bc_x_down == BoundaryCondition::PERIODIC)
+					_x = _x + Mesh<T>::nx;
+				else
+					_x = 0;
+			}
+			if (_x >= Mesh<T>::nx) {
+				if (bc_x_up == BoundaryCondition::PERIODIC)
+					_x = _x - Mesh<T>::nx;
+				else
+					_x = Mesh<T>::nx - 1;
+			}
+			if (_y < 0) {
+				if (bc_y_down == BoundaryCondition::PERIODIC)
+					_y = _y + Mesh<T>::ny;
+				else
+					_y = 0;
+			}
+			if (_y >= Mesh<T>::ny) {
+				if (bc_y_up == BoundaryCondition::PERIODIC)
+					_y = _y - Mesh<T>::ny;
+				else
+					_y = Mesh<T>::ny - 1;
+			}
+			if (_z < 0) {
+				if (bc_z_down == BoundaryCondition::PERIODIC)
+					_z = _z + Mesh<T>::nz;
+				else
+					_z = 0;
+			}
+			if (_z >= Mesh<T>::nz) {
+				if (bc_z_up == BoundaryCondition::PERIODIC)
+					_z = _z - Mesh<T>::nz;
+				else
+					_z = Mesh<T>::nz - 1;
+			}
+			return (*this)(_x, _y, _z);
+		}
+		// - find element with boundary condition
+		T& at2(int x, int y, int z) {
+			size_t _x = size_t(x), _y = size_t(y), _z = size_t(z);
+			if (_x >= 0 && _x < Mesh<T>::nx && _y >= 0 && _y < Mesh<T>::ny && _z >= 0 && _z < Mesh<T>::nz) {
+				return Mesh<T>::data[MESH_INDEX(_x, _y, _z, Mesh<T>::nx, Mesh<T>::ny)];
+			}
+			if (_x < 0) {
+				if (bc_x_down == BoundaryCondition::PERIODIC)
+					_x = _x + Mesh<T>::nx;
+				else
+					_x = 0;
+			}
+			if (_x >= Mesh<T>::nx) {
+				if (bc_x_up == BoundaryCondition::PERIODIC)
+					_x = _x - Mesh<T>::nx;
+				else
+					_x = Mesh<T>::nx - 1;
+			}
+			if (_y < 0) {
+				if (bc_y_down == BoundaryCondition::PERIODIC)
+					_y = _y + Mesh<T>::ny;
+				else
+					_y = 0;
+			}
+			if (_y >= Mesh<T>::ny) {
+				if (bc_y_up == BoundaryCondition::PERIODIC)
+					_y = _y - Mesh<T>::ny;
+				else
+					_y = Mesh<T>::ny - 1;
+			}
+			if (_z < 0) {
+				if (bc_z_down == BoundaryCondition::PERIODIC)
+					_z = _z + Mesh<T>::nz;
+				else
+					_z = 0;
+			}
+			if (_z >= Mesh<T>::nz) {
+				if (bc_z_up == BoundaryCondition::PERIODIC)
+					_z = _z - Mesh<T>::nz;
+				else
+					_z = Mesh<T>::nz - 1;
+			}
+			return (*this)(_x, _y, _z);
+		}
 
 		void init_boundary_condition() {
 			if (bc_x_down == BoundaryCondition::FIXED) {

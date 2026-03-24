@@ -1,4 +1,5 @@
 #pragma once
+#include "../base/MACRO_DEF.h"
 #include "../../MainIterator_Params.h"
 #include "../Modules_Params.h"
 #include "../input_modules/ioFiles_Params.h"
@@ -15,18 +16,18 @@ namespace pf {
 		inline size_t x_end = 0;
 		inline size_t y_end = 0;
 		inline size_t z_end = 0;
-		inline std::vector<void(*)(std::ofstream& fout)> write_vts_scalar_list;
-		inline std::vector<void(*)(std::ofstream& fout)> write_vts_vector_list;
-		inline void load_vts_scalar_func(void(*buff)(std::ofstream& fout));
-		inline void load_vts_vector_func(void(*buff)(std::ofstream& fout));
+		inline std::vector<void(*)(std::ofstream& fout)> write_vts_list;
+		inline void load_vts_func(void(*buff)(std::ofstream& fout));
 		namespace default_functions {
-			void open_vts_scalar_file(std::ofstream& fout, std::string tail);
-			void open_vts_vec3_file(std::ofstream& fout, std::string tail);
+			void open_vts_file(std::ofstream& fout, std::string tail);
 			void write_scalar_grains(std::ofstream& fout);
 			void write_scalar_phi_index(std::ofstream& fout);
 			void write_scalar_phi_all(std::ofstream& fout);
+			void write_scalar_grad_phi_all(std::ofstream& fout);
 			void write_scalar_con_all(std::ofstream& fout);
+			void write_scalar_grad_con_all(std::ofstream& fout);
 			void write_scalar_temperature(std::ofstream& fout);
+			void write_scalar_grad_temperature(std::ofstream& fout);
 			void close_vts_file(std::ofstream& fout);
 		}
 		void write_vts_pre_iii();

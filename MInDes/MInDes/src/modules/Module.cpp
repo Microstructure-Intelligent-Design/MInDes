@@ -25,16 +25,13 @@ namespace pf {
 			data_driven_complex_model::init_model_modules();
 			break;
 		}
-		}
-		// - 
-		microstructure_init::init_microstructure();
-		// - 
+		// - preprocess
 		automatic_change_delt_time::init_auto_time();
-		// - 
+		microstructure_init::init_microstructure();
+		// - posprocess
 		show_loop_information::init_show_loop_information();
-		// - 
 		write_vts::init_write_vts();
-		// - 
 		cpu_memory_usage::init_cpu_memory_usage();
+		}
 	}
 }

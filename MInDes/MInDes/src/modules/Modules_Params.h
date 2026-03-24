@@ -1,5 +1,7 @@
 #pragma once
 #include "base/Mesh_0.h"
+#include "postprocess_modules/Mechanics/MechanicalPoint.h"
+#include "postprocess_modules/FluidDynamics/FluidDynamicsPoint.h"
 namespace pf {
 	enum Dimension { One_Dimension, Two_Dimension, Three_Dimension };
 	namespace mesh_parameters {
@@ -65,5 +67,23 @@ namespace pf {
 					for (long long x = 0; x < temperature_field.Nx(); x++)
 						temperature_field(x, y, z) = 0;
 		}
+
+		// main mesh for mechanical field
+		inline bool is_mech_field_elas_on = false;
+		inline Mesh<ElasticPoint> elastic_field;
+		inline bool is_mech_field_plas_on = false;
+		inline Mesh<PlasticPoint> plastic_field;
+		inline void init_plastic_field() {
+			plastic_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r);
+			for (long long z = 0; z < plastic_field.Nz(); z++)
+				for (long long y = 0; y < plastic_field.Ny(); y++)
+					for (long long x = 0; x < plastic_field.Nx(); x++)
+						plastic_field(x, y, z).AvePlasticStrain = 0;
+		}
+
+		// main mesh for fluid field
+		inline bool is_fluid_field_on = false;
+		inline Mesh_Boundry<LBMPoint> lbm_field;
+
 	}
 }

@@ -34,6 +34,11 @@
     </Filter>
     <Filter Include="src\modules\models\DDC_model">
       <UniqueIdentifier>{955ed84d-77f2-449b-b03e-8dc27bb30103}</UniqueIdentifier>
+    <Filter Include="src\modules\postprocess\mechanics">
+      <UniqueIdentifier>{786d967a-1ef0-415f-b0c6-ebf12c9b59fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\modules\postprocess\fluiddynamics">
+      <UniqueIdentifier>{4464bd04-41d9-4e17-978a-467309cc0a71}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +47,12 @@
     </ClInclude>
     <ClInclude Include="src\MainIterator_Params.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\Module.h">
+      <Filter>src\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\Modules_Params.h">
+      <Filter>src\modules</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\base\MACRO_DEF.h">
       <Filter>src\modules\base</Filter>
@@ -52,7 +63,13 @@
     <ClInclude Include="src\modules\base\RotationMatrix.h">
       <Filter>src\modules\base</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\base\timer.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
     <ClInclude Include="src\modules\base\VectorMatrix.h">
+      <Filter>src\modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\whereami.h">
       <Filter>src\modules\base</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\input_modules\inputfiles\infile_selector.h">
@@ -85,6 +102,24 @@
     <ClInclude Include="src\modules\input_modules\ProgramPath.h">
       <Filter>src\modules\input</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\model_modules\GrainsOrientations.h">
+      <Filter>src\modules\models</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\PhiProperties.h">
+      <Filter>src\modules\models</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.h">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.h">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.h">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\StiffnessEigenStrain.h">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\AutoDeltTime.h">
       <Filter>src\modules\postprocess</Filter>
     </ClInclude>
@@ -92,6 +127,9 @@
       <Filter>src\modules\postprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h">
+      <Filter>src\modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\MechanicalField.h">
       <Filter>src\modules\postprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h">
@@ -109,26 +147,44 @@
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.h">
       <Filter>src\modules\preprocess\microstructure_init</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.h">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h">
       <Filter>src\modules\preprocess\microstructure_init</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit.h">
       <Filter>src\modules\preprocess</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\base\whereami.h">
-      <Filter>src\modules\base</Filter>
+    <ClInclude Include="src\modules\postprocess_modules\FluidField.h">
+      <Filter>src\modules\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\Module.h">
-      <Filter>src\modules</Filter>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h">
-      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\Modules_Params.h">
-      <Filter>src\modules</Filter>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h">
-      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\SourceF.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\Mechanics\MechanicalPoint.h">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\FluidDynamicsPoint.h">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Functions.h">
       <Filter>src\modules\models\DDC_model</Filter>
@@ -149,6 +205,107 @@
     </ClCompile>
     <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Functions.cpp">
       <Filter>src\modules\models\DDC_model</Filter>
+    <ClCompile Include="src\MainIterator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\base\MACRO_DEF.cpp">
+      <Filter>src\modules\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\base\RotationMatrix.cpp">
+      <Filter>src\modules\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\base\VectorMatrix.cpp">
+      <Filter>src\modules\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\base\whereami.c">
+      <Filter>src\modules\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input_modules\inputfiles\infile_selector.cpp">
+      <Filter>src\modules\input\infile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input_modules\inputfiles\InputFileMath.cpp">
+      <Filter>src\modules\input\infile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input_modules\inputfiles\InputFileReader.cpp">
+      <Filter>src\modules\input\infile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input_modules\inputfiles\QuickStartUp.cpp">
+      <Filter>src\modules\input\infile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input_modules\inputfiles\selectFile.cpp">
+      <Filter>src\modules\input\infile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\input_modules\inputfiles\UserStartUp.cpp">
+      <Filter>src\modules\input\infile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp">
+      <Filter>src\modules\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\PhiProperties.cpp">
+      <Filter>src\modules\models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.cpp">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.cpp">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\PlasticSolver.cpp">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\Mechanics\StiffnessEigenStrain.cpp">
+      <Filter>src\modules\postprocess\mechanics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\AutoDeltTime.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\CpuMemoryUsage.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\MechanicalField.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\ShowLoopInfo.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\WriteVTS.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\Bmp24Structure.cpp">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.cpp">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.cpp">
+      <Filter>src\modules\preprocess\microstructure_init</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit.cpp">
+      <Filter>src\modules\preprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidField.cpp">
+      <Filter>src\modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\GoverningEquationsF.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\EquiDistFunc.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\BoundaryCondition.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\SourceF.cpp">
+      <Filter>src\modules\postprocess\fluiddynamics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

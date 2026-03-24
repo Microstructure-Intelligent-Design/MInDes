@@ -10,7 +10,7 @@ namespace pf {
 		int length = wai_getExecutablePath(nullptr, 0, nullptr);
 		if (length <= 0) { 
 			std::cout << "Failed to get executable path length";
-			exit(0);
+			std::exit(0);
 		};
 
 		std::vector<char> wai_path(length + 1);
