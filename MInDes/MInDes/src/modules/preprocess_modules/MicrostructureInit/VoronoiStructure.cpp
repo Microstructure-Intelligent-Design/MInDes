@@ -13,7 +13,8 @@ namespace pf {
 					points_distance = voronoi_reference_dot_max_pointsDistance;
 				}
 				else {
-					points_distance = pos / voronoi_reference_dot_distance * voronoi_reference_dot_max_pointsDistance + (1 - pos / voronoi_reference_dot_distance) * voronoi_reference_dot_min_pointsDistance;
+					points_distance = pos / voronoi_reference_dot_distance * voronoi_reference_dot_max_pointsDistance 
+						+ (1 - pos / voronoi_reference_dot_distance) * voronoi_reference_dot_min_pointsDistance;
 				}
 			}
 			else if (voronoi_type == VoronoiType::VDT_REF_SURFACE) {
@@ -22,7 +23,8 @@ namespace pf {
 					points_distance = voronoi_reference_surface_max_pointsDistance;
 				}
 				else {
-					points_distance = pos / voronoi_reference_surface_distance * voronoi_reference_surface_max_pointsDistance + (1 - pos / voronoi_reference_surface_distance) * voronoi_reference_surface_min_pointsDistance;
+					points_distance = pos / voronoi_reference_surface_distance * voronoi_reference_surface_max_pointsDistance 
+						+ (1 - pos / voronoi_reference_surface_distance) * voronoi_reference_surface_min_pointsDistance;
 				}
 			}
 			else if (voronoi_type == VoronoiType::VDT_DOTS_MATRIX) {
@@ -58,15 +60,15 @@ namespace pf {
 				dimention = 2;
 			size_t grain_number = voronoi_phi_index_range[1] - voronoi_phi_index_range[0] + 1;
 			// > generate points
-			std::random_device rd; // ���������������������
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // ʱ������ӣ�static_cast<unsigned int>(std::time(nullptr))����̶���ֵ int
-			std::mt19937 gen(rd()); // ʹ�� Mersenne Twister �����ʼ�������������
+			std::random_device rd; // 
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // static_cast<unsigned int>(std::time(nullptr))
+			std::mt19937 gen(rd()); //  Mersenne Twister 
 			if (!is_voronoi_rand) {
 				gen.seed(voronoi_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0]
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 			// REAL rand = real_dist(gen);  // random
 			size_t grain_index = 0;
 			while (grain_index < grain_number) {
@@ -230,15 +232,15 @@ namespace pf {
 //				dimention = 2;
 //			size_t grain_number = voronoi_phi_index_range[1] - voronoi_phi_index_range[0] + 1;
 //			// > generate points
-//			std::random_device rd; // ���������������������
-//			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // ʱ������ӣ�static_cast<unsigned int>(std::time(nullptr))����̶���ֵ int
-//			std::mt19937 gen(rd()); // ʹ�� Mersenne Twister �����ʼ�������������
+//			std::random_device rd; // 
+//			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // static_cast<unsigned int>(std::time(nullptr))
+//			std::mt19937 gen(rd()); //  Mersenne Twister 
 //			if (!is_voronoi_rand) {
 //				gen.seed(voronoi_rand_seed);
 //			}
-//			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-//			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-//			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+//			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0]
+//			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100]
+//			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 //			// REAL rand = real_dist(gen);  // random
 //			size_t grain_index = 0;
 //			while (grain_index < grain_number) {
@@ -410,15 +412,15 @@ namespace pf {
 				dimention = 2;
 			size_t grain_number = voronoi_phi_index_range[1] - voronoi_phi_index_range[0] + 1;
 			// > generate points
-			std::random_device rd; // ���������������������
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // ʱ������ӣ�static_cast<unsigned int>(std::time(nullptr))����̶���ֵ int
-			std::mt19937 gen(rd()); // ʹ�� Mersenne Twister �����ʼ�������������
+			std::random_device rd; // 
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // static_cast<unsigned int>(std::time(nullptr))
+			std::mt19937 gen(rd()); //  Mersenne Twister
 			if (!is_voronoi_rand) {
 				gen.seed(voronoi_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] 
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 			// REAL rand = real_dist(gen);  // random
 			size_t grain = 0;
 			while (grain < grain_number) {

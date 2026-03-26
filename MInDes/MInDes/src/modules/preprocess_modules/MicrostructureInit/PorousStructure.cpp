@@ -19,9 +19,9 @@ namespace pf {
 			///*****    3    C    1   *****
 			///*****                  *****
 			///*****    7    4    8   *****
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] 
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 			// REAL rand = real_dist(gen);  // random
 #pragma omp parallel for
 			for (int i = 0; i < Nx; i++) {
@@ -124,15 +124,15 @@ namespace pf {
 		static void quartet_structure_grow_3D(std::vector<std::vector<std::vector<size_t>>>& arrgrid, std::vector<std::vector<size_t>>& soild, size_t& Tnumsoild, std::mt19937& gen) {
 			const size_t NX = arrgrid.size(), NY = arrgrid[0].size(), NZ = arrgrid[0][0].size();
 			size_t numsoild = Tnumsoild;
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] 
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 			// REAL rand = real_dist(gen);  // random
 			for (size_t index_soild = 0; index_soild < Tnumsoild; index_soild++) {
 				size_t index_i = soild[index_soild][0];
 				size_t index_j = soild[index_soild][1];
 				size_t index_k = soild[index_soild][2];
-				//1���ҷ�������
+				//
 				if (index_j < NY - 1) {
 					size_t i = index_i;
 					size_t j = index_j + 1;
@@ -144,7 +144,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//2���������
+				//
 				if (index_i > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j;
@@ -156,7 +156,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//3����������
+				//
 				if (index_j > 0) {
 					size_t i = index_i;
 					size_t j = index_j - 1;
@@ -168,7 +168,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//4��ǰ��������
+				//
 				if (index_i < NX - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j;
@@ -180,7 +180,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//5���Ϸ�������
+				//
 				if (index_k < NZ - 1) {
 					size_t i = index_i;
 					size_t j = index_j;
@@ -192,7 +192,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//6���·�������		
+				//	
 				if (index_k > 0) {
 					size_t i = index_i;
 					size_t j = index_j;
@@ -204,7 +204,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//7��ˮƽ������ǰ����
+				//
 				if (index_i < NX - 1 && index_j < NY - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j + 1;
@@ -216,7 +216,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//8��ˮƽ������ǰ����
+				//
 				if (index_i < NX - 1 && index_j > 0) {
 					size_t i = index_i + 1;
 					size_t j = index_j - 1;
@@ -228,7 +228,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//9��ˮƽ�����Һ�����
+				//
 				if (index_i > 0 && index_j < NY - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j + 1;
@@ -240,7 +240,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//10��ˮƽ�����������
+				//
 				if (index_i > 0 && index_j > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j - 1;
@@ -252,7 +252,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//11�����Ϸ�������
+				//
 				if (index_j < NY - 1 && index_k < NZ - 1) {
 					size_t i = index_i;
 					size_t j = index_j + 1;
@@ -264,7 +264,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//12�����·�������
+				//
 				if (index_j < NY - 1 && index_k >0) {
 					size_t i = index_i;
 					size_t j = index_j + 1;
@@ -276,7 +276,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//13�����Ϸ�������
+				//
 				if (index_j > 0 && index_k < NZ - 1) {
 					size_t i = index_i;
 					size_t j = index_j - 1;
@@ -288,7 +288,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//14�����·�������
+				//
 				if (index_j > 0 && index_k > 0) {
 					size_t i = index_i;
 					size_t j = index_j - 1;
@@ -300,7 +300,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//15��ǰ�Ϸ�������
+				//
 				if (index_i < NX - 1 && index_k < NZ - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j;
@@ -312,7 +312,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//16��ǰ�·�������
+				//
 				if (index_i < NX - 1 && index_k >0) {
 					size_t i = index_i + 1;
 					size_t j = index_j;
@@ -324,7 +324,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//17����Ϸ�������
+				//
 				if (index_i > 0 && index_k < NZ - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j;
@@ -336,7 +336,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//18����·�������
+				//
 				if (index_i > 0 && index_k > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j;
@@ -348,7 +348,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//19����ǰ�϶Խ��߷�������
+				//
 				if (index_i < NX - 1 && index_j < NY - 1 && index_k < NZ - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j + 1;
@@ -360,7 +360,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//20���Һ��϶Խ��߷�������
+				//
 				if (index_i > 0 && index_j < NY - 1 && index_k < NZ - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j + 1;
@@ -372,7 +372,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//21������϶Խ��߷�������
+				//
 				if (index_i > 0 && index_j > 0 && index_k < NZ - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j - 1;
@@ -384,7 +384,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//22����ǰ�϶Խ��߷�������
+				//
 				if (index_i < NX - 1 && index_j>0 && index_k < NZ - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j - 1;
@@ -396,7 +396,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//23����ǰ�¶Խ��߷�������
+				//
 				if (index_i < NX - 1 && index_j < NY - 1 && index_k>0) {
 					size_t i = index_i + 1;
 					size_t j = index_j + 1;
@@ -408,7 +408,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//24���Һ��¶Խ��߷�������
+				//
 				if (index_i > 0 && index_j < NY - 1 && index_k>0) {
 					size_t i = index_i - 1;
 					size_t j = index_j + 1;
@@ -420,7 +420,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//25������¶Խ��߷�������
+				//
 				if (index_i > 0 && index_j > 0 && index_k > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j - 1;
@@ -432,7 +432,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//26����ǰ�¶Խ��߷�������
+				//
 				if (index_i < NX - 1 && index_j>0 && index_k > 0) {
 					size_t i = index_i + 1;
 					size_t j = index_j - 1;
@@ -450,15 +450,15 @@ namespace pf {
 
 		void quartet_structure_generation(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ) {
 			// > generate points
-			std::random_device rd; // ���������������������
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // ʱ������ӣ�static_cast<unsigned int>(std::time(nullptr))����̶���ֵ int
-			std::mt19937 gen(rd()); // ʹ�� Mersenne Twister �����ʼ�������������
+			std::random_device rd; // 
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); //static_cast<unsigned int>(std::time(nullptr))
+			std::mt19937 gen(rd()); //  Mersenne Twister 
 			if (!is_porous_rand) {
 				gen.seed(porous_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] 
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 			// REAL rand = real_dist(gen);  // random
 			std::cout << "> Quartet structure generation:" << std::endl;
 			if (MESH_NZ == 1) {
@@ -594,15 +594,15 @@ namespace pf {
 
 		void quartet_structure_generation_in_phis(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ, std::vector<std::vector<std::vector<double>>>& aim_phi) {
 			// > generate points
-			std::random_device rd; // ���������������������
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // ʱ������ӣ�static_cast<unsigned int>(std::time(nullptr))����̶���ֵ int
-			std::mt19937 gen(rd()); // ʹ�� Mersenne Twister �����ʼ�������������
+			std::random_device rd; // 
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // static_cast<unsigned int>(std::time(nullptr))
+			std::mt19937 gen(rd()); //  Mersenne Twister 
 			if (!is_porous_rand) {
 				gen.seed(porous_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ��Χ�ڵĸ�����
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ��Χ�ڵ�����
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ��̬�ֲ�����ֵ 50����׼�� 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] 
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // 
 			// REAL rand = real_dist(gen);  // random
 			std::cout << "> Quartet structure generation:";
 			if (MESH_NZ == 1) {

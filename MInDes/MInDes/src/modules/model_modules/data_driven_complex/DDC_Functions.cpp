@@ -388,7 +388,7 @@ namespace pf {
 			}
 			//=========================================================================================================================================
 			void init_phi_pair_wise() {
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for
 				for (long long x = 0; x < main_field::phase_field.Nx(); x++)
 					for (long long y = 0; y < main_field::phase_field.Ny(); y++)
 						for (long long z = 0; z < main_field::phase_field.Nz(); z++) {
@@ -410,7 +410,7 @@ namespace pf {
 						}
 			}
 			void pre_calculation_phi_pair_wise() {
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for
 				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
 					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
 						for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
@@ -463,7 +463,7 @@ namespace pf {
 								}
 							}
 						}
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for
 				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
 					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
 						for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
@@ -536,7 +536,7 @@ namespace pf {
 			REAL solve_phi_pair_wise() {
 				REAL MAX_PHI_INCREMENT = 0.0;
 				bool phi_change = false;
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for
 				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
 					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
 						for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {

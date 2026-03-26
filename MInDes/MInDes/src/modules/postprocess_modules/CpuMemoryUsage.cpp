@@ -154,18 +154,18 @@ namespace pf {
             uint64_t mem = 0;
             PROCESS_MEMORY_COUNTERS pmc;
 
-            // ʹ����С��ҪȨ��
+            // 
             HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
             if (process == nullptr) {
-                return 0.0; // �޷��򿪽��̣�Ȩ�޲��㡢���̲����ڵȣ�
+                return 0.0; // 
             }
 
             if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
-                mem = pmc.WorkingSetSize; // �����ڴ�ʹ�������ֽڣ�
+                mem = pmc.WorkingSetSize; // 
             }
 
             CloseHandle(process);
-            return static_cast<double>(mem) / 1024.0 / 1024.0; // B �� MB
+            return static_cast<double>(mem) / 1024.0 / 1024.0; // 
 
 #else
             char file_name[256];
@@ -173,25 +173,25 @@ namespace pf {
             char line[512];
             int vmrss = 0;
 
-            // ʹ�� snprintf ��ֹ���
+            // 
             snprintf(file_name, sizeof(file_name), "/proc/%d/status", pid);
             fd = fopen(file_name, "r");
             if (!fd) {
-                return 0.0; // �޷��� /proc/<pid>/status
+                return 0.0; // 
             }
 
-            // ���в��� VmRSS
+            // 
             while (fgets(line, sizeof(line), fd)) {
                 if (strncmp(line, "VmRSS:", 6) == 0) {
-                    // �ɹ��ҵ� VmRSS ��
+                    // 
                     char* value_str = line + 6;
-                    vmrss = std::atoi(value_str); // �Զ������հײ���������
+                    vmrss = std::atoi(value_str); // 
                     break;
                 }
             }
             fclose(fd);
 
-            return static_cast<double>(vmrss) / 1024.0; // KB �� MB
+            return static_cast<double>(vmrss) / 1024.0; // 
 #endif
         }
         void exec_pre_iii() {

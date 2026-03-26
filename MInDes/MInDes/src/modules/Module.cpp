@@ -6,6 +6,7 @@
 #include "postprocess_modules/CpuMemoryUsage.h"
 // - simlulation models
 #include "model_modules/data_driven_complex/DDC_Manager.h"
+#include "model_modules/grain_grows_spinodal/GGS_Manager.h"
 namespace pf {
 	enum SimulationModels { SM_None, SM_GGS_MODEL, SM_DDC };
 	void register_all_modules() {
