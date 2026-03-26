@@ -8,65 +8,65 @@ namespace pf {
 					return true;
 				if (phi[phi_index] < Phi_Num_Cut_Off) {
 					if (parameters::diff_method == parameters::DifferenceMethod::FIVE_POINT) {
-						if (parameters::phase_field->at(x + 1, y, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x - 1, y, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y, z - 1)[phi_index] >= Phi_Num_Cut_Off)
+						if (main_field::phase_field(x + 1, y, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x - 1, y, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y, z - 1)[phi_index] >= Phi_Num_Cut_Off)
 							return true;
 					}
 					else {
-						if (parameters::phase_field->at(x + 1, y, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x - 1, y, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y, z - 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x + 1, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x + 1, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x + 1, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x + 1, y, z - 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x - 1, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x - 1, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x - 1, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x - 1, y, z - 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y + 1, z + 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y + 1, z - 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y - 1, z + 1)[phi_index] >= Phi_Num_Cut_Off
-							|| parameters::phase_field->at(x, y - 1, z - 1)[phi_index] >= Phi_Num_Cut_Off)
+						if (main_field::phase_field(x + 1, y, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x - 1, y, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y, z - 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x + 1, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x + 1, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x + 1, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x + 1, y, z - 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x - 1, y + 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x - 1, y - 1, z)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x - 1, y, z + 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x - 1, y, z - 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y + 1, z + 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y + 1, z - 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y - 1, z + 1)[phi_index] >= Phi_Num_Cut_Off
+							|| main_field::phase_field(x, y - 1, z - 1)[phi_index] >= Phi_Num_Cut_Off)
 							return true;
 					}
 				}
 				else if (phi[phi_index] > Phi_Num_Cut_Off_R) {
 					if (parameters::diff_method == parameters::DifferenceMethod::FIVE_POINT) {
-						if (parameters::phase_field->at(x + 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x - 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R)
+						if (main_field::phase_field(x + 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x - 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R)
 							return true;
 					}
 					else {
-						if (parameters::phase_field->at(x + 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x - 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x + 1, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x + 1, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x + 1, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x + 1, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x - 1, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x - 1, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x - 1, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x - 1, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y + 1, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y + 1, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y - 1, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
-							|| parameters::phase_field->at(x, y - 1, z - 1)[phi_index] <= Phi_Num_Cut_Off_R)
+						if (main_field::phase_field(x + 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x - 1, y, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x + 1, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x + 1, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x + 1, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x + 1, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x - 1, y + 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x - 1, y - 1, z)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x - 1, y, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x - 1, y, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y + 1, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y + 1, z - 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y - 1, z + 1)[phi_index] <= Phi_Num_Cut_Off_R
+							|| main_field::phase_field(x, y - 1, z - 1)[phi_index] <= Phi_Num_Cut_Off_R)
 							return true;
 					}
 				}
@@ -74,13 +74,13 @@ namespace pf {
 			}
 			static void normalize_phi(FIELD_VAR& var) {
 				REAL all_phi = 0;
-				for (size_t index = 0; index < parameters::phi_number; index++)
+				for (size_t index = 0; index < main_field::phi_number; index++)
 					all_phi += var.new_phi[index];
 				if (all_phi < SYS_EPSILON) {
 					return;
 				}
 				else {
-					for (size_t index = 0; index < parameters::phi_number; index++)
+					for (size_t index = 0; index < main_field::phi_number; index++)
 						var.new_phi[index] /= all_phi;
 				}
 			}
@@ -297,7 +297,8 @@ namespace pf {
 				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER; index++) {
 					size_t phi_bIndex = point.active_index[index];
 					if (phi_bIndex != parameters::PAIRWISE_ACC_STOP && phi_bIndex != phi_index) {
-						pot += 16 / parameters::interface_width / PI / PI * _xi_ab(phi_index, phi_bIndex, point.old_phi[phi_index], point.old_phi[phi_bIndex], point.grad_phi[phi_index], point.grad_phi[phi_bIndex]) * point.old_phi[phi_bIndex];
+						pot += 16 / parameters::interface_width / PI / PI * _xi_ab(phi_index, phi_bIndex, point.old_phi[phi_index], 
+							point.old_phi[phi_bIndex], point.grad_phi[phi_index], point.grad_phi[phi_bIndex]) * point.old_phi[phi_bIndex];
 						for (size_t index2 = index + 1; index2 < parameters::PHI_ACC_NUMBER; index2++) {
 							size_t phi_gIndex = point.active_index[index2];
 							if (phi_gIndex != parameters::PAIRWISE_ACC_STOP && phi_gIndex != phi_index)
@@ -312,7 +313,8 @@ namespace pf {
 				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER; index++) {
 					size_t phi_bIndex = point.active_index[index];
 					if (phi_bIndex != parameters::PAIRWISE_ACC_STOP && phi_bIndex != phi_index) {
-						pot += 18 / parameters::interface_width * _xi_ab(phi_index, phi_bIndex, point.old_phi[phi_index], point.old_phi[phi_bIndex], point.grad_phi[phi_index], point.grad_phi[phi_bIndex]) * point.old_phi[phi_index] * point.old_phi[phi_bIndex] * point.old_phi[phi_bIndex];
+						pot += 18 / parameters::interface_width * _xi_ab(phi_index, phi_bIndex, point.old_phi[phi_index], 
+							point.old_phi[phi_bIndex], point.grad_phi[phi_index], point.grad_phi[phi_bIndex]) * point.old_phi[phi_index] * point.old_phi[phi_bIndex] * point.old_phi[phi_bIndex];
 						for (size_t index2 = index + 1; index2 < parameters::PHI_ACC_NUMBER; index2++) {
 							size_t phi_gIndex = point.active_index[index2];
 							if (phi_gIndex != parameters::PAIRWISE_ACC_STOP && phi_gIndex != phi_index)
@@ -363,7 +365,7 @@ namespace pf {
 				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER; index++) {
 					size_t acc_index = active_index[index];
 					if (acc_index != parameters::PAIRWISE_ACC_STOP && interphase[acc_index]) {
-						increment = *parameters::delt_t * phi_increment[acc_index];
+						increment = time_parameters::delt_t * phi_increment[acc_index];
 						if (isTwoREALEquality(increment, 0))
 							continue;
 						else if ((old_phi[acc_index] + increment) > 1) {
@@ -387,21 +389,21 @@ namespace pf {
 			//=========================================================================================================================================
 			void init_phi_pair_wise() {
 #pragma omp parallel for collapse(3)
-				for (long long x = 0; x < parameters::phase_field->Nx(); x++)
-					for (long long y = 0; y < parameters::phase_field->Ny(); y++)
-						for (long long z = 0; z < parameters::phase_field->Nz(); z++) {
-							std::vector<REAL>& phi = parameters::phase_field->at(x, y, z);
+				for (long long x = 0; x < main_field::phase_field.Nx(); x++)
+					for (long long y = 0; y < main_field::phase_field.Ny(); y++)
+						for (long long z = 0; z < main_field::phase_field.Nz(); z++) {
+							std::vector<REAL>& phi = main_field::phase_field(x, y, z);
 							FIELD_VAR& field_var = parameters::field_variable(x, y, z);
 							if (parameters::is_phi_normalized) {
 								REAL sum_phi = 0.0;
-								for (size_t index = 0; index < parameters::phi_number; index++)
+								for (size_t index = 0; index < main_field::phi_number; index++)
 									sum_phi += phi[index];
 								if (sum_phi > SYS_EPSILON) {
-									for (size_t index = 0; index < parameters::phi_number; index++)
+									for (size_t index = 0; index < main_field::phi_number; index++)
 										phi[index] /= sum_phi;
 								}
 							}
-							for (int index = 0; index < parameters::phi_number; index++) {
+							for (int index = 0; index < main_field::phi_number; index++) {
 								field_var.new_phi[index] = phi[index];
 								field_var.interphase[index] = is_interphase(x, y, z, field_var.new_phi, index);
 							}
@@ -409,11 +411,11 @@ namespace pf {
 			}
 			void pre_calculation_phi_pair_wise() {
 #pragma omp parallel for collapse(3)
-				for (long long x = parameters::phase_field->COMP_X_BGN(); x <= parameters::phase_field->COMP_X_END(); x++)
-					for (long long y = parameters::phase_field->COMP_Y_BGN(); y <= parameters::phase_field->COMP_Y_END(); y++)
-						for (long long z = parameters::phase_field->COMP_Z_BGN(); z <= parameters::phase_field->COMP_Z_END(); z++) {
+				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
+					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
+						for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
 							FIELD_VAR& field_var = parameters::field_variable(x, y, z);
-							for (size_t index = 0; index < parameters::phi_number; index++) {
+							for (size_t index = 0; index < main_field::phi_number; index++) {
 								field_var.old_phi[index] = field_var.new_phi[index]; // save phi 
 								field_var.new_phi[index] = 0;
 							}
@@ -426,15 +428,18 @@ namespace pf {
 									actIndex++;
 								}
 								if (field_var.interphase[index]) {
-									field_var.grad_phi[index][0] = (parameters::field_variable(x + 1, y, z).old_phi[index] - parameters::field_variable(x - 1, y, z).old_phi[index]) / 2 / parameters::delt_r;
-									field_var.grad_phi[index][1] = (parameters::field_variable(x, y + 1, z).old_phi[index] - parameters::field_variable(x, y - 1, z).old_phi[index]) / 2 / parameters::delt_r;
-									field_var.grad_phi[index][2] = (parameters::field_variable(x, y, z + 1).old_phi[index] - parameters::field_variable(x, y, z - 1).old_phi[index]) / 2 / parameters::delt_r;
+									field_var.grad_phi[index][0] = (parameters::field_variable(x + 1, y, z).old_phi[index] 
+										- parameters::field_variable(x - 1, y, z).old_phi[index]) / 2 / mesh_parameters::delt_r;
+									field_var.grad_phi[index][1] = (parameters::field_variable(x, y + 1, z).old_phi[index] 
+										- parameters::field_variable(x, y - 1, z).old_phi[index]) / 2 / mesh_parameters::delt_r;
+									field_var.grad_phi[index][2] = (parameters::field_variable(x, y, z + 1).old_phi[index] 
+										- parameters::field_variable(x, y, z - 1).old_phi[index]) / 2 / mesh_parameters::delt_r;
 									if (parameters::diff_method == parameters::DifferenceMethod::FIVE_POINT) {
 										field_var.lap_phi[index] =
 											(parameters::field_variable(x + 1, y, z).old_phi[index] + parameters::field_variable(x - 1, y, z).old_phi[index]
 												+ parameters::field_variable(x, y + 1, z).old_phi[index] + parameters::field_variable(x, y - 1, z).old_phi[index]
 												+ parameters::field_variable(x, y, z + 1).old_phi[index] + parameters::field_variable(x, y, z - 1).old_phi[index]
-												- 6 * field_var.old_phi[index]) / parameters::delt_r / parameters::delt_r;
+												- 6 * field_var.old_phi[index]) / mesh_parameters::delt_r / mesh_parameters::delt_r;
 									}
 									else if (parameters::diff_method == parameters::DifferenceMethod::NINE_POINT) {
 										field_var.lap_phi[index] =
@@ -447,7 +452,7 @@ namespace pf {
 												+ parameters::field_variable(x + 1, y, z - 1).old_phi[index] + parameters::field_variable(x + 1, y, z + 1).old_phi[index]
 												+ parameters::field_variable(x, y - 1, z - 1).old_phi[index] + parameters::field_variable(x, y - 1, z + 1).old_phi[index]
 												+ parameters::field_variable(x, y + 1, z - 1).old_phi[index] + parameters::field_variable(x, y + 1, z + 1).old_phi[index]
-												- 36 * field_var.old_phi[index]) / 6 / parameters::delt_r / parameters::delt_r;
+												- 36 * field_var.old_phi[index]) / 6 / mesh_parameters::delt_r / mesh_parameters::delt_r;
 									}
 								}
 								else {
@@ -459,9 +464,9 @@ namespace pf {
 							}
 						}
 #pragma omp parallel for collapse(3)
-				for (long long x = parameters::phase_field->COMP_X_BGN(); x <= parameters::phase_field->COMP_X_END(); x++)
-					for (long long y = parameters::phase_field->COMP_Y_BGN(); y <= parameters::phase_field->COMP_Y_END(); y++)
-						for (long long z = parameters::phase_field->COMP_Z_BGN(); z <= parameters::phase_field->COMP_Z_END(); z++) {
+				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
+					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
+						for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
 							FIELD_VAR& field_var = parameters::field_variable(x, y, z);
 							std::vector<REAL>& phi_increment = field_var.new_phi;
 							REAL N = 0;
@@ -532,9 +537,9 @@ namespace pf {
 				REAL MAX_PHI_INCREMENT = 0.0;
 				bool phi_change = false;
 #pragma omp parallel for collapse(3)
-				for (long long x = parameters::phase_field->COMP_X_BGN(); x <= parameters::phase_field->COMP_X_END(); x++)
-					for (long long y = parameters::phase_field->COMP_Y_BGN(); y <= parameters::phase_field->COMP_Y_END(); y++)
-						for (long long z = parameters::phase_field->COMP_Z_BGN(); z <= parameters::phase_field->COMP_Z_END(); z++) {
+				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
+					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
+						for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
 							FIELD_VAR& field_var = parameters::field_variable(x, y, z);
 							std::vector<REAL>& phi_increment = field_var.new_phi;
 							phi_change = false;
@@ -542,7 +547,7 @@ namespace pf {
 								size_t phi_index = field_var.active_index[index];
 								if (phi_index != parameters::PAIRWISE_ACC_STOP && field_var.interphase[phi_index]) {
 									phi_change = true;
-									field_var.new_phi[phi_index] = field_var.old_phi[phi_index] + (*parameters::delt_t) * phi_increment[phi_index];
+									field_var.new_phi[phi_index] = field_var.old_phi[phi_index] + (time_parameters::delt_t) * phi_increment[phi_index];
 #ifdef _OPENMP
 #pragma omp critical
 #endif
@@ -564,9 +569,9 @@ namespace pf {
 								// normalize the phi
 								if (parameters::is_phi_normalized)
 									normalize_phi(field_var);
-								for (size_t index = 0; index < parameters::phi_number; index++) {
+								for (size_t index = 0; index < main_field::phi_number; index++) {
 									// modify phi
-									parameters::phase_field->at(x, y, z)[index] = field_var.new_phi[index];
+									main_field::phase_field(x, y, z)[index] = field_var.new_phi[index];
 									// change _flag
 									if (field_var.new_phi[index] >= Phi_Num_Cut_Off && field_var.new_phi[index] <= Phi_Num_Cut_Off_R) {
 										if (!field_var.interphase[index]) {

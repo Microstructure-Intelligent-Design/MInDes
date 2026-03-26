@@ -1,6 +1,7 @@
 #pragma once
 #include "../../base/Mesh_0.h"
 #include "../../base/RotationMatrix.h"
+#include "../../Modules_Params.h"
 namespace pf {
 	namespace data_driven_complex_model {
 		struct FIELD_VAR
@@ -121,9 +122,6 @@ namespace pf {
 			inline size_t PAIRWISE_ACC_STOP = 0;
 			inline size_t PHI_ACC_NUMBER = 0;
 			// - field
-			inline Mesh_Boundry<std::vector<REAL>>* phase_field;
-			inline Mesh_Boundry<std::vector<REAL>>* concentration_field;
-			inline Mesh_Boundry<REAL>* temperature_field;
 			inline Mesh_Boundry<FIELD_VAR> field_variable;
 			inline Mesh_Boundry<FIELD_VAR_BC> field_variable_bc;
 			// ===================================================================================================
@@ -167,24 +165,6 @@ namespace pf {
 			inline std::vector<std::vector<REAL>> intEnAniso2_matrix; // <- phi property
 			inline std::vector<std::vector<REAL>> intEnAniso3_matrix; // <- phi property
 			inline std::vector<std::vector<REAL>> intEnAniso4_matrix; // <- phi property
-			// ===================================================================================================
-			// - mesh/field parameter
-			inline size_t MESH_NX = 1;
-			inline size_t MESH_NY = 1;
-			inline size_t MESH_NZ = 1;
-			inline BoundaryCondition x_down = BoundaryCondition::PERIODIC;
-			inline BoundaryCondition y_down = BoundaryCondition::PERIODIC;
-			inline BoundaryCondition z_down = BoundaryCondition::PERIODIC;
-			inline BoundaryCondition x_up = BoundaryCondition::PERIODIC;
-			inline BoundaryCondition y_up = BoundaryCondition::PERIODIC;
-			inline BoundaryCondition z_up = BoundaryCondition::PERIODIC;
-			inline REAL delt_r = 1.0;
-			inline REAL* delt_t;
-			inline size_t phi_number = 0;
-			inline REAL* PHI_MAX_VARIATION;
-			inline size_t con_number = 0;
-			inline REAL* CON_MAX_VARIATION;
-			inline REAL* TEMP_MAX_VARIATION;
 		}
 	}
 }
