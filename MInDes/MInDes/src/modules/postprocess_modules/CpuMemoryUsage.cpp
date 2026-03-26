@@ -154,18 +154,18 @@ namespace pf {
             uint64_t mem = 0;
             PROCESS_MEMORY_COUNTERS pmc;
 
-            // Ê¹ÓÃ×îÐ¡±ØÒªÈ¨ÏÞ
+            // Ê¹ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ÒªÈ¨ï¿½ï¿½
             HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
             if (process == nullptr) {
-                return 0.0; // ÎÞ·¨´ò¿ª½ø³Ì£¨È¨ÏÞ²»×ã¡¢½ø³Ì²»´æÔÚµÈ£©
+                return 0.0; // ï¿½Þ·ï¿½ï¿½ò¿ª½ï¿½ï¿½Ì£ï¿½È¨ï¿½Þ²ï¿½ï¿½ã¡¢ï¿½ï¿½ï¿½Ì²ï¿½ï¿½ï¿½ï¿½ÚµÈ£ï¿½
             }
 
             if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
-                mem = pmc.WorkingSetSize; // ÎïÀíÄÚ´æÊ¹ÓÃÁ¿£¨×Ö½Ú£©
+                mem = pmc.WorkingSetSize; // ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½Ú£ï¿½
             }
 
             CloseHandle(process);
-            return static_cast<double>(mem) / 1024.0 / 1024.0; // B ¡ú MB
+            return static_cast<double>(mem) / 1024.0 / 1024.0; // B ï¿½ï¿½ MB
 
 #else
             char file_name[256];
@@ -173,25 +173,25 @@ namespace pf {
             char line[512];
             int vmrss = 0;
 
-            // Ê¹ÓÃ snprintf ·ÀÖ¹Òç³ö
+            // Ê¹ï¿½ï¿½ snprintf ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½
             snprintf(file_name, sizeof(file_name), "/proc/%d/status", pid);
             fd = fopen(file_name, "r");
             if (!fd) {
-                return 0.0; // ÎÞ·¨´ò¿ª /proc/<pid>/status
+                return 0.0; // ï¿½Þ·ï¿½ï¿½ï¿½ /proc/<pid>/status
             }
 
-            // ÖðÐÐ²éÕÒ VmRSS
+            // ï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ VmRSS
             while (fgets(line, sizeof(line), fd)) {
                 if (strncmp(line, "VmRSS:", 6) == 0) {
-                    // ³É¹¦ÕÒµ½ VmRSS ÐÐ
+                    // ï¿½É¹ï¿½ï¿½Òµï¿½ VmRSS ï¿½ï¿½
                     char* value_str = line + 6;
-                    vmrss = std::atoi(value_str); // ×Ô¶¯Ìø¹ý¿Õ°×²¢½âÎöÊý×Ö
+                    vmrss = std::atoi(value_str); // ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ°×²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     break;
                 }
             }
             fclose(fd);
 
-            return static_cast<double>(vmrss) / 1024.0; // KB ¡ú MB
+            return static_cast<double>(vmrss) / 1024.0; // KB ï¿½ï¿½ MB
 #endif
         }
         void exec_pre_iii() {

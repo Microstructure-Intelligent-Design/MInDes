@@ -19,9 +19,9 @@ namespace pf {
 			///*****    3    C    1   *****
 			///*****                  *****
 			///*****    7    4    8   *****
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 			// REAL rand = real_dist(gen);  // random
 #pragma omp parallel for
 			for (int i = 0; i < Nx; i++) {
@@ -124,15 +124,15 @@ namespace pf {
 		static void quartet_structure_grow_3D(std::vector<std::vector<std::vector<size_t>>>& arrgrid, std::vector<std::vector<size_t>>& soild, size_t& Tnumsoild, std::mt19937& gen) {
 			const size_t NX = arrgrid.size(), NY = arrgrid[0].size(), NZ = arrgrid[0][0].size();
 			size_t numsoild = Tnumsoild;
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 			// REAL rand = real_dist(gen);  // random
 			for (size_t index_soild = 0; index_soild < Tnumsoild; index_soild++) {
 				size_t index_i = soild[index_soild][0];
 				size_t index_j = soild[index_soild][1];
 				size_t index_k = soild[index_soild][2];
-				//1ÏòÓÒ·½ÏòÉú³¤
+				//1ï¿½ï¿½ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_j < NY - 1) {
 					size_t i = index_i;
 					size_t j = index_j + 1;
@@ -144,7 +144,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//2Ïòºó·½ÏòÉú³¤
+				//2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j;
@@ -156,7 +156,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//3Ïò×ó·½ÏòÉú³¤
+				//3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_j > 0) {
 					size_t i = index_i;
 					size_t j = index_j - 1;
@@ -168,7 +168,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//4ÏòÇ°·½ÏòÉú³¤
+				//4ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j;
@@ -180,7 +180,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//5ÏòÉÏ·½ÏòÉú³¤
+				//5ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_k < NZ - 1) {
 					size_t i = index_i;
 					size_t j = index_j;
@@ -192,7 +192,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//6ÏòÏÂ·½ÏòÉú³¤		
+				//6ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½		
 				if (index_k > 0) {
 					size_t i = index_i;
 					size_t j = index_j;
@@ -204,7 +204,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//7ÏòË®Æ½·½ÏòÓÒÇ°Éú³¤
+				//7ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_j < NY - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j + 1;
@@ -216,7 +216,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//8ÏòË®Æ½·½Ïò×óÇ°Éú³¤
+				//8ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_j > 0) {
 					size_t i = index_i + 1;
 					size_t j = index_j - 1;
@@ -228,7 +228,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//9ÏòË®Æ½·½ÏòÓÒºóÉú³¤
+				//9ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½Òºï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_j < NY - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j + 1;
@@ -240,7 +240,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//10ÏòË®Æ½·½Ïò×óºóÉú³¤
+				//10ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_j > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j - 1;
@@ -252,7 +252,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//11ÏòÓÒÉÏ·½ÏòÉú³¤
+				//11ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_j < NY - 1 && index_k < NZ - 1) {
 					size_t i = index_i;
 					size_t j = index_j + 1;
@@ -264,7 +264,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//12ÏòÓÒÏÂ·½ÏòÉú³¤
+				//12ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_j < NY - 1 && index_k >0) {
 					size_t i = index_i;
 					size_t j = index_j + 1;
@@ -276,7 +276,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//13Ïò×óÉÏ·½ÏòÉú³¤
+				//13ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_j > 0 && index_k < NZ - 1) {
 					size_t i = index_i;
 					size_t j = index_j - 1;
@@ -288,7 +288,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//14Ïò×óÏÂ·½ÏòÉú³¤
+				//14ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_j > 0 && index_k > 0) {
 					size_t i = index_i;
 					size_t j = index_j - 1;
@@ -300,7 +300,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//15ÏòÇ°ÉÏ·½ÏòÉú³¤
+				//15ï¿½ï¿½Ç°ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_k < NZ - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j;
@@ -312,7 +312,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//16ÏòÇ°ÏÂ·½ÏòÉú³¤
+				//16ï¿½ï¿½Ç°ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_k >0) {
 					size_t i = index_i + 1;
 					size_t j = index_j;
@@ -324,7 +324,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//17ÏòºóÉÏ·½ÏòÉú³¤
+				//17ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_k < NZ - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j;
@@ -336,7 +336,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//18ÏòºóÏÂ·½ÏòÉú³¤
+				//18ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_k > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j;
@@ -348,7 +348,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//19ÏòÓÒÇ°ÉÏ¶Ô½ÇÏß·½ÏòÉú³¤
+				//19ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Ï¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_j < NY - 1 && index_k < NZ - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j + 1;
@@ -360,7 +360,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//20ÏòÓÒºóÉÏ¶Ô½ÇÏß·½ÏòÉú³¤
+				//20ï¿½ï¿½ï¿½Òºï¿½ï¿½Ï¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_j < NY - 1 && index_k < NZ - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j + 1;
@@ -372,7 +372,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//21Ïò×óºóÉÏ¶Ô½ÇÏß·½ÏòÉú³¤
+				//21ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_j > 0 && index_k < NZ - 1) {
 					size_t i = index_i - 1;
 					size_t j = index_j - 1;
@@ -384,7 +384,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//22Ïò×óÇ°ÉÏ¶Ô½ÇÏß·½ÏòÉú³¤
+				//22ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Ï¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_j>0 && index_k < NZ - 1) {
 					size_t i = index_i + 1;
 					size_t j = index_j - 1;
@@ -396,7 +396,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//23ÏòÓÒÇ°ÏÂ¶Ô½ÇÏß·½ÏòÉú³¤
+				//23ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Â¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_j < NY - 1 && index_k>0) {
 					size_t i = index_i + 1;
 					size_t j = index_j + 1;
@@ -408,7 +408,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//24ÏòÓÒºóÏÂ¶Ô½ÇÏß·½ÏòÉú³¤
+				//24ï¿½ï¿½ï¿½Òºï¿½ï¿½Â¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_j < NY - 1 && index_k>0) {
 					size_t i = index_i - 1;
 					size_t j = index_j + 1;
@@ -420,7 +420,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//25Ïò×óºóÏÂ¶Ô½ÇÏß·½ÏòÉú³¤
+				//25ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i > 0 && index_j > 0 && index_k > 0) {
 					size_t i = index_i - 1;
 					size_t j = index_j - 1;
@@ -432,7 +432,7 @@ namespace pf {
 						soild.push_back(new_solid);
 					}
 				}
-				//26Ïò×óÇ°ÏÂ¶Ô½ÇÏß·½ÏòÉú³¤
+				//26ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Â¶Ô½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				if (index_i < NX - 1 && index_j>0 && index_k > 0) {
 					size_t i = index_i + 1;
 					size_t j = index_j - 1;
@@ -450,15 +450,15 @@ namespace pf {
 
 		void quartet_structure_generation(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ) {
 			// > generate points
-			std::random_device rd; // ¸ßÖÊÁ¿Ëæ»úÊýÖÖ×ÓÉú³ÉÆ÷
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±¼ä´ÁÖÖ×Ó£ºstatic_cast<unsigned int>(std::time(nullptr))£¬»ò¹Ì¶¨µÄÖµ int
-			std::mt19937 gen(rd()); // Ê¹ÓÃ Mersenne Twister ÒýÇæ³õÊ¼»¯Ëæ»úÊýÉú³ÉÆ÷
+			std::random_device rd; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½static_cast<unsigned int>(std::time(nullptr))ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½Öµ int
+			std::mt19937 gen(rd()); // Ê¹ï¿½ï¿½ Mersenne Twister ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (!is_porous_rand) {
 				gen.seed(porous_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 			// REAL rand = real_dist(gen);  // random
 			std::cout << "> Quartet structure generation:" << std::endl;
 			if (MESH_NZ == 1) {
@@ -594,15 +594,15 @@ namespace pf {
 
 		void quartet_structure_generation_in_phis(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ, std::vector<std::vector<std::vector<double>>>& aim_phi) {
 			// > generate points
-			std::random_device rd; // ¸ßÖÊÁ¿Ëæ»úÊýÖÖ×ÓÉú³ÉÆ÷
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±¼ä´ÁÖÖ×Ó£ºstatic_cast<unsigned int>(std::time(nullptr))£¬»ò¹Ì¶¨µÄÖµ int
-			std::mt19937 gen(rd()); // Ê¹ÓÃ Mersenne Twister ÒýÇæ³õÊ¼»¯Ëæ»úÊýÉú³ÉÆ÷
+			std::random_device rd; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½static_cast<unsigned int>(std::time(nullptr))ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½Öµ int
+			std::mt19937 gen(rd()); // Ê¹ï¿½ï¿½ Mersenne Twister ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (!is_porous_rand) {
 				gen.seed(porous_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 			// REAL rand = real_dist(gen);  // random
 			std::cout << "> Quartet structure generation:";
 			if (MESH_NZ == 1) {

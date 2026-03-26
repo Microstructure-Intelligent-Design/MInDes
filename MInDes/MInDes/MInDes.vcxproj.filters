@@ -34,6 +34,9 @@
     <Filter Include="modules\postprocess\fluid">
       <UniqueIdentifier>{885b9103-8507-462e-9e7f-479392563c7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\modules\models\ggs-model">
+      <UniqueIdentifier>{421ae540-7b94-4fb4-8a20-a7550c66ff42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -293,6 +296,15 @@
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\WriteVTS.h">
       <Filter>modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h">
+      <Filter>src\modules\models\ggs-model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h">
+      <Filter>src\modules\models\ggs-model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Params.h">
+      <Filter>src\modules\models\ggs-model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

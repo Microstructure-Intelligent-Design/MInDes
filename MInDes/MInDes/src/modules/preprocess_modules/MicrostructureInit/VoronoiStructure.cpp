@@ -58,15 +58,15 @@ namespace pf {
 				dimention = 2;
 			size_t grain_number = voronoi_phi_index_range[1] - voronoi_phi_index_range[0] + 1;
 			// > generate points
-			std::random_device rd; // ¸ßÖÊÁ¿Ëæ»úÊýÖÖ×ÓÉú³ÉÆ÷
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±¼ä´ÁÖÖ×Ó£ºstatic_cast<unsigned int>(std::time(nullptr))£¬»ò¹Ì¶¨µÄÖµ int
-			std::mt19937 gen(rd()); // Ê¹ÓÃ Mersenne Twister ÒýÇæ³õÊ¼»¯Ëæ»úÊýÉú³ÉÆ÷
+			std::random_device rd; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½static_cast<unsigned int>(std::time(nullptr))ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½Öµ int
+			std::mt19937 gen(rd()); // Ê¹ï¿½ï¿½ Mersenne Twister ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (!is_voronoi_rand) {
 				gen.seed(voronoi_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 			// REAL rand = real_dist(gen);  // random
 			size_t grain_index = 0;
 			while (grain_index < grain_number) {
@@ -230,15 +230,15 @@ namespace pf {
 //				dimention = 2;
 //			size_t grain_number = voronoi_phi_index_range[1] - voronoi_phi_index_range[0] + 1;
 //			// > generate points
-//			std::random_device rd; // ¸ßÖÊÁ¿Ëæ»úÊýÖÖ×ÓÉú³ÉÆ÷
-//			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±¼ä´ÁÖÖ×Ó£ºstatic_cast<unsigned int>(std::time(nullptr))£¬»ò¹Ì¶¨µÄÖµ int
-//			std::mt19937 gen(rd()); // Ê¹ÓÃ Mersenne Twister ÒýÇæ³õÊ¼»¯Ëæ»úÊýÉú³ÉÆ÷
+//			std::random_device rd; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½static_cast<unsigned int>(std::time(nullptr))ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½Öµ int
+//			std::mt19937 gen(rd()); // Ê¹ï¿½ï¿½ Mersenne Twister ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //			if (!is_voronoi_rand) {
 //				gen.seed(voronoi_rand_seed);
 //			}
-//			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-//			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-//			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+//			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+//			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+//			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 //			// REAL rand = real_dist(gen);  // random
 //			size_t grain_index = 0;
 //			while (grain_index < grain_number) {
@@ -410,15 +410,15 @@ namespace pf {
 				dimention = 2;
 			size_t grain_number = voronoi_phi_index_range[1] - voronoi_phi_index_range[0] + 1;
 			// > generate points
-			std::random_device rd; // ¸ßÖÊÁ¿Ëæ»úÊýÖÖ×ÓÉú³ÉÆ÷
-			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±¼ä´ÁÖÖ×Ó£ºstatic_cast<unsigned int>(std::time(nullptr))£¬»ò¹Ì¶¨µÄÖµ int
-			std::mt19937 gen(rd()); // Ê¹ÓÃ Mersenne Twister ÒýÇæ³õÊ¼»¯Ëæ»úÊýÉú³ÉÆ÷
+			std::random_device rd; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½static_cast<unsigned int>(std::time(nullptr))ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½Öµ int
+			std::mt19937 gen(rd()); // Ê¹ï¿½ï¿½ Mersenne Twister ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (!is_voronoi_rand) {
 				gen.seed(voronoi_rand_seed);
 			}
-			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ·¶Î§ÄÚµÄ¸¡µãÊý
-			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ·¶Î§ÄÚµÄÕûÊý
-			// std::normal_distribution<> normal_dist(50.0, 10.0); // ÕýÌ¬·Ö²¼£¬¾ùÖµ 50£¬±ê×¼²î 10
+			std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] ï¿½ï¿½Î§ï¿½ÚµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] ï¿½ï¿½Î§ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
+			// std::normal_distribution<> normal_dist(50.0, 10.0); // ï¿½ï¿½Ì¬ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ 50ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ 10
 			// REAL rand = real_dist(gen);  // random
 			size_t grain = 0;
 			while (grain < grain_number) {
