@@ -125,7 +125,8 @@ namespace pf {
 			cal_eigenstrain = _cal_eigenstrain;
 		}
 		void free() {
-			elastic_field->clear();
+			if(elastic_field)
+				elastic_field->clear();
 			for (int n = 0; n < 6; n++)
 			{
 				fftw_destroy_plan(ForwardPlanRHS[n]);

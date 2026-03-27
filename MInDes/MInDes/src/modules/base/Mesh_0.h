@@ -4,9 +4,43 @@
 #include <iostream>
 namespace pf {
 	// - important
+	template <typename T>
+	struct MESH_POS
+	{
+		T x, y, z;
+		MESH_POS(T _x = 0, T _y = 0, T _z = 0) {
+			x = _x;
+			y = _y;
+			z = _z;
+		}
+	};
 	inline size_t MESH_INDEX(size_t x, size_t y, size_t z, size_t Nx, size_t Ny) { return x + y * Nx + z * Nx * Ny; }
 	inline size_t MESH_INDEX(long long x, long long y, long long z, size_t Nx, size_t Ny) { return x + y * Nx + z * Nx * Ny; }
 	inline size_t MESH_INDEX(int x, int y, int z, size_t Nx, size_t Ny) { return x + y * Nx + z * Nx * Ny; }
+	inline MESH_POS<size_t> MESH_POSITION(size_t mesh_index, size_t Nx, size_t Ny) {
+		MESH_POS<size_t> pos;
+		pos.z = mesh_index / (Nx * Ny);
+		size_t rem = mesh_index % (Nx * Ny);
+		pos.y = rem / Nx;
+		pos.x = rem % Nx;
+		return pos;
+	};
+	inline MESH_POS<int> MESH_POSITION(int mesh_index, size_t Nx, size_t Ny) {
+		MESH_POS<int> pos;
+		pos.z = mesh_index / int(Nx * Ny);
+		int rem = mesh_index % int(Nx * Ny);
+		pos.y = rem / int(Nx);
+		pos.x = rem % int(Nx);
+		return pos;
+	};
+	inline MESH_POS<long long> MESH_POSITION(long long mesh_index, size_t Nx, size_t Ny) {
+		MESH_POS<long long> pos;
+		pos.z = mesh_index / static_cast<long long>(Nx * Ny);
+		long long rem = mesh_index % static_cast<long long>(Nx * Ny);
+		pos.y = rem / static_cast<long long>(Nx);
+		pos.x = rem % static_cast<long long>(Nx);
+		return pos;
+	};
 
 	template <typename T>
 	class Mesh {

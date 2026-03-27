@@ -34,8 +34,14 @@
     <Filter Include="modules\postprocess\fluid">
       <UniqueIdentifier>{885b9103-8507-462e-9e7f-479392563c7d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\modules\models\ggs-model">
-      <UniqueIdentifier>{421ae540-7b94-4fb4-8a20-a7550c66ff42}</UniqueIdentifier>
+    <Filter Include="modules\postprocess\machineL">
+      <UniqueIdentifier>{657ecbaa-c8da-419e-ab75-79ce90e6eadd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\model\GGS">
+      <UniqueIdentifier>{4c6583cd-f7c6-4293-99c4-08a0550a530d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\postprocess\machineL\field_predictor">
+      <UniqueIdentifier>{f36a1b94-930b-49df-9da2-46a648796783}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +151,18 @@
     </ClCompile>
     <ClCompile Include="src\modules\postprocess_modules\WriteVTS.cpp">
       <Filter>modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\MachineLearning\field_predictor.cpp">
+      <Filter>modules\postprocess\machineL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp">
+      <Filter>modules\model\GGS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\MachineLearning.cpp">
+      <Filter>modules\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.cpp">
+      <Filter>modules\postprocess\machineL\field_predictor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -297,14 +315,26 @@
     <ClInclude Include="src\modules\postprocess_modules\WriteVTS.h">
       <Filter>modules\postprocess</Filter>
     </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning\field_predictor.h">
+      <Filter>modules\postprocess\machineL</Filter>
+    </ClInclude>
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h">
-      <Filter>src\modules\models\ggs-model</Filter>
+      <Filter>modules\model\GGS</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h">
-      <Filter>src\modules\models\ggs-model</Filter>
+      <Filter>modules\model\GGS</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Params.h">
-      <Filter>src\modules\models\ggs-model</Filter>
+      <Filter>modules\model\GGS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning.h">
+      <Filter>modules\postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_layout.h">
+      <Filter>modules\postprocess\machineL\field_predictor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.h">
+      <Filter>modules\postprocess\machineL\field_predictor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

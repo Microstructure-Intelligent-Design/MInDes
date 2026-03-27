@@ -1,9 +1,12 @@
 #include "Module.h"
+// - preprocess
 #include "preprocess_modules/MicrostructureInit.h"
+// - postprocess
 #include "postprocess_modules/AutoDeltTime.h"
 #include "postprocess_modules/ShowLoopInfo.h"
 #include "postprocess_modules/WriteVTS.h"
 #include "postprocess_modules/CpuMemoryUsage.h"
+#include "postprocess_modules/MachineLearning.h"
 // - simlulation models
 #include "model_modules/data_driven_complex/DDC_Manager.h"
 #include "model_modules/grain_grows_spinodal/GGS_Manager.h"
@@ -39,6 +42,7 @@ namespace pf {
 		show_loop_information::init_show_loop_information();
 		write_vts::init_write_vts();
 		cpu_memory_usage::init_cpu_memory_usage();
+		machine_learning::init_machine_learning();
 		}
 	}
 }

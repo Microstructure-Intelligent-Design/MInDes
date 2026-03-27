@@ -45,6 +45,9 @@
     <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\SourceF.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\FluidField.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\MachineLearning.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.cpp" />
+    <ClCompile Include="src\modules\postprocess_modules\MachineLearning\field_predictor.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\MechanicalField.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.cpp" />
@@ -98,6 +101,10 @@
     <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.h" />
     <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\SourceF.h" />
     <ClInclude Include="src\modules\postprocess_modules\FluidField.h" />
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning.h" />
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_layout.h" />
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.h" />
+    <ClInclude Include="src\modules\postprocess_modules\MachineLearning\field_predictor.h" />
     <ClInclude Include="src\modules\postprocess_modules\MechanicalField.h" />
     <ClInclude Include="src\modules\postprocess_modules\Mechanics\ElasticSolver.h" />
     <ClInclude Include="src\modules\postprocess_modules\Mechanics\GoverningEquationsM.h" />
