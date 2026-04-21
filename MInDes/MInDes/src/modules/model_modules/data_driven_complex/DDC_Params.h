@@ -2,6 +2,9 @@
 #include "../../base/Mesh_0.h"
 #include "../../base/RotationMatrix.h"
 #include "../../Modules_Params.h"
+#include "../PhiProperties.h"
+#include "../ConProperties.h"
+#include "../GrainsOrientations.h"
 namespace pf {
 	namespace data_driven_complex_model {
 		struct FIELD_VAR
@@ -57,61 +60,7 @@ namespace pf {
 				mob = n.mob;
 			}
 		};
-		class GrainsOrientations
-		{
-		public:
-			GrainsOrientations() = default;
-			~GrainsOrientations() {
-				orientations.clear();
-			}
-			GrainsOrientations& operator=(const GrainsOrientations& n) {
-				rotation_gauge = n.rotation_gauge;
-				orientations = n.orientations;
-				return *this;
-			}
-			void init(RotationGauge _rotation_gauge, size_t phi_number) {
-				rotation_gauge = _rotation_gauge;
-				orientations.resize(phi_number);
-				for (size_t index = 0; index < phi_number; index++) {
-					orientations[index][0] = REAL(0.0);
-					orientations[index][1] = REAL(0.0);
-					orientations[index][2] = REAL(0.0);
-				}
-			}
-			void set_phi_orientation(size_t phi_index, Vector3 radian) {
-				orientations[phi_index] = radian;
-			}
-			Vector3 get_phi_orientation(size_t phi_index) {
-				return orientations[phi_index];
-			}
-			Matrix3x3 get_phi_rotationMatrix(size_t phi_index) {
-				return RotationMatrix::rotationMatrix(orientations[phi_index], rotation_gauge);
-			}
-			RotationGauge rotation_gauge;
-			std::vector<Vector3> orientations;
-		};
 		namespace parameters {
-			// phases name/property in this simulation
-			inline std::vector<std::string> PHASES;
-			inline size_t phase_property(std::string phi_name) {
-				for (size_t index = 0; index < PHASES.size(); index++)
-					if (phi_name.compare(PHASES[index]) == 0)
-						return index;
-				std::cout << "ERROR, phase name: " << phi_name << " has not been defined !";
-				exit(0);
-			}
-			// components name/index in this simulation
-			inline std::vector<std::string> COMPONENTS;
-			inline size_t comp_index(std::string con_name) {
-				for (size_t index = 0; index < COMPONENTS.size(); index++)
-					if (con_name.compare(COMPONENTS[index]) == 0)
-						return index;
-				std::cout << "ERROR, component name: " << con_name << " has not been defined !";
-				exit(0);
-			}
-			// - property/index/region parameters
-			inline size_t phi_property_number = 0;
-			inline std::vector<size_t> phi_property; // [index] -> property
 			inline size_t con_region_number = 0;
 			inline std::vector<size_t> con_region; // [index] -> region
 			inline std::vector<std::vector<size_t>> rg_con_index; // [region] -> { con_index1 , con_index2 , ... }
@@ -144,7 +93,6 @@ namespace pf {
 			inline std::vector<std::vector<REAL>> Qij; // <- phi index
 			const REAL R = REAL(8.314);
 			// - interface mobility anisotropy
-			inline GrainsOrientations grains_orientation;
 			enum Int_Mobility_Anisotropic { IMA_ISO, IMA_CUBIC, IMA_HEX_BOETTGER, IMA_HEX_SUN, IMA_HEX_YANG };
 			inline std::vector<std::vector<int>>  intMob_anisotropic_model_matrix; // <- phi property
 			inline std::vector<std::vector<REAL>> intMobAniso1_matrix; // <- phi property

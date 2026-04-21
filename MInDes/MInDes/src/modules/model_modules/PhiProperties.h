@@ -2,7 +2,6 @@
 #include "../base/MACRO_DEF.h"
 #include "../input_modules/inputfiles/InputFileReader.h"
 #include "../Modules_Params.h"
-#include <vector>
 namespace pf {
 	class PhiProperties
 	{
@@ -17,8 +16,14 @@ namespace pf {
 		size_t phi_property_number();
 		bool is_phi_property(std::string _property_name);
 		std::string phi_property_name(int phi_property_index);
+		std::string phi_property_name(size_t phi_property_index);
 		void init();
-
+		size_t operator[](size_t phi_index) {
+			return _phi_property[phi_index];
+		}
+		int operator[](int phi_index) {
+			return int(_phi_property[phi_index]);
+		}
 	private:
 		void add_property_name(std::string _property_name);
 		PhiProperties();

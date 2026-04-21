@@ -164,6 +164,12 @@
     <ClCompile Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.cpp">
       <Filter>modules\postprocess\machineL\field_predictor</Filter>
     </ClCompile>
+    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.cpp">
+      <Filter>modules\model\DDC</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ConProperties.cpp">
+      <Filter>modules\model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h" />
@@ -335,6 +341,12 @@
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.h">
       <Filter>modules\postprocess\machineL\field_predictor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.h">
+      <Filter>modules\model\DDC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ConProperties.h">
+      <Filter>modules\model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

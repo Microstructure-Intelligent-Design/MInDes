@@ -68,6 +68,12 @@ namespace pf {
 		return "DEFAULT_PHASE";
 	}
 
+	std::string PhiProperties::phi_property_name(size_t phi_property_index) {
+		if (phi_property_index < _phi_property_name.size())
+			return _phi_property_name[phi_property_index];
+		return "DEFAULT_PHASE";
+	}
+
 	void PhiProperties::add_property_name(std::string _property_name) {
 		for (size_t index = 0; index < _phi_property_name.size(); index++)
 			if (_phi_property_name[index].compare(_property_name) == 0)

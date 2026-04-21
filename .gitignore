@@ -10,4 +10,4 @@ libmindes-init/
 MInDes/MInDes/_init
 MInDes/MInDes/*.dll
 !LICENSE.txt
-/MInDes/MInDes/infile
+/MInDes/MInDes/infile/3_Applications

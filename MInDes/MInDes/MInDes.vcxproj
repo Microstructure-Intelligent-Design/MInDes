@@ -31,7 +31,9 @@
     <ClCompile Include="src\modules\input_modules\inputfiles\QuickStartUp.cpp" />
     <ClCompile Include="src\modules\input_modules\inputfiles\selectFile.cpp" />
     <ClCompile Include="src\modules\input_modules\inputfiles\UserStartUp.cpp" />
+    <ClCompile Include="src\modules\model_modules\ConProperties.cpp" />
     <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
     <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\PhiProperties.cpp" />
@@ -80,9 +82,11 @@
     <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
     <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
     <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
+    <ClInclude Include="src\modules\model_modules\ConProperties.h" />
     <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Functions.h" />
     <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Manager.h" />
     <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Params.h" />
+    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.h" />
     <ClInclude Include="src\modules\model_modules\GrainsOrientations.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h" />
