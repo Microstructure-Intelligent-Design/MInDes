@@ -12,6 +12,15 @@ namespace pf {
 		inline size_t screen_loop_step   = 0;
 		inline size_t screen_output_step = 0;
 		inline std::string statistic_file_name = "Statistics.txt";
+		inline std::vector<REAL> phi_info;
+		inline bool is_phi_statistic = false;
+		inline std::string phi_info_key = "vol_phi_";
+		inline std::vector<REAL> con_info;
+		inline bool is_con_statistic = false;
+		inline std::string con_info_key = "ave_con_";
+		inline REAL temp_info = 0;
+		inline bool is_temp_statistic = false;
+		inline std::string temp_info_key = "ave_temp";
 
 		std::vector<REAL> statistical_phi();
 

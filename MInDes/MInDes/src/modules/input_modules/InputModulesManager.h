@@ -30,7 +30,7 @@ namespace pf {
 		InputFileReader::get_instance()->debug_custom_variavle_and_funcs();
 		out.str("");
 		out << "=========================================================================================" << endl;
-		out << "================================= Parameters Definition =================================" << endl;
+		out << "============================== Parameters Definition Start ==============================" << endl;
 		out << "=========================================================================================" << endl;
 		add_string_to_file(out.str(), input_output_files_parameters::DebugFile_Path);
 		// parallel
@@ -66,25 +66,32 @@ namespace pf {
 		else
 			mesh_parameters::dimention = Dimension::Three_Dimension;
 		InputFileReader::get_instance()->read_REAL_value("Solver.Mesh.dr", mesh_parameters::delt_r, true);
-		WriteDebugFile("# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ZEROFLUX\n");
+		WriteDebugFile("# Solver.Mesh.BoundaryCondition : 0 - FIXED , 1 - PERIODIC , 2 - ZEROFLUX , 3 - OPEN \n");
 		int boundary_condition = 1;
-		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_up", boundary_condition, true);
-		mesh_parameters::x_up = BoundaryCondition(boundary_condition);
-		boundary_condition = 1;
-		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_down", boundary_condition, true);
-		mesh_parameters::x_down = BoundaryCondition(boundary_condition);
-		boundary_condition = 1;
-		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.y_up", boundary_condition, true);
-		mesh_parameters::y_up = BoundaryCondition(boundary_condition);
-		boundary_condition = 1;
-		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.y_down", boundary_condition, true);
-		mesh_parameters::y_down = BoundaryCondition(boundary_condition);
-		boundary_condition = 1;
-		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.z_up", boundary_condition, true);
-		mesh_parameters::z_up = BoundaryCondition(boundary_condition);
-		boundary_condition = 1;
-		InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.z_dowm", boundary_condition, true);
-		mesh_parameters::z_down = BoundaryCondition(boundary_condition);
+		if (mesh_parameters::MESH_NX > 1) {
+			boundary_condition = 1;
+			InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_up", boundary_condition, true);
+			mesh_parameters::x_up = BoundaryCondition(boundary_condition);
+			boundary_condition = 1;
+			InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.x_down", boundary_condition, true);
+			mesh_parameters::x_down = BoundaryCondition(boundary_condition);
+		}
+		if (mesh_parameters::MESH_NY > 1) {
+			boundary_condition = 1;
+			InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.y_up", boundary_condition, true);
+			mesh_parameters::y_up = BoundaryCondition(boundary_condition);
+			boundary_condition = 1;
+			InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.y_down", boundary_condition, true);
+			mesh_parameters::y_down = BoundaryCondition(boundary_condition);
+		}
+		if (mesh_parameters::MESH_NZ > 1) {
+			boundary_condition = 1;
+			InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.z_up", boundary_condition, true);
+			mesh_parameters::z_up = BoundaryCondition(boundary_condition);
+			boundary_condition = 1;
+			InputFileReader::get_instance()->read_int_value("Solver.Mesh.BoundaryCondition.z_down", boundary_condition, true);
+			mesh_parameters::z_down = BoundaryCondition(boundary_condition);
+		}
 		// - 
 		string pct_field_key = "Solver.Mesh.PCT", pct_field_string = "(0,0,false)";
 		WriteDebugFile("# Solver.Mesh.PCT = ( phi_number, con_number, is_temperature_on ) \n");

@@ -13,6 +13,213 @@ namespace pf {
     class Matrix6x6;
     class vStrain;
     class vStress;
+    // ---------------------------------------------------------------------------
+    // 1D 矩阵封装 (行优先存储)
+    // ---------------------------------------------------------------------------
+    template <typename T>
+    class Matrix1D {
+    private:
+        std::vector<T> data_;
+        size_t length_;
+    public:
+        Matrix1D() : length_(0) {}
+        Matrix1D(size_t length, T value = T{})
+            : data_(length, value), length_(length) {
+        }
+        void resize(size_t length, T value = T{}) {
+            length_ = length;
+            data_.assign(length, value);
+        }
+        void resize(int length, T value = T{}) {
+            length_ = length;
+            data_.assign(size_t(length), value);
+        }
+        inline T& operator()(size_t i) {
+            return data_[i];
+        }
+        inline T& operator()(int i) {
+            return data_[i];
+        }
+        inline const T& operator()(size_t i) const {
+            return data_[i];
+        }
+        inline const T& operator()(int i) const {
+            return data_[i];
+        }
+        inline T& operator[](size_t i) {
+            return data_[i];
+        }
+        inline T& operator[](int i) {
+            return data_[i];
+        }
+        inline const T& operator[](size_t i) const {
+            return data_[i];
+        }
+        inline const T& operator[](int i) const {
+            return data_[i];
+        }
+        // 矩阵加法 (+)
+        Matrix1D operator+(const Matrix1D& other) const {
+            if (length_ != other.length_) {
+                throw std::invalid_argument("Matrix1D + error: lengths do not match!");
+            }
+            Matrix1D result(length_);
+            for (size_t i = 0; i < length_; ++i)
+                result[i] = data_[i] + other[i];
+            return result;
+        }
+        // 矩阵减法 (-)
+        Matrix1D operator-(const Matrix1D& other) const {
+            if (length_ != other.length_) {
+                throw std::invalid_argument("Matrix1D - error: lengths do not match!");
+            }
+            Matrix1D result(length_);
+            for (size_t i = 0; i < length_; ++i)
+                result[i] = data_[i] - other[i];
+            return result;
+        }
+
+        // 矩阵除法 (*) - 逐元素相乘
+        Matrix1D operator*(const REAL& other) const {
+            Matrix1D result(length_);
+            for (size_t i = 0; i < length_; ++i)
+                result[i] = data_[i] * other;
+            return result;
+        }
+
+        // 矩阵除法 (/) - 逐元素相除
+        Matrix1D operator/(const REAL& other) const {
+            Matrix1D result(length_);
+            for (size_t i = 0; i < length_; ++i)
+                result[i] = data_[i] / other;
+            return result;
+        }
+
+        // 复合赋值运算符 (+=)，可以提升连续运算时的性能
+        Matrix1D& operator+=(const Matrix1D& other) {
+            if (length_ != other.length_) {
+                throw std::invalid_argument("Matrix1D += error: lengths do not match!");
+            }
+            for (size_t i = 0; i < length_; ++i) {
+                data_[i] += other.data_[i];
+            }
+            return *this;
+        }
+        // 复合赋值运算符 (-=)，可以提升连续运算时的性能
+        Matrix1D& operator-=(const Matrix1D& other) {
+            if (length_ != other.length_) {
+                throw std::invalid_argument("Matrix1D -= error: lengths do not match!");
+            }
+            for (size_t i = 0; i < length_; ++i) {
+                data_[i] -= other.data_[i];
+            }
+            return *this;
+        }
+
+        // 复合赋值运算符 (*=)，可以提升连续运算时的性能
+        Matrix1D& operator*=(const REAL& other) {
+            for (size_t i = 0; i < length_; ++i) {
+                data_[i] *= other;
+            }
+            return *this;
+        }
+
+        // 复合赋值运算符 (/=)，可以提升连续运算时的性能
+        Matrix1D& operator/=(const REAL& other) {
+            for (size_t i = 0; i < length_; ++i) {
+                data_[i] /= other;
+            }
+            return *this;
+        }
+        size_t size() const { return length_; }
+        T* data() { return data_.data(); }
+        const T* data() const { return data_.data(); }
+    };
+    // ---------------------------------------------------------------------------
+    // 2D 矩阵封装 (行优先存储)
+    // ---------------------------------------------------------------------------
+    template <typename T>
+    class Matrix2D {
+    private:
+        std::vector<T> data_;
+        size_t rows_;
+        size_t cols_;
+    public:
+        Matrix2D() : rows_(0), cols_(0) {}
+        Matrix2D(size_t rows, size_t cols, T value = T{})
+            : data_(rows* cols, value), rows_(rows), cols_(cols) {
+        }
+        void resize(size_t rows, size_t cols, T value = T{}) {
+            rows_ = rows;
+            cols_ = cols;
+            data_.assign(rows * cols, value);
+        }
+        void resize(int rows, int cols, T value = T{}) {
+            rows_ = rows;
+            cols_ = cols;
+            data_.assign(size_t(rows * cols), value);
+        }
+        inline T& operator()(size_t i, size_t j) {
+            return data_[i * cols_ + j];
+        }
+        inline T& operator()(int i, int j) {
+            return data_[i * cols_ + j];
+        }
+        inline const T& operator()(size_t i, size_t j) const {
+            return data_[i * cols_ + j];
+        }
+        inline const T& operator()(int i, int j) const {
+            return data_[i * cols_ + j];
+        }
+        size_t rows() const { return rows_; }
+        size_t cols() const { return cols_; }
+        T* data() { return data_.data(); }
+        const T* data() const { return data_.data(); }
+    };
+    // ---------------------------------------------------------------------------
+    // 3D 矩阵封装 (行优先存储)
+    // 内存布局：[z][y][x] -> 线性索引 = z * (Y*X) + y * X + x
+    // ---------------------------------------------------------------------------
+    template <typename T>
+    class Matrix3D {
+    private:
+        std::vector<T> data_;
+        size_t dim_x_;
+        size_t dim_y_;
+        size_t dim_z_;
+    public:
+        Matrix3D() : dim_x_(0), dim_y_(0), dim_z_(0) {}
+        Matrix3D(size_t x, size_t y, size_t z, T value = T{})
+            : data_(x* y* z, value), dim_x_(x), dim_y_(y), dim_z_(z) {
+        }
+        void resize(size_t x, size_t y, size_t z, T value = T{}) {
+            dim_x_ = x;
+            dim_y_ = y;
+            dim_z_ = z;
+            data_.assign(x * y * z, value);
+        }
+        void resize(int x, int y, int z, T value = T{}) {
+            dim_x_ = x;
+            dim_y_ = y;
+            dim_z_ = z;
+            data_.assign(x * y * z, value);
+        }
+        inline T& operator()(size_t i, size_t j, size_t k) {
+            return data_[k * (dim_y_ * dim_x_) + j * dim_x_ + i];
+        }
+        inline T& operator()(int i, int j, int k) {
+            return data_[k * (dim_y_ * dim_x_) + j * dim_x_ + i];
+        }
+        inline const T& operator()(size_t i, size_t j, size_t k) const {
+            return data_[k * (dim_y_ * dim_x_) + j * dim_x_ + i];
+        }
+        inline const T& operator()(int i, int j, int k) const {
+            return data_[k * (dim_y_ * dim_x_) + j * dim_x_ + i];
+        }
+        size_t x() const { return dim_x_; }
+        size_t y() const { return dim_y_; }
+        size_t z() const { return dim_z_; }
+    };
     class Matrix3x3
     {
     public:
@@ -66,7 +273,6 @@ namespace pf {
 
         REAL storage[3][3];
     };
-
     class Vector3
     {
     public:

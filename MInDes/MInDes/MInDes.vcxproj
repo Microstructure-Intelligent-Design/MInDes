@@ -31,9 +31,11 @@
     <ClCompile Include="src\modules\input_modules\inputfiles\QuickStartUp.cpp" />
     <ClCompile Include="src\modules\input_modules\inputfiles\selectFile.cpp" />
     <ClCompile Include="src\modules\input_modules\inputfiles\UserStartUp.cpp" />
-    <ClCompile Include="src\modules\model_modules\ConProperties.cpp" />
-    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Functions.cpp" />
-    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ConRegions.cpp" />
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Con_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Phi_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
     <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\PhiProperties.cpp" />
@@ -62,6 +64,7 @@
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\PorousStructure.cpp" />
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.cpp" />
     <ClCompile Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.cpp" />
+    <ClCompile Include="src\modules\preprocess_modules\Pretreatment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h" />
@@ -82,11 +85,13 @@
     <ClInclude Include="src\modules\input_modules\InputModulesManager.h" />
     <ClInclude Include="src\modules\input_modules\ioFiles_Params.h" />
     <ClInclude Include="src\modules\input_modules\ProgramPath.h" />
-    <ClInclude Include="src\modules\model_modules\ConProperties.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Functions.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Manager.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Params.h" />
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ConRegions.h" />
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Con_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Params.h" />
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Phi_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.h" />
     <ClInclude Include="src\modules\model_modules\GrainsOrientations.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h" />
@@ -124,6 +129,7 @@
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\stb_image.h" />
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\VoronoiStructure.h" />
     <ClInclude Include="src\modules\preprocess_modules\MicrostructureInit\WriteMeshData.h" />
+    <ClInclude Include="src\modules\preprocess_modules\Pretreatment.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -199,7 +205,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -243,7 +249,7 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

@@ -123,7 +123,7 @@ namespace pf {
 		std::vector<T> data;
 	};
 
-	enum class BoundaryCondition { FIXED, PERIODIC, ZEROFLUX};
+	enum class BoundaryCondition { FIXED, PERIODIC, ZEROFLUX, OPENFLUX };
 
 	template <typename T>
 	class Mesh_Boundry : public Mesh<T> {
@@ -197,6 +197,27 @@ namespace pf {
 		long long COMP_X_END() { return static_cast<long long>(Mesh<T>::nx) - 2; };
 		long long COMP_Y_END() { return static_cast<long long>(Mesh<T>::ny) - 2; };
 		long long COMP_Z_END() { return static_cast<long long>(Mesh<T>::nz) - 2; };
+		bool IS_COMP_POINT(int x, int y, int z) {
+			if (x > 0 && x < int(Mesh<T>::nx) - 1 &&
+				y > 0 && y < int(Mesh<T>::ny) - 1 &&
+				z > 0 && z < int(Mesh<T>::nz) - 1)
+				return true;
+			return false;
+		}
+		bool IS_COMP_POINT(size_t x, size_t y, size_t z) {
+			if (x > 0 && x < Mesh<T>::nx - 1 &&
+				y > 0 && y < Mesh<T>::ny - 1 &&
+				z > 0 && z < Mesh<T>::nz - 1)
+				return true;
+			return false;
+		}
+		bool IS_COMP_POINT(long long x, long long y, long long z) {
+			if (x > 0 && x < static_cast<long long>(Mesh<T>::nx) - 1 &&
+				y > 0 && y < static_cast<long long>(Mesh<T>::ny) - 1 &&
+				z > 0 && z < static_cast<long long>(Mesh<T>::nz) - 1)
+				return true;
+			return false;
+		}
 
 		T& at_boundary_x_down(long long y, long long z) {
 			return Mesh<T>::data[MESH_INDEX(0LL, y, z, Mesh<T>::nx, Mesh<T>::ny)];
@@ -420,6 +441,13 @@ namespace pf {
 						at_boundary_x_down(y, z) = Mesh<T>::at(1, y, z);
 					}
 			}
+			else if (bc_x_down == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int y = 0; y < Mesh<T>::ny; y++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_x_down(y, z) = Mesh<T>::at(1, y, z) * 2 - Mesh<T>::at(2, y, z);
+					}
+			}
 			if (bc_y_down == BoundaryCondition::PERIODIC) {
 #pragma omp parallel for
 				for (int x = 0; x < Mesh<T>::nx; x++)
@@ -432,6 +460,13 @@ namespace pf {
 				for (int x = 0; x < Mesh<T>::nx; x++)
 					for (int z = 0; z < Mesh<T>::nz; z++) {
 						at_boundary_y_down(x, z) = Mesh<T>::at(x, 1, z);
+					}
+			}
+			else if (bc_y_down == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_y_down(x, z) = Mesh<T>::at(x, 1, z) * 2 - Mesh<T>::at(x, 2, z);
 					}
 			}
 			if (bc_z_down == BoundaryCondition::PERIODIC) {
@@ -448,6 +483,13 @@ namespace pf {
 						at_boundary_z_down(x, y) = Mesh<T>::at(x, y, 1);
 					}
 			}
+			else if (bc_z_down == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int y = 0; y < Mesh<T>::ny; y++) {
+						at_boundary_z_down(x, y) = Mesh<T>::at(x, y, 1) * 2 - Mesh<T>::at(x, y, 2);
+					}
+			}
 			if (bc_x_up == BoundaryCondition::PERIODIC) {
 #pragma omp parallel for
 				for (int y = 0; y < Mesh<T>::ny; y++)
@@ -460,6 +502,13 @@ namespace pf {
 				for (int y = 0; y < Mesh<T>::ny; y++)
 					for (int z = 0; z < Mesh<T>::nz; z++) {
 						at_boundary_x_up(y, z) = Mesh<T>::at(int(Mesh<T>::nx) - 2, y, z);
+					}
+			}
+			else if (bc_x_up == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int y = 0; y < Mesh<T>::ny; y++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_x_up(y, z) = Mesh<T>::at(int(Mesh<T>::nx) - 2, y, z) * 2 - Mesh<T>::at(int(Mesh<T>::nx) - 3, y, z);
 					}
 			}
 			if (bc_y_up == BoundaryCondition::PERIODIC) {
@@ -476,6 +525,13 @@ namespace pf {
 						at_boundary_y_up(x, z) = Mesh<T>::at(x, int(Mesh<T>::ny) - 2, z);
 					}
 			}
+			else if (bc_y_up == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_y_up(x, z) = Mesh<T>::at(x, int(Mesh<T>::ny) - 2, z) * 2 - Mesh<T>::at(x, int(Mesh<T>::ny) - 3, z);
+					}
+			}
 			if (bc_z_up == BoundaryCondition::PERIODIC) {
 #pragma omp parallel for
 				for (int x = 0; x < Mesh<T>::nx; x++)
@@ -488,6 +544,13 @@ namespace pf {
 				for (int x = 0; x < Mesh<T>::nx; x++)
 					for (int y = 0; y < Mesh<T>::ny; y++) {
 						at_boundary_z_up(x, y) = Mesh<T>::at(x, y, int(Mesh<T>::nz) - 2);
+					}
+			}
+			else if (bc_z_up == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int y = 0; y < Mesh<T>::ny; y++) {
+						at_boundary_z_up(x, y) = Mesh<T>::at(x, y, int(Mesh<T>::nz) - 2) * 2 - Mesh<T>::at(x, y, int(Mesh<T>::nz) - 3);
 					}
 			}
 		}

@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "../../base/VectorMatrix.h"
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -848,9 +848,12 @@ namespace pf {
 			SegmentedCylinder cylinder;
 			size_t generate_step;
 			size_t phaseIndex;
-			std::vector<double> con;
+			Matrix1D<double> con;
 			double temperature;
 			double phi;
+			bool is_phi = false;
+			bool is_con = false;
+			bool is_temp = false;
 			bool isReverseRegion;
 			bool isNormalized;
 
@@ -876,6 +879,9 @@ namespace pf {
 				this->cylinder = n.cylinder;
 				this->con = n.con;
 				this->phi = n.phi;
+				this->is_phi = n.is_phi;
+				this->is_con = n.is_con;
+				this->is_temp = n.is_temp;
 				this->isReverseRegion = n.isReverseRegion;
 				this->isNormalized = n.isNormalized;
 				return *this;
@@ -899,9 +905,12 @@ namespace pf {
 			std::vector<double> points_phi;
 			size_t generate_step;
 			size_t phaseIndex;
-			std::vector<double> con;
+			Matrix1D<double> con;
 			double temperature;
 			bool is_normalized;
+			bool is_phi = false;
+			bool is_con = false;
+			bool is_temp = false;
 			bool is_point_in_set(Point point, int x_limit, BoundaryCondition x_down_bc, BoundaryCondition x_up_bc, int y_limit = 1,
 				BoundaryCondition y_down_bc = BoundaryCondition::ADIABATIC, BoundaryCondition y_up_bc = BoundaryCondition::ADIABATIC,
 				int z_limit = 1, BoundaryCondition z_down_bc = BoundaryCondition::ADIABATIC, BoundaryCondition z_up_bc = BoundaryCondition::ADIABATIC) {
@@ -972,6 +981,9 @@ namespace pf {
 				this->con = n.con;
 				this->points_phi = n.points_phi;
 				this->is_normalized = n.is_normalized;
+				this->is_phi = n.is_phi;
+				this->is_con = n.is_con;
+				this->is_temp = n.is_temp;
 				return *this;
 			}
 		};
@@ -993,7 +1005,7 @@ namespace pf {
 		// - matrix
 		inline size_t matrix_phi_index = 0;
 		inline double matrix_phi_value = 0;
-		inline std::vector<double> matrix_con;
+		inline Matrix1D<REAL> matrix_con;
 		inline double matrix_temperature = 0.0;
 	}
 }

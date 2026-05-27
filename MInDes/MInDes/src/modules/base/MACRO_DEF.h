@@ -17,16 +17,11 @@ using REAL = double; // use double
 #define SYS_EPSILON   (0.000001)
 #define SYS_EPSILON_R (0.999999)
 
-#define Phi_Num_Cut_Off   (0.001)
-#define Phi_Num_Cut_Off_R (0.999)
-
-#define PhiCon_Num_Cut_Off   (0.01)
-#define PhiCon_Num_Cut_Off_R (0.99)
-
 inline double NaN() { return std::numeric_limits<double>::max(); };
 inline double REAL_MAX() { return std::numeric_limits<double>::max(); };
 
 #define PI (3.1415926535897932)
+#define PI2 (9.869604401089357)
 
 #define AngleToRadians(angle) double(angle/180.0*PI)
 

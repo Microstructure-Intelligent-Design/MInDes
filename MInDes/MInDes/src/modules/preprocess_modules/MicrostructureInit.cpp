@@ -84,12 +84,12 @@ namespace pf {
 								geo->phi = 0.0;
 						}
 						if (geo->geometryProperty == pf::geometry_structure::Geometry::Geo_Ellipsoid) {
-							if (pf::main_field::is_phi_field_on) {
+							if (pf::main_field::is_phi_field_on && geo->is_phi) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::phase_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::phase_field.Ny(); y++)
 										for (long long x = 0; x < pf::main_field::phase_field.Nx(); x++) {
-											std::vector<REAL>& phi = pf::main_field::phase_field(x, y, z);
+											Matrix1D<REAL>& phi = pf::main_field::phase_field(x, y, z);
 											// -
 											pf::Vector3 p(x - geo->ellipSolid.core.x, y - geo->ellipSolid.core.y, z - geo->ellipSolid.core.z);
 											p.do_rotate(pf::RotationMatrix::rotationMatrix(pf::Vector3(geo->ellipSolid.radian_x,
@@ -131,12 +131,12 @@ namespace pf {
 											}
 										}
 							}
-							if (pf::main_field::is_con_field_on) {
+							if (pf::main_field::is_con_field_on && geo->is_con) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::concentration_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::concentration_field.Ny(); y++)
 										for (long long x = 0; x < pf::main_field::concentration_field.Nx(); x++) {
-											std::vector<REAL>& con = pf::main_field::concentration_field(x, y, z);
+											Matrix1D<REAL>& con = pf::main_field::concentration_field(x, y, z);
 											// -
 											pf::Vector3 p(x - geo->ellipSolid.core.x, y - geo->ellipSolid.core.y, z - geo->ellipSolid.core.z);
 											p.do_rotate(pf::RotationMatrix::rotationMatrix(pf::Vector3(geo->ellipSolid.radian_x, geo->ellipSolid.radian_y, geo->ellipSolid.radian_z),
@@ -154,7 +154,7 @@ namespace pf {
 											}
 										}
 							}
-							if (pf::main_field::is_temp_field_on) {
+							if (pf::main_field::is_temp_field_on && geo->is_temp) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::temperature_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::temperature_field.Ny(); y++)
@@ -183,12 +183,12 @@ namespace pf {
 							WriteLog(report.str());
 						}
 						else if (geo->geometryProperty == pf::geometry_structure::Geometry::Geo_Polyhedron) {
-							if (pf::main_field::is_phi_field_on) {
+							if (pf::main_field::is_phi_field_on && geo->is_phi) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::phase_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::phase_field.Ny(); y++)
 										for (long long x = 0; x < pf::main_field::phase_field.Nx(); x++) {
-											std::vector<REAL>& phi = pf::main_field::phase_field(x, y, z);
+											Matrix1D<REAL>& phi = pf::main_field::phase_field(x, y, z);
 											// -
 											pf::Vector3 pv(x - geo->polyhedron.point_inside_polyhedron.x, y - geo->polyhedron.point_inside_polyhedron.y, z - geo->polyhedron.point_inside_polyhedron.z);
 											pv.do_rotate(pf::RotationMatrix::rotationMatrix(pf::Vector3(geo->polyhedron.radian_x, geo->polyhedron.radian_y, geo->polyhedron.radian_z),
@@ -231,12 +231,12 @@ namespace pf {
 											}
 										};
 							}
-							if (pf::main_field::is_con_field_on) {
+							if (pf::main_field::is_con_field_on && geo->is_con) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::concentration_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::concentration_field.Ny(); y++)
 										for (long long x = 0; x < pf::main_field::concentration_field.Nx(); x++) {
-											std::vector<REAL>& con = pf::main_field::concentration_field(x, y, z);
+											Matrix1D<REAL>& con = pf::main_field::concentration_field(x, y, z);
 											pf::Vector3 pv(x - geo->polyhedron.point_inside_polyhedron.x, y - geo->polyhedron.point_inside_polyhedron.y, z - geo->polyhedron.point_inside_polyhedron.z);
 											pv.do_rotate(pf::RotationMatrix::rotationMatrix(pf::Vector3(geo->polyhedron.radian_x, geo->polyhedron.radian_y, geo->polyhedron.radian_z),
 												pf::RotationGauge(geo->polyhedron.rotationGauge)));
@@ -254,7 +254,7 @@ namespace pf {
 											}
 										};
 							}
-							if (pf::main_field::is_temp_field_on) {
+							if (pf::main_field::is_temp_field_on && geo->is_temp) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::temperature_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::temperature_field.Ny(); y++)
@@ -285,12 +285,12 @@ namespace pf {
 							WriteLog(report.str());
 						}
 						else if (geo->geometryProperty == pf::geometry_structure::Geometry::Geo_SegmentedCylinder) {
-							if (pf::main_field::is_phi_field_on) {
+							if (pf::main_field::is_phi_field_on && geo->is_phi) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::phase_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::phase_field.Ny(); y++)
 										for (long long x = 0; x < pf::main_field::phase_field.Nx(); x++) {
-											std::vector<REAL>& phi = pf::main_field::phase_field(x, y, z);
+											Matrix1D<REAL>& phi = pf::main_field::phase_field(x, y, z);
 											// Vector3 p(x, y, z);
 											pf::Vector3 p(x - geo->cylinder.geometric_center.x, y - geo->cylinder.geometric_center.y, z - geo->cylinder.geometric_center.z);
 											p.do_rotate(pf::RotationMatrix::rotationMatrix(pf::Vector3(geo->cylinder.radian_x, geo->cylinder.radian_y, geo->cylinder.radian_z),
@@ -332,12 +332,12 @@ namespace pf {
 											}
 										};
 							}
-							if (pf::main_field::is_con_field_on) {
+							if (pf::main_field::is_con_field_on && geo->is_con) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::concentration_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::concentration_field.Ny(); y++)
 										for (long long x = 0; x < pf::main_field::concentration_field.Nx(); x++) {
-											std::vector<REAL>& con = pf::main_field::concentration_field(x, y, z);
+											Matrix1D<REAL>& con = pf::main_field::concentration_field(x, y, z);
 											// Vector3 p(x, y, z);
 											pf::Vector3 p(x - geo->cylinder.geometric_center.x, y - geo->cylinder.geometric_center.y, z - geo->cylinder.geometric_center.z);
 											p.do_rotate(pf::RotationMatrix::rotationMatrix(pf::Vector3(geo->cylinder.radian_x, geo->cylinder.radian_y, geo->cylinder.radian_z),
@@ -355,7 +355,7 @@ namespace pf {
 											}
 										};
 							}
-							if (pf::main_field::is_temp_field_on) {
+							if (pf::main_field::is_temp_field_on && geo->is_temp) {
 #pragma omp parallel for
 								for (long long z = 0; z < pf::main_field::temperature_field.Nz(); z++)
 									for (long long y = 0; y < pf::main_field::temperature_field.Ny(); y++)
@@ -401,10 +401,10 @@ namespace pf {
 									point_set->points_phi[index] = 0.0;
 							}
 						}
-						if (pf::main_field::is_phi_field_on) {
+						if (pf::main_field::is_phi_field_on && point_set->is_phi) {
 #pragma omp parallel for
 							for (int point_index = 0; point_index < point_set->points.size(); point_index++) {
-								std::vector<REAL>& phi = pf::main_field::phase_field(pf::REAL_to_int(point_set->points[point_index].x),
+								Matrix1D<REAL>& phi = pf::main_field::phase_field(pf::REAL_to_int(point_set->points[point_index].x),
 									pf::REAL_to_int(point_set->points[point_index].y), pf::REAL_to_int(point_set->points[point_index].z));
 								if (point_set->is_normalized) {
 									REAL sum_phis = 0.0;
@@ -421,15 +421,15 @@ namespace pf {
 								phi[point_set->phaseIndex] = point_set->points_phi[point_index];
 							}
 						}
-						if (pf::main_field::is_con_field_on) {
+						if (pf::main_field::is_con_field_on && point_set->is_con) {
 #pragma omp parallel for
 							for (int point_index = 0; point_index < point_set->points.size(); point_index++) {
-								std::vector<REAL>& con = pf::main_field::concentration_field(pf::REAL_to_int(point_set->points[point_index].x),
+								Matrix1D<REAL>& con = pf::main_field::concentration_field(pf::REAL_to_int(point_set->points[point_index].x),
 									pf::REAL_to_int(point_set->points[point_index].y), pf::REAL_to_int(point_set->points[point_index].z));
 								con = point_set->con;
 							}
 						}
-						if (pf::main_field::is_temp_field_on) {
+						if (pf::main_field::is_temp_field_on && point_set->is_temp) {
 #pragma omp parallel for
 							for (int point_index = 0; point_index < point_set->points.size(); point_index++) {
 								REAL& temp = pf::main_field::temperature_field(pf::REAL_to_int(point_set->points[point_index].x),
@@ -451,14 +451,14 @@ namespace pf {
 		void check_phi_index(size_t phi_index) {
 			if (phi_index >= main_field::phi_number) {
 				std::string _report = "> ERROR : Phi index = " + std::to_string(phi_index) + " should smaller than phi number !\n";
-				WriteLog(_report);
+				WriteDebugFile(_report);
 				SYS_PROGRAM_STOP;
 			}
 		}
 		void check_con_index(size_t con_index) {
 			if (con_index >= main_field::con_number) {
 				std::string _report = "> ERROR : Con index = " + std::to_string(con_index) + " should smaller than con number !\n";
-				WriteLog(_report);
+				WriteDebugFile(_report);
 				SYS_PROGRAM_STOP;
 			}
 		}
@@ -466,7 +466,7 @@ namespace pf {
 			if (con_size != main_field::con_number) {
 				std::string _report = "> ERROR : Con size = " + std::to_string(con_size)
 					+ " is not equal to con number = " + std::to_string(main_field::con_number) + " !\n";
-				WriteLog(_report);
+				WriteDebugFile(_report);
 				SYS_PROGRAM_STOP;
 			}
 		}
@@ -516,7 +516,7 @@ namespace pf {
 							for (size_t y = 0; y < mesh_parameters::MESH_NY; y++) {
 								aim_phi[x][y].resize(mesh_parameters::MESH_NZ);
 								for (size_t z = 0; z < mesh_parameters::MESH_NZ; z++) {
-									std::vector<REAL>& phi = main_field::phase_field(x + 1, y + 1, z + 1);
+									Matrix1D<REAL>& phi = main_field::phase_field(x + 1, y + 1, z + 1);
 									aim_phi[x][y][z] = 0.0;
 									for (size_t index = 0; index < main_field::phi_number; index++)
 										for (size_t phi_index : porous_phis_indexs)
@@ -544,7 +544,7 @@ namespace pf {
 							for (int y = 0; y < main_field::phase_field.Ny(); y++) {
 								aim_phi[x][y].resize(main_field::phase_field.Nz(), 0);
 								for (int z = 0; z < main_field::phase_field.Nz(); z++) {
-									std::vector<REAL>& phi = main_field::phase_field(x, y, z);
+									Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
 									aim_phi[x][y][z] = 0.0;
 									for (size_t index = 0; index < main_field::phi_number; index++)
 										for (size_t phi_index : voronoi_phis_indexs)
@@ -563,6 +563,14 @@ namespace pf {
 					functions::definiteNucleation(main_iterator::Current_ITE_step);
 				}
 				// - others
+
+				// - boundary condition
+				if (main_field::is_phi_field_on)
+					main_field::phase_field.do_boundary_condition();
+				if (main_field::is_con_field_on)
+					main_field::concentration_field.do_boundary_condition();
+				if (main_field::is_temp_field_on)
+					main_field::temperature_field.do_boundary_condition();
 			}
 		}
 		// - 
@@ -598,7 +606,7 @@ namespace pf {
 					}
 #else
 					if (!write_mesh_data::is_read_datafile_by_path) {
-						WriteLog("> Error : Preprocess.Microstructure.datafile_path should be defined ! \n");
+						WriteDebugFile("> Error : Preprocess.Microstructure.datafile_path should be defined ! \n");
 						std::exit(0);
 					}
 #endif
@@ -606,13 +614,13 @@ namespace pf {
 				else {
 					// - init matrix 
 					if (main_field::is_phi_field_on) {
-						string matrix_key = "Preprocess.Microstructure.matrix_phi", matrix_string = "(0,1)";
+						std::string matrix_key = "Preprocess.Microstructure.matrix_phi", matrix_string = "(0,1)";
 						WriteDebugFile("# .matrix_phi = ( phi_index, phi_value ) \n");
 						if (InputFileReader::get_instance()->read_string_value(matrix_key, matrix_string, true)) {
-							vector<InputValueType> matrix_structure;
+							std::vector<InputValueType> matrix_structure;
 							matrix_structure.push_back(InputValueType::IVType_INT);
 							matrix_structure.push_back(InputValueType::IVType_REAL);
-							vector<input_value> matrix_value =
+							std::vector<input_value> matrix_value =
 								InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(matrix_structure, matrix_key, matrix_string, true);
 							geometry_structure::matrix_phi_index = matrix_value[0].int_value;
 							geometry_structure::matrix_phi_value = matrix_value[1].REAL_value;
@@ -620,26 +628,26 @@ namespace pf {
 						}
 					}
 					if (main_field::is_con_field_on) {
-						string matrix_key = "Preprocess.Microstructure.matrix_con", matrix_string = "()";
+						std::string matrix_key = "Preprocess.Microstructure.matrix_con", matrix_string = "()";
 						WriteDebugFile("# .matrix_con = ( con_0_value, con_1_value, ... ) \n");
 						geometry_structure::matrix_con.resize(main_field::con_number, 0);
 						if (InputFileReader::get_instance()->read_string_value(matrix_key, matrix_string, true)) {
-							vector<input_value> matrix_value =
+							std::vector<input_value> matrix_value =
 								InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, matrix_key, matrix_string, true);
 							for (int index = 0; index < matrix_value.size(); index++)
 								geometry_structure::matrix_con[index] = matrix_value[index].REAL_value;
-							check_con_size(int(geometry_structure::matrix_con.size()));
 						}
+						check_con_size(geometry_structure::matrix_con.size());
 					}
 					if (main_field::is_temp_field_on) {
-						string matrix_key = "Preprocess.Microstructure.matrix_temperature";
+						std::string matrix_key = "Preprocess.Microstructure.matrix_temperature";
 						InputFileReader::get_instance()->read_REAL_value(matrix_key, geometry_structure::matrix_temperature, true);
 					}
 				}
 				// - init geometry structure
 				// geometry structure
 				int nucleation_layer = 0;
-				vector<int> geometry_layer;
+				std::vector<int> geometry_layer;
 				InputFileReader::get_instance()->read_int_value("Preprocess.Microstructure.geometry_layer_number", nucleation_layer, true);
 				for (int layer_index = 0; layer_index < nucleation_layer; layer_index++) {
 					geometry_structure::GeometricRegion geo;
@@ -655,21 +663,21 @@ namespace pf {
 							+ to_string(mesh_parameters::MESH_NX + 1) + " , y = 0 and " + to_string(mesh_parameters::MESH_NY + 1)
 							+ " , z = 0 and " + to_string(mesh_parameters::MESH_NZ + 1) + " \n");
 					}
-					string layer_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".property";
-					string layer_input_property = "(0,0,1,false)";
+					std::string layer_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".property";
+					std::string layer_input_property = "(0,0,1,false)";
 					if (InputFileReader::get_instance()->read_string_value(layer_key, layer_input_property, true)) {
-						vector<InputValueType> layer_input_property_structure; layer_input_property_structure.push_back(InputValueType::IVType_INT); layer_input_property_structure.push_back(InputValueType::IVType_INT);
+						std::vector<InputValueType> layer_input_property_structure; layer_input_property_structure.push_back(InputValueType::IVType_INT); layer_input_property_structure.push_back(InputValueType::IVType_INT);
 						layer_input_property_structure.push_back(InputValueType::IVType_INT); layer_input_property_structure.push_back(InputValueType::IVType_BOOL);
-						vector<input_value> layer_input_property_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(layer_input_property_structure, layer_key, layer_input_property, true);
+						std::vector<input_value> layer_input_property_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(layer_input_property_structure, layer_key, layer_input_property, true);
 						check_phi_index(layer_input_property_value[0].int_value);
 						geo.init(geometry_structure::Geometry(layer_input_property_value[1].int_value), 0, layer_input_property_value[0].int_value, layer_input_property_value[3].bool_value);
 						RotationGauge rotation_gauge = RotationGauge(layer_input_property_value[2].int_value);
 						if (geo.geometryProperty == geometry_structure::Geometry::Geo_Ellipsoid) {
 							WriteDebugFile("# .ellipsoid = [(core_x,core_y,core_z),(radius_x,radius_y,radius_z),(rotation_angle_1,rotation_angle_2,rotation_angle_3)] \n");
-							string layer_ellipsoid_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".ellipsoid";
-							string layer_input_ellipsoid = "[(0,0,0),(0,0,0),(0,0,0)]";
+							std::string layer_ellipsoid_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".ellipsoid";
+							std::string layer_input_ellipsoid = "[(0,0,0),(0,0,0),(0,0,0)]";
 							InputFileReader::get_instance()->read_string_value(layer_ellipsoid_key, layer_input_ellipsoid, true);
-							vector<vector<input_value>> layer_input_ellipsoid_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, layer_ellipsoid_key, layer_input_ellipsoid, true);
+							std::vector<std::vector<input_value>> layer_input_ellipsoid_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, layer_ellipsoid_key, layer_input_ellipsoid, true);
 							geo.ellipSolid.set_core(layer_input_ellipsoid_value[0][0].REAL_value, layer_input_ellipsoid_value[0][1].REAL_value, layer_input_ellipsoid_value[0][2].REAL_value);
 							geo.ellipSolid.set_radius(layer_input_ellipsoid_value[1][0].REAL_value, layer_input_ellipsoid_value[1][1].REAL_value, layer_input_ellipsoid_value[1][2].REAL_value);
 							REAL radian[] = { AngleToRadians(layer_input_ellipsoid_value[2][0].REAL_value), AngleToRadians(layer_input_ellipsoid_value[2][1].REAL_value), AngleToRadians(layer_input_ellipsoid_value[2][2].REAL_value) };
@@ -678,10 +686,10 @@ namespace pf {
 						if (geo.geometryProperty == geometry_structure::Geometry::Geo_Polyhedron) {
 							WriteDebugFile("# .polyhedron = {[inside_point],[surf_point,surf_point,surf_point], .... ,[(rotation_angle_1,rotation_angle_2,rotation_angle_3)]} \n");
 							WriteDebugFile("#                surf_point = (position_x,position_y,position_z) \n");
-							string layer_polyhedron_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".polyhedron";
-							string layer_input_polyhedron = "{[(-1,0,0)],[(0,0,0),(0,1,0),(0,0,1)],[(0,0,0)]}";
+							std::string layer_polyhedron_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".polyhedron";
+							std::string layer_input_polyhedron = "{[(-1,0,0)],[(0,0,0),(0,1,0),(0,0,1)],[(0,0,0)]}";
 							InputFileReader::get_instance()->read_string_value(layer_polyhedron_key, layer_input_polyhedron, true);
-							vector<vector<vector<input_value>>> layer_input_polyhedron_value = InputFileReader::get_instance()->trans_matrix_3d_const_const_const_to_input_value(InputValueType::IVType_REAL, layer_polyhedron_key, layer_input_polyhedron, true);
+							std::vector<std::vector<std::vector<input_value>>> layer_input_polyhedron_value = InputFileReader::get_instance()->trans_matrix_3d_const_const_const_to_input_value(InputValueType::IVType_REAL, layer_polyhedron_key, layer_input_polyhedron, true);
 							geo.polyhedron.set_a_point_inside_polyhedron(geometry_structure::Point(layer_input_polyhedron_value[0][0][0].REAL_value, layer_input_polyhedron_value[0][0][1].REAL_value, layer_input_polyhedron_value[0][0][2].REAL_value));
 							for (int surf_index = 1; surf_index < layer_input_polyhedron_value.size() - 1; surf_index++) {
 								geo.polyhedron.add_surf(geometry_structure::Point(layer_input_polyhedron_value[surf_index][0][0].REAL_value, layer_input_polyhedron_value[surf_index][0][1].REAL_value, layer_input_polyhedron_value[surf_index][0][2].REAL_value),
@@ -694,17 +702,17 @@ namespace pf {
 						}
 						if (geo.geometryProperty == geometry_structure::Geometry::Geo_SegmentedCylinder) {
 							WriteDebugFile("# .segmented_cylinder = [(radius),(central_axis_point_x,central_axis_point_y,central_axis_point_z), ... at least two point ... ,(rotation_angle_1,rotation_angle_2,rotation_angle_3)] \n");
-							string layer_cylindricity_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".segmented_cylinder";
-							string layer_input_cylindricity = "[(0),(0,0,0),(0,0,0),(0,0,0)]";
+							std::string layer_cylindricity_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".segmented_cylinder";
+							std::string layer_input_cylindricity = "[(0),(0,0,0),(0,0,0),(0,0,0)]";
 							InputFileReader::get_instance()->read_string_value(layer_cylindricity_key, layer_input_cylindricity, true);
-							vector<vector<input_value>> layer_input_cylindricity_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, layer_cylindricity_key, layer_input_cylindricity, true);
+							std::vector<std::vector<input_value>> layer_input_cylindricity_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, layer_cylindricity_key, layer_input_cylindricity, true);
 							int vec_size = int(layer_input_cylindricity_value.size());
 							if (vec_size < 4) {
 								WriteDebugFile("> ERROR .segmented_cylinder : the central axis line need at least two point ! \n");
 								exit(0);
 							}
 							geo.cylinder.set_radius(layer_input_cylindricity_value[0][0].REAL_value);
-							for (int index = 1; index < vec_size - 1; index++) {
+							for (size_t index = 1; index < vec_size - 1; index++) {
 								geo.cylinder.add_point(geometry_structure::Point(layer_input_cylindricity_value[index][0].REAL_value, layer_input_cylindricity_value[index][1].REAL_value, layer_input_cylindricity_value[index][2].REAL_value));
 							}
 							REAL radian[] = { AngleToRadians(layer_input_cylindricity_value[vec_size - 1][0].REAL_value),
@@ -715,10 +723,10 @@ namespace pf {
 						if (geo.geometryProperty == geometry_structure::Geometry::Geo_RectangularCuboid) {
 							geo.geometryProperty = geometry_structure::Geometry::Geo_Polyhedron;
 							WriteDebugFile("# .rectangular_cuboid = [(central_point),(x_length,y_length,z_length),(rotation_angle_1,rotation_angle_2,rotation_angle_3)] \n");
-							string layer_polyhedron_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".rectangular_cuboid";
-							string layer_input_polyhedron = "[(-1,-1,-1),(1,1,1),(0,0,0)]";
+							std::string layer_polyhedron_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".rectangular_cuboid";
+							std::string layer_input_polyhedron = "[(-1,-1,-1),(1,1,1),(0,0,0)]";
 							InputFileReader::get_instance()->read_string_value(layer_polyhedron_key, layer_input_polyhedron, true);
-							vector<vector<input_value>> layer_input_polyhedron_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, layer_polyhedron_key, layer_input_polyhedron, true);
+							std::vector<std::vector<input_value>> layer_input_polyhedron_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, layer_polyhedron_key, layer_input_polyhedron, true);
 							geometry_structure::Point central_point(layer_input_polyhedron_value[0][0].REAL_value, layer_input_polyhedron_value[0][1].REAL_value, layer_input_polyhedron_value[0][2].REAL_value);
 							geo.polyhedron.set_a_point_inside_polyhedron(central_point);
 
@@ -754,25 +762,28 @@ namespace pf {
 							geo.polyhedron.set_rotation_radian_and_rotation_gauge(radian, rotation_gauge);
 						}
 						if (main_field::is_phi_field_on) {
-							string layer_phi_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".phi";
-							InputFileReader::get_instance()->read_REAL_value(layer_phi_key, geo.phi, true);
-							string layer_norm_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".is_normalized";
+							std::string layer_phi_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".phi";
+							if (InputFileReader::get_instance()->read_REAL_value(layer_phi_key, geo.phi, true))
+								geo.is_phi = true;
+							std::string layer_norm_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".is_normalized";
 							InputFileReader::get_instance()->read_bool_value(layer_norm_key, geo.isNormalized, true);
 						}
 						if (main_field::is_con_field_on) {
 							WriteDebugFile("# .con = ( con_0_value, con_1_value, ... ) \n");
-							string layer_x_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".con", layer_x_input = "()";
-							geo.con.resize(0);
+							std::string layer_x_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".con", layer_x_input = "()";
+							geo.con.resize(main_field::con_number, 0);
 							if (InputFileReader::get_instance()->read_string_value(layer_x_key, layer_x_input, true)) {
-								vector<input_value> layer_input_x_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, layer_x_key, layer_x_input, true);
-								for (int x_index = 0; x_index < layer_input_x_value.size(); x_index++)
-									geo.con.push_back(layer_input_x_value[x_index].REAL_value);
-								check_con_size(int(geo.con.size()));
+								geo.is_con = true;
+								std::vector<input_value> layer_input_x_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, layer_x_key, layer_x_input, true);
+								for (size_t x_index = 0; x_index < layer_input_x_value.size(); x_index++)
+									geo.con[x_index] = layer_input_x_value[x_index].REAL_value;
 							}
+							check_con_size(int(geo.con.size()));
 						}
 						if (main_field::is_temp_field_on) {
-							string layer_temp_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".temp";
-							InputFileReader::get_instance()->read_REAL_value(layer_temp_key, geo.temperature, true);
+							std::string layer_temp_key = "Preprocess.Microstructure.geometry_layer_" + to_string(layer_index) + ".temp";
+							if (InputFileReader::get_instance()->read_REAL_value(layer_temp_key, geo.temperature, true))
+								geo.is_temp = true;
 						}
 						geometry_layer.push_back(int(geometry_structure::nucleation_box.geometry_box.size()));
 						geometry_structure::nucleation_box.geometry_box.push_back(geo);
@@ -865,7 +876,7 @@ namespace pf {
 					std::replace(bmp24_structure::bmp24file_path.begin(), bmp24_structure::bmp24file_path.end(), '\\', '/');
 					std::fstream bmp_reader(bmp24_structure::bmp24file_path, std::ios::in);
 					if (!bmp_reader.is_open()) {
-						WriteLog("> Error : bmp24.file_path can not be opened ! \n");
+						WriteDebugFile("> Error : bmp24.file_path can not be opened ! \n");
 #ifdef _WIN32
 						selectAllFile(bmp24_structure::bmp24file_path);
 #else
@@ -873,21 +884,28 @@ namespace pf {
 #endif // _WIN32
 					}
 					InputFileReader::get_instance()->read_int_value("Preprocess.Microstructure.bmp24.layer_number", bmp24_structure::bmp24_layer, true);
-					for (int bmp_layer = 0; bmp_layer < bmp24_structure::bmp24_layer; bmp_layer++) {
+					bmp24_structure::is_phi.resize(bmp24_structure::bmp24_layer, false);
+					bmp24_structure::is_con.resize(bmp24_structure::bmp24_layer, false);
+					bmp24_structure::is_temp.resize(bmp24_structure::bmp24_layer, false);
+					bmp24_structure::bmp24_threshold.resize(bmp24_structure::bmp24_layer);
+					bmp24_structure::bmp24_con.resize(bmp24_structure::bmp24_layer);
+					bmp24_structure::bmp24_temperature.resize(bmp24_structure::bmp24_layer, 0);
+					for (size_t bmp_layer = 0; bmp_layer < bmp24_structure::bmp24_layer; bmp_layer++) {
 						// - gray_threshold
 						WriteDebugFile("# .gray_threshold = (range_left, range_right) \n");
-						string bmp24_threshold_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".gray_threshold", bmp24_threshold_input = "(0,0)";
+						std::string bmp24_threshold_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".gray_threshold", bmp24_threshold_input = "(0,0)";
 						InputFileReader::get_instance()->read_string_value(bmp24_threshold_key, bmp24_threshold_input, true);
-						vector<input_value> bmp24_threshold_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, bmp24_threshold_key, bmp24_threshold_input, true);
-						bmp24_structure::bmp24_threshold.push_back({ bmp24_threshold_value[0].REAL_value, bmp24_threshold_value[1].REAL_value });
+						std::vector<input_value> bmp24_threshold_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, bmp24_threshold_key, bmp24_threshold_input, true);
+						bmp24_structure::bmp24_threshold[bmp_layer] = { bmp24_threshold_value[0].REAL_value, bmp24_threshold_value[1].REAL_value };
 						// - phi
 						if (main_field::is_phi_field_on) {
 							WriteDebugFile("# .phi = ( phi_index, phi_value, is_normalized ) \n");
-							string bmp24_phi_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".phi", bmp24_phi_input = "(0,0,false)";
-							InputFileReader::get_instance()->read_string_value(bmp24_phi_key, bmp24_phi_input, true);
-							vector<InputValueType> bmp24_phi_structure; bmp24_phi_structure.push_back(InputValueType::IVType_INT);
+							std::string bmp24_phi_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".phi", bmp24_phi_input = "(0,0,false)";
+							if (InputFileReader::get_instance()->read_string_value(bmp24_phi_key, bmp24_phi_input, true))
+								bmp24_structure::is_phi[bmp_layer] = true;
+							std::vector<InputValueType> bmp24_phi_structure; bmp24_phi_structure.push_back(InputValueType::IVType_INT);
 							bmp24_phi_structure.push_back(InputValueType::IVType_REAL); bmp24_phi_structure.push_back(InputValueType::IVType_BOOL);
-							vector<input_value> bmp24_phi_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(bmp24_phi_structure, bmp24_phi_key, bmp24_phi_input, true);
+							std::vector<input_value> bmp24_phi_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(bmp24_phi_structure, bmp24_phi_key, bmp24_phi_input, true);
 							bmp24_structure::bmp24_phi_index.push_back(bmp24_phi_value[0].int_value);
 							check_phi_index(bmp24_phi_value[0].int_value);
 							bmp24_structure::bmp24_phi_value.push_back(bmp24_phi_value[1].REAL_value);
@@ -895,167 +913,188 @@ namespace pf {
 						}
 						// - con
 						if (main_field::is_con_field_on) {
-							vector<REAL> con;
+							Matrix1D<REAL> con(main_field::con_number, 0);
 							WriteDebugFile("# .con = ( con_0_value, con_1_value, ... ) \n");
-							string bmp24_x_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".con", bmp24_x_input = "()";
+							std::string bmp24_x_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".con", bmp24_x_input = "()";
 							if (InputFileReader::get_instance()->read_string_value(bmp24_x_key, bmp24_x_input, true)) {
-								vector<input_value> bmp24_x_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, bmp24_x_key, bmp24_x_input, true);
-								for (int x_index = 0; x_index < bmp24_x_value.size(); x_index++)
-									con.push_back(bmp24_x_value[x_index].REAL_value);
-								check_con_size(int(con.size()));
-								bmp24_structure::bmp24_con.push_back(con);
+								std::vector<input_value> bmp24_x_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, bmp24_x_key, bmp24_x_input, true);
+								check_con_size(bmp24_x_value.size());
+								for (size_t x_index = 0; x_index < bmp24_x_value.size(); x_index++)
+									con[x_index] = bmp24_x_value[x_index].REAL_value;
+								bmp24_structure::bmp24_con[bmp_layer] = con;
+								bmp24_structure::is_con[bmp_layer] = true;
 							}
 						}
 						// - temperature
 						if (main_field::is_temp_field_on) {
-							string bmp24_temp_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".temperature"; REAL bmp_temp = 0.0;
-							InputFileReader::get_instance()->read_REAL_value(bmp24_temp_key, bmp_temp, true);
-							bmp24_structure::bmp24_temperature.push_back(bmp_temp);
+							std::string bmp24_temp_key = "Preprocess.Microstructure.bmp24_layer_" + to_string(bmp_layer) + ".temperature"; REAL bmp_temp = 0.0;
+							if(InputFileReader::get_instance()->read_REAL_value(bmp24_temp_key, bmp_temp, true))
+								bmp24_structure::is_temp[bmp_layer] = true;
+							bmp24_structure::bmp24_temperature[bmp_layer] = bmp_temp;
 						}
 					}
 				}
 				// - init porous structure
-				WriteDebugFile("# Preprocess.Microstructure.porous = (first_phi_index, second_phi_index, porosity, noise_level) \n");
-				string porous_key = "Preprocess.Microstructure.porous", porous_input = "()";
+				WriteDebugFile("# Preprocess.Microstructure.porous = (porosity, noise_level) \n");
+				std::string porous_key = "Preprocess.Microstructure.porous", porous_input = "()";
 				if (InputFileReader::get_instance()->read_string_value(porous_key, porous_input, true)) {
+					std::vector<input_value> porous_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, porous_key, porous_input, true);
 					porous_structure::is_porous = true;
-					vector<InputValueType> porous_structure = { InputValueType::IVType_INT ,
-						InputValueType::IVType_INT ,InputValueType::IVType_REAL, InputValueType::IVType_REAL };
-					vector<input_value> porous_value = InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(porous_structure, porous_key, porous_input, true);
-					porous_structure::porous_first_phi_index = porous_value[0].int_value;
-					porous_structure::porous_second_phi_index = porous_value[1].int_value;
-					check_phi_index(porous_structure::porous_first_phi_index);
-					check_phi_index(porous_structure::porous_second_phi_index);
-					porous_structure::porosity = porous_value[2].REAL_value;
-					porous_structure::porous_init_noise = porous_value[3].REAL_value;
+					porous_structure::porosity = porous_value[0].REAL_value;
+					porous_structure::porous_init_noise = porous_value[1].REAL_value;
+					if (main_field::is_phi_field_on) {
+						WriteDebugFile("# .phi = (first_phi_index, second_phi_index) \n");
+						std::string porous_phi_key = "Preprocess.Microstructure.Porous.phi", porous_phi_input = "()";
+						if (InputFileReader::get_instance()->read_string_value(porous_phi_key, porous_phi_input, true)) {
+							std::vector<input_value> porous_phi_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, porous_phi_key, porous_phi_input, true);
+							porous_structure::porous_first_phi_index = porous_phi_value[0].int_value;
+							porous_structure::porous_second_phi_index = porous_phi_value[1].int_value;
+							check_phi_index(porous_structure::porous_first_phi_index);
+							check_phi_index(porous_structure::porous_second_phi_index);
+							porous_structure::is_phi = true;
+							std::string porous_norm_key = "Preprocess.Microstructure.Porous.is_phi_normalized";
+							InputFileReader::get_instance()->read_bool_value(porous_norm_key, porous_structure::is_porous_normalized, true);
+						}
+					}
 					if (main_field::is_con_field_on) {
 						WriteDebugFile("# .con = [(first_con_0_value, first_con_1_value, ... ), (second_con_0_value, second_con_1_value, ... )] \n");
-						string porous_x_key = "Preprocess.Microstructure.Porous.con", porous_x_input = "[()]";
+						std::string porous_x_key = "Preprocess.Microstructure.Porous.con", porous_x_input = "[()]";
+						porous_structure::porous_first_con.resize(main_field::con_number, 0);
+						porous_structure::porous_second_con.resize(main_field::con_number, 0);
 						if (InputFileReader::get_instance()->read_string_value(porous_x_key, porous_x_input, true)) {
-							vector<vector<input_value>> porous_x_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, porous_x_key, porous_x_input, true);
-							for (int x_index = 0; x_index < porous_x_value[0].size(); x_index++)
-								porous_structure::porous_first_con.push_back(porous_x_value[0][x_index].REAL_value);
-							for (int x_index = 0; x_index < porous_x_value[1].size(); x_index++)
-								porous_structure::porous_second_con.push_back(porous_x_value[1][x_index].REAL_value);
-							check_con_size(int(porous_structure::porous_first_con.size()));
-							check_con_size(int(porous_structure::porous_second_con.size()));
+							std::vector<std::vector<input_value>> porous_x_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, porous_x_key, porous_x_input, true);
+							check_con_size(porous_x_value[0].size());
+							check_con_size(porous_x_value[1].size());
+							porous_structure::is_con = true;
+							for (size_t x_index = 0; x_index < porous_x_value[0].size(); x_index++)
+								porous_structure::porous_first_con[x_index] = porous_x_value[0][x_index].REAL_value;
+							for (size_t x_index = 0; x_index < porous_x_value[1].size(); x_index++)
+								porous_structure::porous_second_con[x_index] = porous_x_value[1][x_index].REAL_value;
 						}
 					}
 					if (main_field::is_temp_field_on) {
 						WriteDebugFile("# .temperature = (first_temperature, second_temperature) \n");
-						string porous_temp_key = "Preprocess.Microstructure.Porous.temperature", porous_temp_input = "(0,0)";
-						InputFileReader::get_instance()->read_string_value(porous_temp_key, porous_temp_input, true);
-						vector<input_value> porous_temp_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, porous_temp_key, porous_temp_input, true);
-						porous_structure::porous_first_temperature = porous_temp_value[0].REAL_value;
-						porous_structure::porous_second_temperature = porous_temp_value[1].REAL_value;
+						std::string porous_temp_key = "Preprocess.Microstructure.Porous.temperature", porous_temp_input = "(0,0)";
+						if (InputFileReader::get_instance()->read_string_value(porous_temp_key, porous_temp_input, true)) {
+							std::vector<input_value> porous_temp_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, porous_temp_key, porous_temp_input, true);
+							porous_structure::porous_first_temperature = porous_temp_value[0].REAL_value;
+							porous_structure::porous_second_temperature = porous_temp_value[1].REAL_value;
+							porous_structure::is_temp = true;
+						}
 					}
-
-					string porous_norm_key = "Preprocess.Microstructure.Porous.is_normalized";
-					InputFileReader::get_instance()->read_bool_value(porous_norm_key, porous_structure::is_porous_normalized, true);
 
 					if (InputFileReader::get_instance()->read_int_value("Preprocess.Microstructure.Porous.rand_seed", porous_structure::porous_rand_seed, true))
 						porous_structure::is_porous_rand = false;
 
 					WriteDebugFile("# .in_phi_indexs = ( phi_index_1, phi_index_2, ... ) \n");
-					string porous_in_phis_key = "Preprocess.Microstructure.Porous.in_phi_indexs", porous_in_phis_input = "()";
+					std::string porous_in_phis_key = "Preprocess.Microstructure.Porous.in_phi_indexs", porous_in_phis_input = "()";
 					InputFileReader::get_instance()->read_string_value(porous_in_phis_key, porous_in_phis_input, true);
-					vector<input_value> porous_in_phis_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, porous_in_phis_key, porous_in_phis_input, true);
-					for (int in_phi_index = 0; in_phi_index < porous_in_phis_value.size(); in_phi_index++) {
+					std::vector<input_value> porous_in_phis_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, porous_in_phis_key, porous_in_phis_input, true);
+					for (size_t in_phi_index = 0; in_phi_index < porous_in_phis_value.size(); in_phi_index++) {
 						porous_phis_indexs.push_back(size_t(porous_in_phis_value[in_phi_index].int_value));
 						check_phi_index(porous_in_phis_value[in_phi_index].int_value);
 					}
 				}
 				// - init voronoi structure
-				WriteDebugFile("# .voronoi = (phi_index_begin, phi_index_end) \n");
-				string voronoi_property_key = "Preprocess.Microstructure.voronoi", voronoi_property_input = "(0,0)";
-				if (InputFileReader::get_instance()->read_string_value(voronoi_property_key, voronoi_property_input, true)) {
-					voronoi_structure::is_voronoi = true;
-					vector<input_value> voronoi_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, voronoi_property_key, voronoi_property_input, true);
-					voronoi_structure::voronoi_phi_index_range[0] = voronoi_value[0].int_value;
-					voronoi_structure::voronoi_phi_index_range[1] = voronoi_value[1].int_value;
-					check_phi_index(voronoi_structure::voronoi_phi_index_range[0]);
-					check_phi_index(voronoi_structure::voronoi_phi_index_range[1]);
-					voronoi_structure::voronoi_box_position[0] = 1;
-					voronoi_structure::voronoi_box_position[1] = 1;
-					voronoi_structure::voronoi_box_position[2] = 1;
-					voronoi_structure::voronoi_box_size[0] = int(mesh_parameters::MESH_NX);
-					voronoi_structure::voronoi_box_size[1] = int(mesh_parameters::MESH_NY);
-					voronoi_structure::voronoi_box_size[2] = int(mesh_parameters::MESH_NZ);
+				if (main_field::is_phi_field_on) {
+					WriteDebugFile("# .voronoi = (phi_index_begin, phi_index_end) \n");
+					std::string voronoi_property_key = "Preprocess.Microstructure.voronoi", voronoi_property_input = "(0,0)";
+					if (InputFileReader::get_instance()->read_string_value(voronoi_property_key, voronoi_property_input, true)) {
+						voronoi_structure::is_voronoi = true;
+						std::vector<input_value> voronoi_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, voronoi_property_key, voronoi_property_input, true);
+						voronoi_structure::voronoi_phi_index_range[0] = voronoi_value[0].int_value;
+						voronoi_structure::voronoi_phi_index_range[1] = voronoi_value[1].int_value;
+						check_phi_index(voronoi_structure::voronoi_phi_index_range[0]);
+						check_phi_index(voronoi_structure::voronoi_phi_index_range[1]);
+						voronoi_structure::voronoi_box_position[0] = 1;
+						voronoi_structure::voronoi_box_position[1] = 1;
+						voronoi_structure::voronoi_box_position[2] = 1;
+						voronoi_structure::voronoi_box_size[0] = int(mesh_parameters::MESH_NX);
+						voronoi_structure::voronoi_box_size[1] = int(mesh_parameters::MESH_NY);
+						voronoi_structure::voronoi_box_size[2] = int(mesh_parameters::MESH_NZ);
 
-					if (mesh_parameters::x_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NX <= 1)
-						voronoi_structure::is_x_down_periodic = false;
-					if (mesh_parameters::x_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NX <= 1)
-						voronoi_structure::is_x_up_periodic = false;
-					if (mesh_parameters::y_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NY <= 1)
-						voronoi_structure::is_y_down_periodic = false;
-					if (mesh_parameters::y_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NY <= 1)
-						voronoi_structure::is_y_up_periodic = false;
-					if (mesh_parameters::z_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NZ <= 1)
-						voronoi_structure::is_z_down_periodic = false;
-					if (mesh_parameters::z_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NZ <= 1)
-						voronoi_structure::is_z_up_periodic = false;
+						if (mesh_parameters::x_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NX <= 1)
+							voronoi_structure::is_x_down_periodic = false;
+						if (mesh_parameters::x_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NX <= 1)
+							voronoi_structure::is_x_up_periodic = false;
+						if (mesh_parameters::y_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NY <= 1)
+							voronoi_structure::is_y_down_periodic = false;
+						if (mesh_parameters::y_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NY <= 1)
+							voronoi_structure::is_y_up_periodic = false;
+						if (mesh_parameters::z_down != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NZ <= 1)
+							voronoi_structure::is_z_down_periodic = false;
+						if (mesh_parameters::z_up != BoundaryCondition::PERIODIC || mesh_parameters::MESH_NZ <= 1)
+							voronoi_structure::is_z_up_periodic = false;
 
-					WriteDebugFile("# .con = (con_0_value, con_1_value, ... )] \n");
-					string voronoi_x_key = "Preprocess.Microstructure.Voronoi.con", voronoi_x_input = "()";
-					InputFileReader::get_instance()->read_string_value(voronoi_x_key, voronoi_x_input, true);
-					vector<input_value> voronoi_x_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, voronoi_x_key, voronoi_x_input, true);
-					for (int x_index = 0; x_index < voronoi_x_value.size(); x_index++)
-						voronoi_structure::voronoi_con.push_back(voronoi_x_value[x_index].REAL_value);
-					check_con_size(int(voronoi_structure::voronoi_con.size()));
-
-					string voronoi_temperature_key = "Preprocess.Microstructure.Voronoi.temperature";
-					InputFileReader::get_instance()->read_REAL_value(voronoi_temperature_key, voronoi_structure::voronoi_temperature, true);
-					if (InputFileReader::get_instance()->read_int_value("Preprocess.Microstructure.Voronoi.rand_seed", voronoi_structure::voronoi_rand_seed, true))
-						voronoi_structure::is_voronoi_rand = false;
-
-					WriteDebugFile("# Preprocess.Microstructure.Voronoi.const_distance = 0.0 \n");
-					WriteDebugFile("#                                  .ref_dot = [(REF_DOT), (distance, min_points_distance, max_points_distance)] \n");
-					WriteDebugFile("#                                  .ref_surface = [(REF_SURF_POINT_1), (REF_SURF_POINT_2), (REF_SURF_POINT_3), (distance, min_points_distance, max_points_distance)] \n");
-					WriteDebugFile("#                                  .dots_matrix = [(DOT1, points_distances1), (DOT2, points_distances2), ... ] \n");
-					string voronoi_const_distance_key = "Preprocess.Microstructure.Voronoi.const_distance";
-					string voronoi_ref_dot_key = "Preprocess.Microstructure.Voronoi.ref_dot", voronoi_ref_dot_input = "[()]";
-					string voronoi_ref_surface_key = "Preprocess.Microstructure.Voronoi.ref_surface", voronoi_ref_surface_input = "[()]";
-					string voronoi_dots_matrix_key = "Preprocess.Microstructure.Voronoi.dots_matrix", voronoi_dots_matrix_input = "[()]";
-					if (InputFileReader::get_instance()->read_REAL_value(voronoi_const_distance_key, voronoi_structure::voronoi_const_pointsDistance, true)) {
-						voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_CONST;
-					}
-					else if (InputFileReader::get_instance()->read_string_value(voronoi_ref_dot_key, voronoi_ref_dot_input, true)) {
-						voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_REF_DOT;
-						vector<vector<input_value>> voronoi_ref_dot_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, voronoi_ref_dot_key, voronoi_ref_dot_input, true);
-						voronoi_structure::voronoi_reference_dot.set(voronoi_ref_dot_value[0][0].REAL_value, voronoi_ref_dot_value[0][1].REAL_value, voronoi_ref_dot_value[0][2].REAL_value);
-						voronoi_structure::voronoi_reference_dot_distance = voronoi_ref_dot_value[1][0].REAL_value;
-						voronoi_structure::voronoi_reference_dot_min_pointsDistance = voronoi_ref_dot_value[1][1].REAL_value;
-						voronoi_structure::voronoi_reference_dot_max_pointsDistance = voronoi_ref_dot_value[1][2].REAL_value;
-					}
-					else if (InputFileReader::get_instance()->read_string_value(voronoi_ref_surface_key, voronoi_ref_surface_input, true)) {
-						voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_REF_SURFACE;
-						vector<vector<input_value>> voronoi_ref_surface_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, voronoi_ref_surface_key, voronoi_ref_surface_input, true);
-						voronoi_structure::voronoi_reference_surface.init(voronoi_ref_surface_value[0][0].REAL_value, voronoi_ref_surface_value[0][1].REAL_value, voronoi_ref_surface_value[0][2].REAL_value,
-							voronoi_ref_surface_value[1][0].REAL_value, voronoi_ref_surface_value[1][1].REAL_value, voronoi_ref_surface_value[1][2].REAL_value,
-							voronoi_ref_surface_value[2][0].REAL_value, voronoi_ref_surface_value[2][1].REAL_value, voronoi_ref_surface_value[2][2].REAL_value);
-						voronoi_structure::voronoi_reference_surface_distance = voronoi_ref_surface_value[3][0].REAL_value;
-						voronoi_structure::voronoi_reference_surface_min_pointsDistance = voronoi_ref_surface_value[3][1].REAL_value;
-						voronoi_structure::voronoi_reference_surface_max_pointsDistance = voronoi_ref_surface_value[3][2].REAL_value;
-					}
-					else if (InputFileReader::get_instance()->read_string_value(voronoi_dots_matrix_key, voronoi_dots_matrix_input, true)) {
-						voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_DOTS_MATRIX;
-						vector<vector<input_value>> voronoi_dots_matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, voronoi_dots_matrix_key, voronoi_dots_matrix_input, true);
-						if (voronoi_dots_matrix_value.size() < 2) {
-							WriteDebugFile(" ERROR: Preprocess.Microstructure.Voronoi.dots_matrix, the number of DOTS should be larger than 1. \n");
-							exit(0);
+						if (main_field::is_con_field_on) {
+							WriteDebugFile("# .con = (con_0_value, con_1_value, ... )] \n");
+							std::string voronoi_x_key = "Preprocess.Microstructure.Voronoi.con", voronoi_x_input = "()";
+							if (InputFileReader::get_instance()->read_string_value(voronoi_x_key, voronoi_x_input, true)) {
+								voronoi_structure::is_con = true;
+								voronoi_structure::voronoi_con.resize(main_field::con_number, 0);
+								std::vector<input_value> voronoi_x_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, voronoi_x_key, voronoi_x_input, true);
+								check_con_size(voronoi_x_value.size());
+								for (size_t x_index = 0; x_index < voronoi_x_value.size(); x_index++)
+									voronoi_structure::voronoi_con[x_index] = voronoi_x_value[x_index].REAL_value;
+							}
 						}
-						for (int index = 0; index < voronoi_dots_matrix_value.size(); index++) {
-							voronoi_structure::voronoi_matrix_dots.push_back(geometry_structure::Point(voronoi_dots_matrix_value[index][0].REAL_value, voronoi_dots_matrix_value[index][1].REAL_value, voronoi_dots_matrix_value[index][2].REAL_value));
-							voronoi_structure::voronoi_matrix_dots_pointsDistance.push_back(voronoi_dots_matrix_value[index][3].REAL_value);
+
+						std::string voronoi_temperature_key = "Preprocess.Microstructure.Voronoi.temperature";
+						if(InputFileReader::get_instance()->read_REAL_value(voronoi_temperature_key, voronoi_structure::voronoi_temperature, true))
+							voronoi_structure::is_temp = true;
+
+						if (InputFileReader::get_instance()->read_int_value("Preprocess.Microstructure.Voronoi.rand_seed", voronoi_structure::voronoi_rand_seed, true))
+							voronoi_structure::is_voronoi_rand = false;
+
+						WriteDebugFile("# Preprocess.Microstructure.Voronoi.const_distance = 0.0 \n");
+						WriteDebugFile("#                                  .ref_dot = [(REF_DOT), (distance, min_points_distance, max_points_distance)] \n");
+						WriteDebugFile("#                                  .ref_surface = [(REF_SURF_POINT_1), (REF_SURF_POINT_2), (REF_SURF_POINT_3), (distance, min_points_distance, max_points_distance)] \n");
+						WriteDebugFile("#                                  .dots_matrix = [(DOT1, points_distances1), (DOT2, points_distances2), ... ] \n");
+						std::string voronoi_const_distance_key = "Preprocess.Microstructure.Voronoi.const_distance";
+						std::string voronoi_ref_dot_key = "Preprocess.Microstructure.Voronoi.ref_dot", voronoi_ref_dot_input = "[()]";
+						std::string voronoi_ref_surface_key = "Preprocess.Microstructure.Voronoi.ref_surface", voronoi_ref_surface_input = "[()]";
+						std::string voronoi_dots_matrix_key = "Preprocess.Microstructure.Voronoi.dots_matrix", voronoi_dots_matrix_input = "[()]";
+						if (InputFileReader::get_instance()->read_REAL_value(voronoi_const_distance_key, voronoi_structure::voronoi_const_pointsDistance, true)) {
+							voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_CONST;
 						}
-					}
-					WriteDebugFile("# .in_phi_indexs = ( phi_index_1, phi_index_2, ... ) \n");
-					string voronoi_in_phis_key = "Preprocess.Microstructure.Voronoi.in_phi_indexs", voronoi_in_phis_input = "()";
-					InputFileReader::get_instance()->read_string_value(voronoi_in_phis_key, voronoi_in_phis_input, true);
-					vector<input_value> voronoi_in_phis_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, voronoi_in_phis_key, voronoi_in_phis_input, true);
-					for (int in_phi_index = 0; in_phi_index < voronoi_in_phis_value.size(); in_phi_index++) {
-						voronoi_phis_indexs.push_back(size_t(voronoi_in_phis_value[in_phi_index].int_value));
-						check_phi_index(voronoi_in_phis_value[in_phi_index].int_value);
+						else if (InputFileReader::get_instance()->read_string_value(voronoi_ref_dot_key, voronoi_ref_dot_input, true)) {
+							voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_REF_DOT;
+							std::vector<std::vector<input_value>> voronoi_ref_dot_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, voronoi_ref_dot_key, voronoi_ref_dot_input, true);
+							voronoi_structure::voronoi_reference_dot.set(voronoi_ref_dot_value[0][0].REAL_value, voronoi_ref_dot_value[0][1].REAL_value, voronoi_ref_dot_value[0][2].REAL_value);
+							voronoi_structure::voronoi_reference_dot_distance = voronoi_ref_dot_value[1][0].REAL_value;
+							voronoi_structure::voronoi_reference_dot_min_pointsDistance = voronoi_ref_dot_value[1][1].REAL_value;
+							voronoi_structure::voronoi_reference_dot_max_pointsDistance = voronoi_ref_dot_value[1][2].REAL_value;
+						}
+						else if (InputFileReader::get_instance()->read_string_value(voronoi_ref_surface_key, voronoi_ref_surface_input, true)) {
+							voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_REF_SURFACE;
+							std::vector<std::vector<input_value>> voronoi_ref_surface_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, voronoi_ref_surface_key, voronoi_ref_surface_input, true);
+							voronoi_structure::voronoi_reference_surface.init(voronoi_ref_surface_value[0][0].REAL_value, voronoi_ref_surface_value[0][1].REAL_value, voronoi_ref_surface_value[0][2].REAL_value,
+								voronoi_ref_surface_value[1][0].REAL_value, voronoi_ref_surface_value[1][1].REAL_value, voronoi_ref_surface_value[1][2].REAL_value,
+								voronoi_ref_surface_value[2][0].REAL_value, voronoi_ref_surface_value[2][1].REAL_value, voronoi_ref_surface_value[2][2].REAL_value);
+							voronoi_structure::voronoi_reference_surface_distance = voronoi_ref_surface_value[3][0].REAL_value;
+							voronoi_structure::voronoi_reference_surface_min_pointsDistance = voronoi_ref_surface_value[3][1].REAL_value;
+							voronoi_structure::voronoi_reference_surface_max_pointsDistance = voronoi_ref_surface_value[3][2].REAL_value;
+						}
+						else if (InputFileReader::get_instance()->read_string_value(voronoi_dots_matrix_key, voronoi_dots_matrix_input, true)) {
+							voronoi_structure::voronoi_type = voronoi_structure::VoronoiType::VDT_DOTS_MATRIX;
+							std::vector<std::vector<input_value>> voronoi_dots_matrix_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_REAL, voronoi_dots_matrix_key, voronoi_dots_matrix_input, true);
+							if (voronoi_dots_matrix_value.size() < 2) {
+								WriteDebugFile(" ERROR: Preprocess.Microstructure.Voronoi.dots_matrix, the number of DOTS should be larger than 1. \n");
+								exit(0);
+							}
+							for (size_t index = 0; index < voronoi_dots_matrix_value.size(); index++) {
+								voronoi_structure::voronoi_matrix_dots.push_back(geometry_structure::Point(voronoi_dots_matrix_value[index][0].REAL_value, voronoi_dots_matrix_value[index][1].REAL_value, voronoi_dots_matrix_value[index][2].REAL_value));
+								voronoi_structure::voronoi_matrix_dots_pointsDistance.push_back(voronoi_dots_matrix_value[index][3].REAL_value);
+							}
+						}
+						WriteDebugFile("# .in_phi_indexs = ( phi_index_1, phi_index_2, ... ) \n");
+						std::string voronoi_in_phis_key = "Preprocess.Microstructure.Voronoi.in_phi_indexs", voronoi_in_phis_input = "()";
+						InputFileReader::get_instance()->read_string_value(voronoi_in_phis_key, voronoi_in_phis_input, true);
+						std::vector<input_value> voronoi_in_phis_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, voronoi_in_phis_key, voronoi_in_phis_input, true);
+						for (size_t in_phi_index = 0; in_phi_index < voronoi_in_phis_value.size(); in_phi_index++) {
+							voronoi_phis_indexs.push_back(size_t(voronoi_in_phis_value[in_phi_index].int_value));
+							check_phi_index(voronoi_in_phis_value[in_phi_index].int_value);
+						}
 					}
 				}
 				// - others

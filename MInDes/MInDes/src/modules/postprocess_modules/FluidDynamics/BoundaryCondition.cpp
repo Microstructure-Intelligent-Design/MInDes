@@ -1303,7 +1303,7 @@ namespace pf {
 				for (long long y = 0; y < main_field::lbm_field.Ny(); y++)
 					for (long long z = 0; z < main_field::lbm_field.Nz(); z++) {
 						LBMPoint& fluid_point = main_field::lbm_field(x, y, z);
-						std::vector<REAL>& phi_point = main_field::phase_field(x, y, z);
+						Matrix1D<REAL>& phi_point = main_field::phase_field(x, y, z);
 						fluid_point.fluid_region = 0.0;
 						for (size_t index = 0; index < main_field::phi_number; index++)
 							if (is_solid_phases[index])

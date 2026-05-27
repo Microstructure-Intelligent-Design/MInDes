@@ -43,6 +43,9 @@
     <Filter Include="modules\postprocess\machineL\field_predictor">
       <UniqueIdentifier>{f36a1b94-930b-49df-9da2-46a648796783}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\model\DDC\CALPHAD">
+      <UniqueIdentifier>{3b4c9eed-5746-4b10-9dc4-ef52e71f4ed1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -61,9 +64,6 @@
     </ClCompile>
     <ClCompile Include="src\modules\base\whereami.c">
       <Filter>modules\base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Functions.cpp">
-      <Filter>modules\model\DDC</Filter>
     </ClCompile>
     <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp">
       <Filter>modules\model</Filter>
@@ -164,11 +164,23 @@
     <ClCompile Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.cpp">
       <Filter>modules\postprocess\machineL\field_predictor</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.cpp">
+    <ClCompile Include="src\modules\model_modules\ConRegions.cpp">
+      <Filter>modules\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\preprocess_modules\Pretreatment.cpp">
+      <Filter>modules\preprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Con_Functions.cpp">
       <Filter>modules\model\DDC</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\model_modules\ConProperties.cpp">
-      <Filter>modules\model</Filter>
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Functions.cpp">
+      <Filter>modules\model\DDC</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Phi_Functions.cpp">
+      <Filter>modules\model\DDC</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.cpp">
+      <Filter>modules\model\DDC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -197,15 +209,6 @@
     </ClInclude>
     <ClInclude Include="src\modules\base\whereami.h">
       <Filter>modules\base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Functions.h">
-      <Filter>modules\model\DDC</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Manager.h">
-      <Filter>modules\model\DDC</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Params.h">
-      <Filter>modules\model\DDC</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\GrainsOrientations.h">
       <Filter>modules\model</Filter>
@@ -342,11 +345,29 @@
     <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.h">
       <Filter>modules\postprocess\machineL\field_predictor</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\model_modules\data_driven_complex\DDC_Phi_Functions.h">
+    <ClInclude Include="src\modules\model_modules\ConRegions.h">
+      <Filter>modules\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\preprocess_modules\Pretreatment.h">
+      <Filter>modules\preprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Con_Functions.h">
       <Filter>modules\model\DDC</Filter>
     </ClInclude>
-    <ClInclude Include="src\modules\model_modules\ConProperties.h">
-      <Filter>modules\model</Filter>
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Functions.h">
+      <Filter>modules\model\DDC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Manager.h">
+      <Filter>modules\model\DDC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Params.h">
+      <Filter>modules\model\DDC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Phi_Functions.h">
+      <Filter>modules\model\DDC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.h">
+      <Filter>modules\model\DDC</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

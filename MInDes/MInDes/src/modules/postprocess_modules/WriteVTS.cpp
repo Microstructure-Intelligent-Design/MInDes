@@ -29,7 +29,7 @@ namespace pf {
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							std::vector<REAL>& point = main_field::phase_field(i, j, k);
+							Matrix1D<REAL>& point = main_field::phase_field(i, j, k);
 							REAL fix = 0.0;
 							for (size_t index = 0; index < main_field::phi_number; index++)
 								fix += point[index] * point[index];
@@ -46,7 +46,7 @@ namespace pf {
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							std::vector<REAL>& point = main_field::phase_field(i, j, k);
+							Matrix1D<REAL>& point = main_field::phase_field(i, j, k);
 							REAL fix = 0.0;
 							for (size_t index = 0; index < main_field::phi_number; index++)
 								fix += point[index] * index;

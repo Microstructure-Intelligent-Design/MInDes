@@ -35,7 +35,7 @@ namespace pf {
 					for (size_t x = 0; x < mesh_info.PNx; x++)
 						for (size_t y = 0; y < mesh_info.PNy; y++)
 							for (size_t z = 0; z < mesh_info.PNz; z++) {
-								std::vector<REAL>& point = main_field::phase_field(x, y, z);
+								Matrix1D<REAL>& point = main_field::phase_field(x, y, z);
 								for (size_t index = 0; index < mesh_info.phi_number; index++) {
 									float phi = float(point[index]);
 									fout.write((const char*)&phi, sizeof(float));
@@ -46,7 +46,7 @@ namespace pf {
 					for (size_t x = 0; x < mesh_info.CNx; x++)
 						for (size_t y = 0; y < mesh_info.CNy; y++)
 							for (size_t z = 0; z < mesh_info.CNz; z++) {
-								std::vector<REAL>& point = main_field::concentration_field(x, y, z);
+								Matrix1D<REAL>& point = main_field::concentration_field(x, y, z);
 								for (size_t index = 0; index < mesh_info.con_number; index++) {
 									float con = float(point[index]);
 									fout.write((const char*)&con, sizeof(float));
@@ -90,7 +90,7 @@ namespace pf {
 					for (size_t y = 0; y < mesh_info.PNy; y++)
 						for (size_t z = 0; z < mesh_info.PNz; z++) {
 							if (x < pNx && y < pNy && z < pNz) {
-								std::vector<REAL>& point = main_field::phase_field(x, y, z);
+								Matrix1D<REAL>& point = main_field::phase_field(x, y, z);
 								for (size_t index = 0; index < mesh_info.phi_number; index++) {
 									fin.read((char*)&data_buff, sizeof(float));
 									if (index < main_field::phi_number)
@@ -110,7 +110,7 @@ namespace pf {
 					for (size_t y = 0; y < mesh_info.CNy; y++)
 						for (size_t z = 0; z < mesh_info.CNz; z++) {
 							if (x < cNx && y < cNy && z < cNz) {
-								std::vector<REAL>& point = main_field::concentration_field(x, y, z);
+								Matrix1D<REAL>& point = main_field::concentration_field(x, y, z);
 								for (size_t index = 0; index < mesh_info.con_number; index++) {
 									fin.read((char*)&data_buff, sizeof(float));
 									if (index < main_field::con_number)

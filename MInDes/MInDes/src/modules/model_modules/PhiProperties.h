@@ -11,18 +11,15 @@ namespace pf {
 
 		static PhiProperties& instance();
 		size_t phi_property(size_t phi_index);
-		int phi_property(int phi_index);
 		size_t phi_property(std::string _property_name);
+		std::vector<size_t> property_phi(size_t phi_property_index);
+		std::vector<size_t> property_phi(std::string _property_name);
 		size_t phi_property_number();
 		bool is_phi_property(std::string _property_name);
-		std::string phi_property_name(int phi_property_index);
 		std::string phi_property_name(size_t phi_property_index);
 		void init();
 		size_t operator[](size_t phi_index) {
 			return _phi_property[phi_index];
-		}
-		int operator[](int phi_index) {
-			return int(_phi_property[phi_index]);
 		}
 	private:
 		void add_property_name(std::string _property_name);
@@ -32,5 +29,6 @@ namespace pf {
 		size_t _phi_property_number = 0;
 		std::vector<std::string> _phi_property_name;
 		std::vector<size_t> _phi_property;
+		std::vector<std::vector<size_t>> _property_phi;
 	};
 }

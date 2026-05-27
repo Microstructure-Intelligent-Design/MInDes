@@ -20,8 +20,10 @@ namespace pf {
 		inline std::vector<int> voronoi_box_position = { 0, 0, 0 };
 		inline std::vector<int> voronoi_box_size = { 0, 0, 0 };
 		inline std::vector<size_t> voronoi_phi_index_range = { 0, 0 };
-		inline std::vector<double> voronoi_con;
+		inline Matrix1D<REAL> voronoi_con;
 		inline double voronoi_temperature = 0.0;
+		inline bool is_con = false;
+		inline bool is_temp = false;
 		inline VoronoiType voronoi_type = VoronoiType::VDT_CONST;
 		inline std::vector<geometry_structure::Point> voronoi_points;
 		inline double voronoi_const_pointsDistance = -1.0;

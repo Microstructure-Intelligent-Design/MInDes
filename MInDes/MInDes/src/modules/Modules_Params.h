@@ -31,10 +31,24 @@ namespace pf {
 		inline bool is_phi_field_on = false;
 		inline size_t phi_number = 0;
 		inline REAL PHI_MAX_VARIATION = 0;
-		inline Mesh_Boundry<std::vector<REAL>> phase_field;
+		inline Mesh_Boundry<Matrix1D<REAL>> phase_field;
 		inline void init_phase_field() {
+			BoundaryCondition bc_x_down = mesh_parameters::x_down, bc_x_up = mesh_parameters::x_up, bc_y_down = mesh_parameters::y_down, 
+				bc_y_up = mesh_parameters::y_up, bc_z_down = mesh_parameters::z_down, bc_z_up = mesh_parameters::z_up;
+			if (bc_x_down == BoundaryCondition::OPENFLUX)
+				bc_x_down = BoundaryCondition::ZEROFLUX;
+			if (bc_y_down == BoundaryCondition::OPENFLUX)
+				bc_y_down = BoundaryCondition::ZEROFLUX;
+			if (bc_z_down == BoundaryCondition::OPENFLUX)
+				bc_z_down = BoundaryCondition::ZEROFLUX;
+			if (bc_x_up == BoundaryCondition::OPENFLUX)
+				bc_x_up = BoundaryCondition::ZEROFLUX;
+			if (bc_y_up == BoundaryCondition::OPENFLUX)
+				bc_y_up = BoundaryCondition::ZEROFLUX;
+			if (bc_z_up == BoundaryCondition::OPENFLUX)
+				bc_z_up = BoundaryCondition::ZEROFLUX;
 			phase_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r,
-				mesh_parameters::x_down, mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up, mesh_parameters::z_down, mesh_parameters::z_up);
+				bc_x_down, bc_x_up, bc_y_down, bc_y_up, bc_z_down, bc_z_up);
 			for (long long z = 0; z < phase_field.Nz(); z++)
 				for (long long y = 0; y < phase_field.Ny(); y++)
 					for (long long x = 0; x < phase_field.Nx(); x++)
@@ -45,7 +59,7 @@ namespace pf {
 		inline bool is_con_field_on = false;
 		inline size_t con_number = 0;
 		inline REAL CON_MAX_VARIATION = 0;
-		inline Mesh_Boundry<std::vector<REAL>> concentration_field;
+		inline Mesh_Boundry<Matrix1D<REAL>> concentration_field;
 		inline void init_concentration_field() {
 			concentration_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r,
 				mesh_parameters::x_down, mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up, mesh_parameters::z_down, mesh_parameters::z_up);

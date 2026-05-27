@@ -20,8 +20,10 @@ Preprocess.Microstructure.geometry_layer_0.ellipsoid = [(51,51,1),(45,30,0),(0,1
 Preprocess.Microstructure.geometry_layer_0.phi = 1.000000
 Preprocess.Microstructure.geometry_layer_0.is_normalized = true
 
-# Preprocess.Microstructure.porous = (first_phi_index, second_phi_index, porosity, noise_level) 
-Preprocess.Microstructure.porous = (0,1,0.5,0.1)
+# Preprocess.Microstructure.porous = (porosity, noise_level) 
+Preprocess.Microstructure.porous = (0.5,0.1)
+# .phi = (first_phi_index, second_phi_index) 
+Preprocess.Microstructure.Porous.phi = (0,1)
 # .in_phi_indexs = ( phi_index_1, phi_index_2, ... ) 
 Preprocess.Microstructure.Porous.in_phi_indexs = (1)
 

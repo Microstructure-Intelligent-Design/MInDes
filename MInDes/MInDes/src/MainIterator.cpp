@@ -104,6 +104,10 @@ namespace pf {
 					else if (main_iterator::OpenMP_Thread_Counts < 1)
 						main_iterator::OpenMP_Thread_Counts = 1;
 					omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
+#ifdef _DEBUG
+					omp_set_dynamic(0);
+					omp_set_num_threads(1);
+#endif
 					// - license
 
 					double cal_times = 0.0;

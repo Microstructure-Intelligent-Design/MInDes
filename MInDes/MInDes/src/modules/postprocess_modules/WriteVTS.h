@@ -9,7 +9,7 @@ namespace pf {
 
 	namespace write_vts {
 		inline size_t output_frequence = 0;
-		inline bool is_show_with_boundary = false;
+		inline bool is_show_with_boundary = true;
 		inline size_t x_begin = 0;
 		inline size_t y_begin = 0;
 		inline size_t z_begin = 0;

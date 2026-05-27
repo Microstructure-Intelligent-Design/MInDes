@@ -2,6 +2,7 @@
 #include <vector>
 // - modules
 #include "preprocess_modules/MicrostructureInit.h"
+#include "preprocess_modules/Pretreatment.h"
 #include "model_modules/PhiProperties.h"
 #include "model_modules/GrainsOrientations.h"
 #include "postprocess_modules/AutoDeltTime.h"

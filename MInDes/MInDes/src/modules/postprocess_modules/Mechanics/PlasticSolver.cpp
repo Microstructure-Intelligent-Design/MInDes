@@ -4,7 +4,7 @@ namespace pf {
 		namespace default_functions {
 			static void cal_plastic_parameters_norm(long long x, long long y, long long z, 
 				double& yield_stress, double& hardening_modulus, double& shear_modulus) {
-				std::vector<REAL>& phi = main_field::phase_field(x, y, z);
+				Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
 				for (size_t index = 0; index < phi_number; index++) {
 					yield_stress += phi[index] * phi_yield_stress[index];
 					hardening_modulus += phi[index] * phi_hardening_modulus[index];

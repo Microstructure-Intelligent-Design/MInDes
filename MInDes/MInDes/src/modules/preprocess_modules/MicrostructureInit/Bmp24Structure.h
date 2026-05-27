@@ -2,7 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <vector>
+#include "../../base/VectorMatrix.h"
 #include "GeometryStructure.h"
 namespace pf {
 	namespace bmp24_structure {
@@ -14,8 +14,11 @@ namespace pf {
 		inline std::vector<int> bmp24_phi_index;
 		inline std::vector<double> bmp24_phi_value;
 		inline std::vector<bool> bmp24_phi_normalized;
-		inline std::vector<std::vector<double>> bmp24_con;
+		inline std::vector<bool> is_phi;
+		inline std::vector<Matrix1D<REAL>> bmp24_con;
+		inline std::vector<bool> is_con;
 		inline std::vector<double> bmp24_temperature;
+		inline std::vector<bool> is_temp;
 		// -
 		void generate_structure_from_BMP_pic(size_t MESH_NX, size_t MESH_NY, size_t MESH_NZ, 
 			bool is_phi_field_on, bool is_con_field_on, bool is_temp_field_on);
