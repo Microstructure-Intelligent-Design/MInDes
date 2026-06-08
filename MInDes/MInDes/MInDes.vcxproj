@@ -36,6 +36,11 @@
     <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Phi_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_BulkEnergy.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Con_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
     <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\PhiProperties.cpp" />
@@ -92,6 +97,13 @@
     <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Params.h" />
     <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Phi_Functions.h" />
     <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_BulkEnergy.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Con_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Params.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.h" />
     <ClInclude Include="src\modules\model_modules\GrainsOrientations.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h" />

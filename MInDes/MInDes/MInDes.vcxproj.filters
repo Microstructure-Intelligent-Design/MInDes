@@ -43,8 +43,8 @@
     <Filter Include="modules\postprocess\machineL\field_predictor">
       <UniqueIdentifier>{f36a1b94-930b-49df-9da2-46a648796783}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\model\DDC\CALPHAD">
-      <UniqueIdentifier>{3b4c9eed-5746-4b10-9dc4-ef52e71f4ed1}</UniqueIdentifier>
+    <Filter Include="modules\model\DDC_CP_AI">
+      <UniqueIdentifier>{07ae6cab-ee74-44f1-a8fe-e77e186b7998}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +181,21 @@
     </ClCompile>
     <ClCompile Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.cpp">
       <Filter>modules\model\DDC</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Con_Functions.cpp">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Functions.cpp">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.cpp">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.cpp">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_BulkEnergy.cpp">
+      <Filter>modules\model\DDC_CP_AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -368,6 +383,27 @@
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\Data_Driven_Complex\DDC_Temp_Functions.h">
       <Filter>modules\model\DDC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Con_Functions.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Functions.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Manager.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Params.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_BulkEnergy.h">
+      <Filter>modules\model\DDC_CP_AI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
