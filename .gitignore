@@ -10,4 +10,6 @@ libmindes-init/
 MInDes/MInDes/_init
 MInDes/MInDes/*.dll
 !LICENSE.txt
-/MInDes/MInDes/infile/3_Applications
+MInDes/MInDes/infile/
+!MInDes/MInDes/infile/1_Microstructure/
+!MInDes/MInDes/infile/2_PhysicalFields/
