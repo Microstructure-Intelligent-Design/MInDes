@@ -32,11 +32,15 @@ namespace pf {
 			if (main_field::is_con_field_on) {
 				parameters::Con_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r, mesh_parameters::x_down,
 					mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up, mesh_parameters::z_down, mesh_parameters::z_up);
+				chemical_energy_functions::init_phase_concentration();
+				chemical_energy_functions::calculation_energy_minimazation_pre();
 				concentration_field_functions::init_total_concentration();
 			}
 			if (main_field::is_temp_field_on) {
 				temperature_functions::init_temperature_field();
 			}
+			chemical_energy_functions::write_csv_energy_results();
+			chemical_energy_functions::write_csv_energy_minimization_results();
 		}
 		void exec_i() {
 			// - phase-field evolution
@@ -54,6 +58,9 @@ namespace pf {
 			}
 		}
 		void exec_pos_i() {
+			if (main_field::is_con_field_on) {
+				chemical_energy_functions::calculation_energy_minimazation_pos();
+			}
 			if (show_loop_information::screen_output_step == 0)
 				return;
 			if (main_iterator::Current_ITE_step % show_loop_information::screen_output_step == 0) {

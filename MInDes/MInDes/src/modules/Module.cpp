@@ -26,7 +26,7 @@ namespace pf {
 		WriteDebugFile("# SimulationModels.model =  0 - None \n");
 		WriteDebugFile("#                           1 - Grain Grows Spinodal , PCT = (N,1,false) \n");
 		WriteDebugFile("#                           2 - Data Driven Complex Model , PCT = (N > 0, K, true/false) \n");
-		WriteDebugFile("#                           3 - Data Driven Complex Model - coupled with CALPHAD & AI , PCT = (N > 0, K, true/false) \n");
+		WriteDebugFile("#                           3 - Data Driven Complex Model - coupled with CALPHAD & AI , PCT = (N > 0, K, true) \n");
 		int sm_model = SimulationModels::SM_None;
 		infile_reader::read_int_value("SimulationModels.model", sm_model, true);
 		switch (SimulationModels(sm_model)) {

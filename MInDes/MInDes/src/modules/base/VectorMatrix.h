@@ -34,7 +34,7 @@ namespace pf {
             length_ = length;
             data_.assign(size_t(length), value);
         }
-        inline Matrix1D& operator=(Matrix1D& rhs) {
+        inline Matrix1D& operator=(const Matrix1D& rhs) {
             length_ = rhs.length_;
             data_ = rhs.data_;
             return *this;
@@ -164,7 +164,7 @@ namespace pf {
             cols_ = cols;
             data_.assign(size_t(rows * cols), value);
         }
-        inline Matrix2D& operator=(Matrix2D& rhs) {
+        inline Matrix2D& operator=(const Matrix2D& rhs) {
             rows_ = rhs.rows_;
             cols_ = rhs.cols_;
             data_ = rhs.data_;
@@ -227,7 +227,7 @@ namespace pf {
         inline const T& operator()(int i, int j, int k) const {
             return data_[k * (dim_y_ * dim_x_) + j * dim_x_ + i];
         }
-        inline Matrix3D& operator=(Matrix3D& rhs) {
+        inline Matrix3D& operator=(const Matrix3D& rhs) {
             dim_x_ = rhs.dim_x_;
             dim_y_ = rhs.dim_y_;
             dim_z_ = rhs.dim_z_;

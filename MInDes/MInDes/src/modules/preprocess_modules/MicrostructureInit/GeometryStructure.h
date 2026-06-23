@@ -1005,7 +1005,10 @@ namespace pf {
 		// - matrix
 		inline size_t matrix_phi_index = 0;
 		inline double matrix_phi_value = 0;
+		inline bool is_matrix_phi = false;
 		inline Matrix1D<REAL> matrix_con;
+		inline bool is_matrix_con = false;
 		inline double matrix_temperature = 0.0;
+		inline bool is_matrix_temp = false;
 	}
 }

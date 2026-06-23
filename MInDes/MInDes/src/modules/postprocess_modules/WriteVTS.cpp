@@ -8,7 +8,7 @@ namespace pf {
 		namespace default_functions {
 			void open_vts_file(std::ofstream& fout, std::string tail) {
 				std::string fname;
-				fname = input_output_files_parameters::WorkingFolder_Path + dirSeparator + "MeshData_" + tail + ".vts";
+				fname = input_output_files_parameters::WorkingFolder_Path + dirSeparator + "SimData_" + tail + ".vts";
 				fout.open(fname);
 				if (!fout) {
 					std::cout << "Failed to write the vtk file..." << std::endl;

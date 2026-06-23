@@ -12,6 +12,11 @@ namespace pf {
 		enum Int_Potential { Nestler_Well, Nestler_Obstacle, Steinbach_P2009 };
 		enum DifferenceMethod { SEVEN_POINT, NINETEEN_POINT };
 		enum InterfaceFlag { IF_BULK, IF_NEAR_INTERFACE, IF_INTERFACE };
+		struct ThermoCalcScanRange {
+			REAL begin = 0;
+			REAL end = 0;
+			REAL step = 1;
+		};
 		struct FIELD_PhiTemp
 		{
 			// - phi
@@ -333,18 +338,43 @@ namespace pf {
 			inline std::vector<REAL> Mtemp;             // [phi property] -> Mtemp
 			// ===================================================================================================
 			// - parameters bulk energy
-			inline Matrix1D<bool> is_energy_minimization;      // [region index] -> true/false
+			inline std::vector<bool> is_energy_minimization;      // [region index] -> true/false
 			inline size_t max_phasecon_variation_step = 100;
 			inline REAL L_phasecon = 1.0;
-			inline REAL max_phasecon_variation = 1e-4;
+			inline REAL phasecon_epsilon = 1e-4;
 			// - chemical energy
-			REAL (*miu)(std::vector<REAL> con, size_t phi_property, size_t con_index);
+			inline REAL (*fchem)(std::vector<REAL> con, REAL temperature, size_t phi_property);
+			inline REAL (*miu)(std::vector<REAL> con, REAL temperature, size_t phi_property, size_t con_index);
 			// - polynomial
-			inline Matrix3D<int> orders;      // (phi_property, term index, con index) -> order
-			inline Matrix2D<REAL> params;  // (phi_property, term index) -> param
-			inline Matrix1D<size_t> terms_number;       // [phi_property] -> term number
+			inline std::vector<Matrix2D<int>> con_orders;      // [phi_property](term index, con index) -> con order
+			inline std::vector<Matrix2D<REAL>> params;         // [phi_property](term index, temp term index) -> param
+			inline std::vector<Matrix2D<int>> temp_orders;     // [phi_property](term index, temp term index) -> temp order
+			inline std::vector<size_t> terms_number;           // [phi_property] -> term number
+			inline std::vector<std::vector<size_t>> temp_terms_number;       // [phi_property][term index] -> temp term number
 			// - AI
 
+			// ===================================================================================================
+			// - output
+			inline std::vector<std::pair<size_t, size_t>> is_write_phase_con;  // ( phase_property , con_index )
+			inline std::vector<size_t> is_write_con;  // ( con_index )
+			inline std::vector<std::pair<size_t, size_t>> is_write_phase_miu;  // ( phase_property , con_index )
+			inline std::vector<size_t> is_write_miu;                           // ( con_index )
+			inline std::vector<size_t> is_write_fchem;                         // ( phase_property )
+			// - write thermodynamic energy
+			inline std::vector<size_t> thermo_calc_energy_phases;
+			inline std::vector<ThermoCalcScanRange> thermo_calc_energy_con_ranges;
+			inline ThermoCalcScanRange thermo_calc_energy_temp_range;
+			inline std::string thermo_calc_energy_csv_name = "thermo_calc_energy_data.csv";
+			// - write thermodynamic calculation data
+			inline bool is_write_thermo_calc_csv = false;
+			inline size_t thermo_calc_region = 0;
+			inline std::vector<bool> thermo_calc_phi_property;
+			inline std::vector<std::pair<bool, REAL>> thermo_calc_fix_con;
+			inline std::vector<size_t> thermo_calc_phases;
+			inline std::vector<ThermoCalcScanRange> thermo_calc_con_ranges;
+			inline std::vector<ThermoCalcScanRange> thermo_calc_phi_ranges;
+			inline ThermoCalcScanRange thermo_calc_temp_range;
+			inline std::string thermo_calc_equi_csv_name = "thermo_calc_equi_data.csv";
 		}
 	}
 }

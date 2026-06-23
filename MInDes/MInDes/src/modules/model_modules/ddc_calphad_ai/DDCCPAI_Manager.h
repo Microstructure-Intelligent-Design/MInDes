@@ -13,7 +13,12 @@ namespace pf {
 		inline void init_model_modules() {
 			// - check
 			if (main_field::phi_number == 0) {
-				string error_report = "> ERROR, the PCT command line settings do not meet the requirements : PCT = (N>0,K,false/true) !\n";
+				string error_report = "> ERROR, the PCT command line settings do not meet the requirements : PCT = (N>0,K,true) !\n";
+				WriteLog(error_report);
+				std::exit(0);
+			}
+			if (main_field::is_temp_field_on == false) {
+				string error_report = "> ERROR, the PCT command line settings do not meet the requirements : PCT = (N>0,K,true) !\n";
 				WriteLog(error_report);
 				std::exit(0);
 			}
@@ -560,12 +565,409 @@ namespace pf {
 			}
 			// ==========================================================================================================================
 			// - init correlation terms in physics-informed equations
-			
+			{
+				// - CALPHAD coupling
+				parameters::is_energy_minimization.resize(ConRegions::instance().region_number(), false);
+				WriteDebugFile("# Model.DDCCPAI.ThermoCalc.regions = ( region_name, ... )\n");
+				std::string rg_key = "Model.DDCCPAI.ThermoCalc.regions", rg_input = "()";
+				infile_reader::read_string_value(rg_key, rg_input, true);
+				bool is_thermocalc = false;
+				std::vector<input_value> rg_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, rg_key, rg_input, true);
+				for(size_t index = 0; index < rg_value.size(); index++)
+					if (ConRegions::instance().is_region(rg_value[index].string_value)) {
+						size_t rg_index = ConRegions::instance().region_index(rg_value[index].string_value);
+						parameters::is_energy_minimization[rg_index] = true;
+						is_thermocalc = true;
+					}
+				if (is_thermocalc) {
+					parameters::con_orders.resize(PhiProperties::instance().phi_property_number());
+					parameters::params.resize(PhiProperties::instance().phi_property_number());
+					parameters::temp_orders.resize(PhiProperties::instance().phi_property_number());
+					parameters::terms_number.resize(PhiProperties::instance().phi_property_number(), 0);
+					parameters::temp_terms_number.resize(PhiProperties::instance().phi_property_number());
+					for (size_t rg_index = 0; rg_index < ConRegions::instance().region_number(); rg_index++)
+						if (parameters::is_energy_minimization[rg_index]) {
+							for (size_t index = 0; index < ConRegions::instance().region_phi_property_number(rg_index); index++) {
+								WriteDebugFile("# Model.DDCCPAI.ThermoCalc.ChemEnergy.PhaseName = {[( Con_0_Order, Con_1_Order, ... ), ( Temp_0_Order, ... ), ( Temp_0_Param, ... )], ... }\n");
+								size_t phi_property = ConRegions::instance().region_phi_property(rg_index, index);
+								std::string chem_key = "Model.DDCCPAI.ThermoCalc.ChemEnergy." + PhiProperties::instance().phi_property_name(phi_property), 
+									chem_input = "{[(),(),()]}";
+								infile_reader::read_string_value(chem_key, chem_input, true);
+								std::vector<std::vector<std::vector<input_value>>> chem_value = InputFileReader::get_instance()->
+									trans_matrix_3d_const_array_const_to_input_value({ InputValueType::IVType_INT, InputValueType::IVType_INT, InputValueType::IVType_REAL }, chem_key, chem_input, true);
+								parameters::terms_number[phi_property] = chem_value.size();
+								parameters::con_orders[phi_property].resize(parameters::terms_number[phi_property], main_field::con_number, 0);
+								parameters::temp_terms_number[phi_property].resize(parameters::terms_number[phi_property], 0);
+								size_t max_temp_term = 0;
+								for (size_t tindex = 0; tindex < parameters::terms_number[phi_property]; tindex++) {
+									if (chem_value[tindex].size() != 3) {
+										WriteDebugFile("# ERROR: Please follow format of " + chem_key + " to write the input value ! (terms " + std::to_string(tindex) + " )\n");
+										SYS_PROGRAM_STOP;
+									}
+									if (chem_value[tindex][0].size() != main_field::con_number) {
+										WriteDebugFile("# ERROR:  " + chem_key + " : Number of component should be " + std::to_string(main_field::con_number) + ", which defined before ! (terms " + std::to_string(tindex) + " ) \n");
+										SYS_PROGRAM_STOP;
+									}
+									for (size_t cindex = 0; cindex < main_field::con_number; cindex++)
+										parameters::con_orders[phi_property](tindex, cindex) = chem_value[tindex][0][cindex].int_value;
+									if (chem_value[tindex][1].size() == 0) {
+										WriteDebugFile("# ERROR:  " + chem_key + " : Temperature orders and parameters should be defined ! (terms " + std::to_string(tindex) + " ) \n");
+										SYS_PROGRAM_STOP;
+									}
+									if (chem_value[tindex][1].size() != chem_value[tindex][2].size()) {
+										WriteDebugFile("# ERROR:  " + chem_key + " : Number of Temperature orders and parameters should be equal ! (terms " + std::to_string(tindex) + " ) \n");
+										SYS_PROGRAM_STOP;
+									}
+									parameters::temp_terms_number[phi_property][tindex] = chem_value[tindex][1].size();
+									if (max_temp_term < parameters::temp_terms_number[phi_property][tindex])
+										max_temp_term = parameters::temp_terms_number[phi_property][tindex];
+								}
+								parameters::params[phi_property].resize(parameters::terms_number[phi_property], max_temp_term, 0);
+								parameters::temp_orders[phi_property].resize(parameters::terms_number[phi_property], max_temp_term, 0);
+								for (size_t tindex = 0; tindex < parameters::terms_number[phi_property]; tindex++)
+									for (size_t temp_index = 0; temp_index < parameters::temp_terms_number[phi_property][tindex]; temp_index++) {
+										parameters::temp_orders[phi_property](tindex, temp_index) = chem_value[tindex][1][temp_index].int_value;
+										parameters::params[phi_property](tindex, temp_index) = chem_value[tindex][2][temp_index].REAL_value;
+									}
+							}
+						}
+					infile_reader::read_int_value("Model.DDCCPAI.ThermoCalc.max_variation_step", parameters::max_phasecon_variation_step, true);
+					infile_reader::read_real_value("Model.DDCCPAI.ThermoCalc.L", parameters::L_phasecon, true);
+					infile_reader::read_real_value("Model.DDCCPAI.ThermoCalc.epsilon", parameters::phasecon_epsilon, true);
+					parameters::fchem = chemical_energy_functions::fchem_polynomial;
+					parameters::miu = chemical_energy_functions::miu_polynomial;
+				}
+			}
+			// ==========================================================================================================================
+			// - output a standalone thermodynamic energy-minimization scan
+			{
+				const std::string csv_prefix = "Model.DDCCPAI.Output.CSV.EnergyMinimization.";
+				WriteDebugFile("# " + csv_prefix + "active = true/false\n");
+				infile_reader::read_bool_value(csv_prefix + "active", parameters::is_write_thermo_calc_csv, true);
+				if (parameters::is_write_thermo_calc_csv) {
+					auto input_error = [](const std::string& message) {
+						WriteLog("> ERROR: " + message + "\n");
+						SYS_PROGRAM_STOP
+					};
+					if (!main_field::is_con_field_on)
+						input_error("DDCCPAI energy-minimization CSV output requires the concentration field.");
+
+					WriteDebugFile("# " + csv_prefix + "file_name = thermo_calc_data.csv\n");
+					infile_reader::read_string_value(csv_prefix + "file_name", parameters::thermo_calc_equi_csv_name, true);
+					if (parameters::thermo_calc_equi_csv_name.empty())
+						input_error(csv_prefix + "file_name cannot be empty.");
+
+					std::string region_name;
+					WriteDebugFile("# " + csv_prefix + "region = RegionName\n");
+					if (!infile_reader::read_string_value(csv_prefix + "region", region_name, true) ||
+						!ConRegions::instance().is_region(region_name))
+						input_error(csv_prefix + "region is missing or has not been defined.");
+					parameters::thermo_calc_region = ConRegions::instance().region_index(region_name);
+					if (parameters::thermo_calc_region >= parameters::is_energy_minimization.size() ||
+						!parameters::is_energy_minimization[parameters::thermo_calc_region])
+						input_error(csv_prefix + "region must be enabled in Model.DDCCPAI.ThermoCalc.regions");
+
+					parameters::thermo_calc_phases.clear();
+					parameters::thermo_calc_phi_property.assign(PhiProperties::instance().phi_property_number(), false);
+					for (size_t index = 0; index < ConRegions::instance().region_phi_property_number(parameters::thermo_calc_region); index++) {
+						size_t phi_property = ConRegions::instance().region_phi_property(parameters::thermo_calc_region, index);
+						parameters::thermo_calc_phi_property[phi_property] = true;
+						parameters::thermo_calc_phases.push_back(phi_property);
+					}
+					if (parameters::thermo_calc_phases.empty())
+						input_error(csv_prefix + "region does not contain a defined phase.");
+
+					const std::string con_key = csv_prefix + "concentration";
+					std::string con_input = "[()]";
+					WriteDebugFile("# " + con_key + " = [(ConName, start, end, step), ...]   # all components in the selected region\n");
+					if (!infile_reader::read_string_value(con_key, con_input, true))
+						input_error(con_key + " is required.");
+					std::vector<std::vector<input_value>> con_values = InputFileReader::get_instance()->
+						trans_matrix_2d_const_array_to_input_value(
+							{ InputValueType::IVType_STRING, InputValueType::IVType_REAL, InputValueType::IVType_REAL, InputValueType::IVType_REAL },
+							con_key, con_input, true);
+					parameters::thermo_calc_con_ranges.assign(main_field::con_number, ThermoCalcScanRange());
+					parameters::thermo_calc_fix_con.assign(main_field::con_number, { false, 0 });
+					std::vector<bool> con_defined(main_field::con_number, false);
+					for (const std::vector<input_value>& con_value : con_values) {
+						const std::string& con_name = con_value[0].string_value;
+						if (!ConRegions::instance().is_con(con_name))
+							input_error(con_key + " contains an undefined concentration: " + con_name + ".");
+						size_t con_index = ConRegions::instance().con_index(con_name);
+						if (!ConRegions::instance().is_con_in_region(parameters::thermo_calc_region, con_index))
+							input_error("Concentration " + con_name + " does not belong to region " + region_name + ".");
+						if (con_defined[con_index])
+							input_error(con_key + " contains duplicate concentration: " + con_name + ".");
+						ThermoCalcScanRange range{ con_value[1].REAL_value, con_value[2].REAL_value, con_value[3].REAL_value };
+						if (range.begin < 0 || range.end >= 1 || range.begin > range.end || range.step <= 0)
+							input_error("Concentration range for " + con_name + " must satisfy 0 <= start <= end < 1 and step > 0.");
+						parameters::thermo_calc_con_ranges[con_index] = range;
+						parameters::thermo_calc_fix_con[con_index] = { range.begin == range.end, range.begin };
+						con_defined[con_index] = true;
+					}
+					for (size_t index = 0; index < ConRegions::instance().region_con_number(parameters::thermo_calc_region); index++) {
+						size_t con_index = ConRegions::instance().region_con(parameters::thermo_calc_region, index);
+						if (!con_defined[con_index])
+							input_error(con_key + " must define concentration " + ConRegions::instance().con_name(con_index) + ".");
+					}
+					if (con_values.size() != ConRegions::instance().region_con_number(parameters::thermo_calc_region))
+						input_error(con_key + " must contain each concentration in the selected region exactly once.");
+
+					const std::string phi_key = csv_prefix + "phase_fraction";
+					std::string phi_input = "[()]";
+					WriteDebugFile("# " + phi_key + " = [(PhaseName, start, end, step), ...]    # all phases in the selected region\n");
+					if (!infile_reader::read_string_value(phi_key, phi_input, true))
+						input_error(phi_key + " is required.");
+					std::vector<std::vector<input_value>> phi_values = InputFileReader::get_instance()->
+						trans_matrix_2d_const_array_to_input_value(
+							{ InputValueType::IVType_STRING, InputValueType::IVType_REAL, InputValueType::IVType_REAL, InputValueType::IVType_REAL },
+							phi_key, phi_input, true);
+					if (phi_values.size() != parameters::thermo_calc_phases.size())
+						input_error(phi_key + " must define every phase in the selected region exactly once.");
+					parameters::thermo_calc_phi_ranges.assign(PhiProperties::instance().phi_property_number(), ThermoCalcScanRange());
+					std::vector<bool> phi_defined(PhiProperties::instance().phi_property_number(), false);
+					for (const std::vector<input_value>& phi_value : phi_values) {
+						const std::string& phase_name = phi_value[0].string_value;
+						if (!PhiProperties::instance().is_phi_property(phase_name))
+							input_error(phi_key + " contains an undefined phase: " + phase_name + ".");
+						size_t phi_property = PhiProperties::instance().phi_property(phase_name);
+						if (!parameters::thermo_calc_phi_property[phi_property])
+							input_error("Phase " + phase_name + " does not belong to region " + region_name + ".");
+						if (phi_defined[phi_property])
+							input_error(phi_key + " contains duplicate phase: " + phase_name + ".");
+						ThermoCalcScanRange range{ phi_value[1].REAL_value, phi_value[2].REAL_value, phi_value[3].REAL_value };
+						if (range.begin <= 0 || range.end >= 1 || range.begin > range.end || range.step <= 0)
+							input_error("Phase-fraction range for " + phase_name + " must satisfy 0 < start <= end < 1 and step > 0.");
+						parameters::thermo_calc_phi_ranges[phi_property] = range;
+						phi_defined[phi_property] = true;
+					}
+					for (size_t index = 0; index < parameters::thermo_calc_phases.size(); index++)
+						if (!phi_defined[parameters::thermo_calc_phases[index]])
+							input_error(phi_key + " must define phase " +
+								PhiProperties::instance().phi_property_name(parameters::thermo_calc_phases[index]) + ".");
+
+					const std::string temp_key = csv_prefix + "temperature";
+					std::string temp_input = "()";
+					WriteDebugFile("# " + temp_key + " = (start, end, step)\n");
+					if (!infile_reader::read_string_value(temp_key, temp_input, true))
+						input_error(temp_key + " is required.");
+					std::vector<input_value> temp_values = InputFileReader::get_instance()->
+						trans_matrix_1d_array_to_input_value(
+							{ InputValueType::IVType_REAL, InputValueType::IVType_REAL, InputValueType::IVType_REAL },
+							temp_key, temp_input, true);
+					parameters::thermo_calc_temp_range =
+						{ temp_values[0].REAL_value, temp_values[1].REAL_value, temp_values[2].REAL_value };
+					if (parameters::thermo_calc_temp_range.begin > parameters::thermo_calc_temp_range.end ||
+						parameters::thermo_calc_temp_range.step <= 0)
+						input_error(temp_key + " must satisfy start <= end and step > 0.");
+				}
+			}
+			// ==========================================================================================================================
+			// - output chemical-energy scans for selected phases
+			{
+				const std::string energy_key = "Model.DDCCPAI.Output.CSV.ChemEnergy";
+				std::string energy_input = "()";
+				WriteDebugFile("# " + energy_key + " = (PhaseName, ...)\n");
+				parameters::thermo_calc_energy_phases.clear();
+				if (infile_reader::read_string_value(energy_key, energy_input, true)) {
+					auto input_error = [](const std::string& message) {
+						WriteLog("> ERROR: " + message + "\n");
+						SYS_PROGRAM_STOP
+					};
+					std::vector<input_value> energy_values = InputFileReader::get_instance()->
+						trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, energy_key, energy_input, true);
+					std::vector<bool> phase_defined(PhiProperties::instance().phi_property_number(), false);
+					std::vector<bool> required_con(main_field::con_number, false);
+					for (const input_value& energy_value : energy_values) {
+						const std::string& phase_name = energy_value.string_value;
+						if (!PhiProperties::instance().is_phi_property(phase_name))
+							input_error(energy_key + " contains an undefined phase: " + phase_name + ".");
+						size_t phi_property = PhiProperties::instance().phi_property(phase_name);
+						size_t region_index = ConRegions::instance().phi_property_region(phi_property);
+						if (region_index >= parameters::is_energy_minimization.size() ||
+							!parameters::is_energy_minimization[region_index])
+							input_error("Phase " + phase_name + " is not in an energy-minimization region.");
+						if (phase_defined[phi_property])
+							input_error(energy_key + " contains duplicate phase: " + phase_name + ".");
+						phase_defined[phi_property] = true;
+						parameters::thermo_calc_energy_phases.push_back(phi_property);
+						for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++)
+							required_con[ConRegions::instance().region_con(region_index, index)] = true;
+					}
+
+					if (!parameters::thermo_calc_energy_phases.empty()) {
+						WriteDebugFile("# " + energy_key + ".file_name = thermo_calc_energy_data.csv\n");
+						infile_reader::read_string_value(energy_key + ".file_name", parameters::thermo_calc_energy_csv_name, true);
+						if (parameters::thermo_calc_energy_csv_name.empty())
+							input_error(energy_key + ".file_name cannot be empty.");
+
+						const std::string con_key = energy_key + ".concentration";
+						std::string con_input = "[()]";
+						WriteDebugFile("# " + con_key + " = [(ConName, start, end, step), ...]   # all components used by selected phases\n");
+						if (!infile_reader::read_string_value(con_key, con_input, true))
+							input_error(con_key + " is required.");
+						std::vector<std::vector<input_value>> con_values = InputFileReader::get_instance()->
+							trans_matrix_2d_const_array_to_input_value(
+								{ InputValueType::IVType_STRING, InputValueType::IVType_REAL, InputValueType::IVType_REAL, InputValueType::IVType_REAL },
+								con_key, con_input, true);
+						parameters::thermo_calc_energy_con_ranges.assign(main_field::con_number, ThermoCalcScanRange());
+						std::vector<bool> con_defined(main_field::con_number, false);
+						for (const std::vector<input_value>& con_value : con_values) {
+							const std::string& con_name = con_value[0].string_value;
+							if (!ConRegions::instance().is_con(con_name))
+								input_error(con_key + " contains an undefined concentration: " + con_name + ".");
+							size_t con_index = ConRegions::instance().con_index(con_name);
+							if (!required_con[con_index])
+								input_error("Concentration " + con_name + " is not used by a selected phase.");
+							if (con_defined[con_index])
+								input_error(con_key + " contains duplicate concentration: " + con_name + ".");
+							ThermoCalcScanRange range{ con_value[1].REAL_value, con_value[2].REAL_value, con_value[3].REAL_value };
+							if (range.begin < 0 || range.end > 1 || range.begin > range.end || range.step <= 0)
+								input_error("Concentration range for " + con_name + " must satisfy 0 <= start <= end <= 1 and step > 0.");
+							parameters::thermo_calc_energy_con_ranges[con_index] = range;
+							con_defined[con_index] = true;
+						}
+						for (size_t con_index = 0; con_index < main_field::con_number; con_index++)
+							if (required_con[con_index] && !con_defined[con_index])
+								input_error(con_key + " must define concentration " + ConRegions::instance().con_name(con_index) + ".");
+
+						const std::string temp_key = energy_key + ".temperature";
+						std::string temp_input = "()";
+						WriteDebugFile("# " + temp_key + " = (start, end, step)\n");
+						if (!infile_reader::read_string_value(temp_key, temp_input, true))
+							input_error(temp_key + " is required.");
+						std::vector<input_value> temp_values = InputFileReader::get_instance()->
+							trans_matrix_1d_array_to_input_value(
+								{ InputValueType::IVType_REAL, InputValueType::IVType_REAL, InputValueType::IVType_REAL },
+								temp_key, temp_input, true);
+						parameters::thermo_calc_energy_temp_range =
+							{ temp_values[0].REAL_value, temp_values[1].REAL_value, temp_values[2].REAL_value };
+						if (parameters::thermo_calc_energy_temp_range.begin > parameters::thermo_calc_energy_temp_range.end ||
+							parameters::thermo_calc_energy_temp_range.step <= 0)
+							input_error(temp_key + " must satisfy start <= end and step > 0.");
+					}
+				}
+			}
 			// ==========================================================================================================================
 			bool buff = false;
 			InputFileReader::get_instance()->read_bool_value("Model.DDCCPAI.Output.VTS.active_phis", buff, true);
 			if (buff)
 				write_vts::load_vts_func(phase_field_functions::write_scalar_active_phi_number);
+			{
+				WriteDebugFile("# Model.DDCCPAI.Output.VTS.phase_con = [( phase_name, con_name ), ... ]\n");
+				std::string vts_key = "Model.DDCCPAI.Output.VTS.phase_con", vts_input = "[()]";
+				if (InputFileReader::get_instance()->read_string_value(vts_key, vts_input, true)) {
+					std::vector<std::vector<input_value>> vts_value = InputFileReader::get_instance()->
+						trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_STRING, vts_key, vts_input, true);
+					write_vts::load_vts_func(chemical_energy_functions::write_scalar_phasecon);
+					for (size_t index = 0; index < vts_value.size(); index++) {
+						if (!PhiProperties::instance().is_phi_property(vts_value[index][0].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_con : The phase name " + vts_value[index][0].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						}
+						size_t region_index = ConRegions::instance().phi_property_region(PhiProperties::instance().phi_property(vts_value[index][0].string_value));
+						if (!parameters::is_energy_minimization[region_index]) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_con : The phase name " + vts_value[index][0].string_value + " do not need calphad calculation. \n");
+							SYS_PROGRAM_STOP;
+						}
+						if (!ConRegions::instance().is_con(vts_value[index][1].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_con : The con name " + vts_value[index][1].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						}
+						if (!ConRegions::instance().is_con_in_region(region_index, ConRegions::instance().con_index(vts_value[index][1].string_value))) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_con : The con name " + vts_value[index][1].string_value + " has not been defined in this phase & region. \n");
+							SYS_PROGRAM_STOP;
+						}
+						parameters::is_write_phase_con.push_back(
+							{ PhiProperties::instance().phi_property(vts_value[index][0].string_value), 
+							  ConRegions::instance().con_index(vts_value[index][1].string_value)});
+					}
+				}
+			}
+			{
+				WriteDebugFile("# Model.DDCCPAI.Output.VTS.con = ( con_name, ... ) \n");
+				std::string vts_key = "Model.DDCCPAI.Output.VTS.con", vts_input = "()";
+				if (InputFileReader::get_instance()->read_string_value(vts_key, vts_input, true)) {
+					std::vector<input_value> vts_value = InputFileReader::get_instance()->
+						trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, vts_key, vts_input, true);
+					write_vts::load_vts_func(chemical_energy_functions::write_scalar_con);
+					for (size_t index = 0; index < vts_value.size(); index++) {
+						if (!ConRegions::instance().is_con(vts_value[index].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.con : The con name " + vts_value[index].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						}
+						parameters::is_write_con.push_back(ConRegions::instance().con_index(vts_value[index].string_value));
+					}
+				}
+			}
+			{
+				WriteDebugFile("# Model.DDCCPAI.Output.VTS.phase_miu = [( phase_name, con_name ), ... ]\n");
+				std::string vts_key = "Model.DDCCPAI.Output.VTS.phase_miu", vts_input = "[()]";
+				if (InputFileReader::get_instance()->read_string_value(vts_key, vts_input, true)) {
+					std::vector<std::vector<input_value>> vts_value = InputFileReader::get_instance()->
+						trans_matrix_2d_const_const_to_input_value(InputValueType::IVType_STRING, vts_key, vts_input, true);
+					write_vts::load_vts_func(chemical_energy_functions::write_scalar_phasemiu);
+					for (size_t index = 0; index < vts_value.size(); index++) {
+						if (!PhiProperties::instance().is_phi_property(vts_value[index][0].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_miu : The phase name " + vts_value[index][0].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						} 
+						size_t region_index = ConRegions::instance().phi_property_region(PhiProperties::instance().phi_property(vts_value[index][0].string_value));
+						if (!parameters::is_energy_minimization[region_index]) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_miu : The phase name " + vts_value[index][0].string_value + " do not need calphad calculation. \n");
+							SYS_PROGRAM_STOP;
+						}
+						if (!ConRegions::instance().is_con(vts_value[index][1].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_miu : The con name " + vts_value[index][1].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						}
+						if (!ConRegions::instance().is_con_in_region(region_index, ConRegions::instance().con_index(vts_value[index][1].string_value))) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.phase_miu : The con name " + vts_value[index][1].string_value + " has not been defined in this phase & region. \n");
+							SYS_PROGRAM_STOP;
+						}
+						parameters::is_write_phase_miu.push_back(
+							{ PhiProperties::instance().phi_property(vts_value[index][0].string_value),
+							  ConRegions::instance().con_index(vts_value[index][1].string_value) });
+					}
+				}
+			}
+			{
+				WriteDebugFile("# Model.DDCCPAI.Output.VTS.miu = ( con_name, ... ) \n");
+				std::string vts_key = "Model.DDCCPAI.Output.VTS.miu", vts_input = "()";
+				if (InputFileReader::get_instance()->read_string_value(vts_key, vts_input, true)) {
+					std::vector<input_value> vts_value = InputFileReader::get_instance()->
+						trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, vts_key, vts_input, true);
+					write_vts::load_vts_func(chemical_energy_functions::write_scalar_miu);
+					for (size_t index = 0; index < vts_value.size(); index++) {
+						if (!ConRegions::instance().is_con(vts_value[index].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.miu : The con name " + vts_value[index].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						}
+						parameters::is_write_miu.push_back(ConRegions::instance().con_index(vts_value[index].string_value));
+					}
+				}
+			}
+			{
+				WriteDebugFile("# Model.DDCCPAI.Output.VTS.f_chemical = ( phase_name, ... ) \n");
+				std::string vts_key = "Model.DDCCPAI.Output.VTS.f_chemical", vts_input = "()";
+				if (InputFileReader::get_instance()->read_string_value(vts_key, vts_input, true)) {
+					std::vector<input_value> vts_value = InputFileReader::get_instance()->
+						trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, vts_key, vts_input, true);
+					write_vts::load_vts_func(chemical_energy_functions::write_scalar_fchem);
+					for (size_t index = 0; index < vts_value.size(); index++) {
+						if (!PhiProperties::instance().is_phi_property(vts_value[index].string_value)) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.f_chemical : The phase name " + vts_value[index].string_value + " has not been defined. \n");
+							SYS_PROGRAM_STOP;
+						}
+						size_t region_index = ConRegions::instance().phi_property_region(PhiProperties::instance().phi_property(vts_value[index].string_value));
+						if (!parameters::is_energy_minimization[region_index]) {
+							WriteDebugFile("# ERROR: Model.DDCCPAI.Output.VTS.f_chemical : The phase name " + vts_value[index].string_value + " do not need calphad calculation. \n");
+							SYS_PROGRAM_STOP;
+						}
+						parameters::is_write_fchem.push_back(PhiProperties::instance().phi_property(vts_value[index].string_value));
+					}
+				}
+			}
 			// ==========================================================================================================================
 			// infile_reader::read_real_value("SimulationModels.DataDrivenComplex.L", parameters::L, true);
 			load_a_new_module(nullptr, exec_pre_ii, exec_pre_iii,  // exec_pre_i   exec_pre_ii    exec_pre_iii

@@ -2,6 +2,7 @@
 #include "DDCCPAI_Phi_Functions.h"
 #include "DDCCPAI_Con_Functions.h"
 #include "DDCCPAI_Temp_Functions.h"
+#include "DDCCPAI_BulkEnergy.h"
 #include "../../postprocess_modules/ShowLoopInfo.h"
 namespace pf {
 	namespace ddc_calphad_ai_model {

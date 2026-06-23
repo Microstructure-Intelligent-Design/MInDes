@@ -109,7 +109,7 @@ namespace pf {
 			default:
 				break;
 			}
-			if (_simu_info.is_simu_ready = true)
+			if (_simu_info.is_simu_ready == true)
 				break;
 		}
 	}

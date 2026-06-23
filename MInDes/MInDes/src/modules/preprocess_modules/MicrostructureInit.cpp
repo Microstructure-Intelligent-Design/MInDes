@@ -476,102 +476,100 @@ namespace pf {
 				WriteLog("> Open datafile : " + write_mesh_data::datafile_path + "\n");
 				functions::init_mesh_with_datafile(write_mesh_data::datafile_report, write_mesh_data::datafile_path);
 			}
-			else {
-				if (main_field::is_phi_field_on) {
+			if (geometry_structure::is_matrix_phi) {
 #pragma omp parallel for
-					for (long long x = 0; x < main_field::phase_field.Nx(); x++)
-						for (long long y = 0; y < main_field::phase_field.Ny(); y++)
-							for (long long z = 0; z < main_field::phase_field.Nz(); z++)
-								main_field::phase_field(x, y, z)[geometry_structure::matrix_phi_index] = geometry_structure::matrix_phi_value;
-				}
-				if (main_field::is_con_field_on) {
-#pragma omp parallel for
-					for (long long x = 0; x < main_field::concentration_field.Nx(); x++)
-						for (long long y = 0; y < main_field::concentration_field.Ny(); y++)
-							for (long long z = 0; z < main_field::concentration_field.Nz(); z++)
-								main_field::concentration_field(x, y, z) = geometry_structure::matrix_con;
-				}
-				if (main_field::is_temp_field_on) {
-#pragma omp parallel for
-					for (long long x = 0; x < main_field::temperature_field.Nx(); x++)
-						for (long long y = 0; y < main_field::temperature_field.Ny(); y++)
-							for (long long z = 0; z < main_field::temperature_field.Nz(); z++)
-								main_field::temperature_field(x, y, z) = geometry_structure::matrix_temperature;
-				}
-				// - normal init structure
-				functions::definiteNucleation(main_iterator::Current_ITE_step);
-				if (bmp24_structure::is_read_bmp24file) {
-					bmp24_structure::generate_structure_from_BMP_pic(
-						mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
-						main_field::is_phi_field_on, main_field::is_con_field_on, main_field::is_temp_field_on);
-					functions::definiteNucleation(main_iterator::Current_ITE_step);
-				}
-				// - porous
-				if (porous_structure::is_porous) {
-					if (porous_phis_indexs.size() != 0 && main_field::is_phi_field_on) {
-						std::vector<std::vector<std::vector<double>>> aim_phi;
-						aim_phi.resize(mesh_parameters::MESH_NX);
-						for (size_t x = 0; x < mesh_parameters::MESH_NX; x++) {
-							aim_phi[x].resize(mesh_parameters::MESH_NY);
-							for (size_t y = 0; y < mesh_parameters::MESH_NY; y++) {
-								aim_phi[x][y].resize(mesh_parameters::MESH_NZ);
-								for (size_t z = 0; z < mesh_parameters::MESH_NZ; z++) {
-									Matrix1D<REAL>& phi = main_field::phase_field(x + 1, y + 1, z + 1);
-									aim_phi[x][y][z] = 0.0;
-									for (size_t index = 0; index < main_field::phi_number; index++)
-										for (size_t phi_index : porous_phis_indexs)
-											if (index == phi_index && phi[index] > 1e-6) {
-												aim_phi[x][y][z] += phi[index];
-												phi[index] = 0.0;
-											}
-								}
-							}
-						}
-						porous_structure::quartet_structure_generation_in_phis(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, aim_phi);
-					}
-					else {
-						porous_structure::quartet_structure_generation(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ);
-					}
-					functions::definiteNucleation(main_iterator::Current_ITE_step);
-				}
-				// - voronoi
-				if (voronoi_structure::is_voronoi) {
-					if (voronoi_phis_indexs.size() != 0 && main_field::is_phi_field_on) {
-						std::vector<std::vector<std::vector<double>>> aim_phi;
-						aim_phi.resize(main_field::phase_field.Nx());
-						for (int x = 0; x < main_field::phase_field.Nx(); x++) {
-							aim_phi[x].resize(main_field::phase_field.Ny());
-							for (int y = 0; y < main_field::phase_field.Ny(); y++) {
-								aim_phi[x][y].resize(main_field::phase_field.Nz(), 0);
-								for (int z = 0; z < main_field::phase_field.Nz(); z++) {
-									Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
-									aim_phi[x][y][z] = 0.0;
-									for (size_t index = 0; index < main_field::phi_number; index++)
-										for (size_t phi_index : voronoi_phis_indexs)
-											if (index == phi_index && phi[index] > 1e-6) {
-												aim_phi[x][y][z] += phi[index];
-												phi[index] = 0.0;
-											}
-								}
-							}
-						}
-						voronoi_structure::generate_voronoi_structure_in_phis(aim_phi);
-					}
-					else {
-						voronoi_structure::generate_voronoi_structure();
-					}
-					functions::definiteNucleation(main_iterator::Current_ITE_step);
-				}
-				// - others
-
-				// - boundary condition
-				if (main_field::is_phi_field_on)
-					main_field::phase_field.do_boundary_condition();
-				if (main_field::is_con_field_on)
-					main_field::concentration_field.do_boundary_condition();
-				if (main_field::is_temp_field_on)
-					main_field::temperature_field.do_boundary_condition();
+				for (long long x = 0; x < main_field::phase_field.Nx(); x++)
+					for (long long y = 0; y < main_field::phase_field.Ny(); y++)
+						for (long long z = 0; z < main_field::phase_field.Nz(); z++)
+							main_field::phase_field(x, y, z)[geometry_structure::matrix_phi_index] = geometry_structure::matrix_phi_value;
 			}
+			if (geometry_structure::is_matrix_con) {
+#pragma omp parallel for
+				for (long long x = 0; x < main_field::concentration_field.Nx(); x++)
+					for (long long y = 0; y < main_field::concentration_field.Ny(); y++)
+						for (long long z = 0; z < main_field::concentration_field.Nz(); z++)
+							main_field::concentration_field(x, y, z) = geometry_structure::matrix_con;
+			}
+			if (geometry_structure::is_matrix_temp) {
+#pragma omp parallel for
+				for (long long x = 0; x < main_field::temperature_field.Nx(); x++)
+					for (long long y = 0; y < main_field::temperature_field.Ny(); y++)
+						for (long long z = 0; z < main_field::temperature_field.Nz(); z++)
+							main_field::temperature_field(x, y, z) = geometry_structure::matrix_temperature;
+			}
+			// - normal init structure
+			functions::definiteNucleation(main_iterator::Current_ITE_step);
+			if (bmp24_structure::is_read_bmp24file) {
+				bmp24_structure::generate_structure_from_BMP_pic(
+					mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
+					main_field::is_phi_field_on, main_field::is_con_field_on, main_field::is_temp_field_on);
+				functions::definiteNucleation(main_iterator::Current_ITE_step);
+			}
+			// - porous
+			if (porous_structure::is_porous) {
+				if (porous_phis_indexs.size() != 0 && main_field::is_phi_field_on) {
+					std::vector<std::vector<std::vector<double>>> aim_phi;
+					aim_phi.resize(mesh_parameters::MESH_NX);
+					for (size_t x = 0; x < mesh_parameters::MESH_NX; x++) {
+						aim_phi[x].resize(mesh_parameters::MESH_NY);
+						for (size_t y = 0; y < mesh_parameters::MESH_NY; y++) {
+							aim_phi[x][y].resize(mesh_parameters::MESH_NZ);
+							for (size_t z = 0; z < mesh_parameters::MESH_NZ; z++) {
+								Matrix1D<REAL>& phi = main_field::phase_field(x + 1, y + 1, z + 1);
+								aim_phi[x][y][z] = 0.0;
+								for (size_t index = 0; index < main_field::phi_number; index++)
+									for (size_t phi_index : porous_phis_indexs)
+										if (index == phi_index && phi[index] > 1e-6) {
+											aim_phi[x][y][z] += phi[index];
+											phi[index] = 0.0;
+										}
+							}
+						}
+					}
+					porous_structure::quartet_structure_generation_in_phis(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, aim_phi);
+				}
+				else {
+					porous_structure::quartet_structure_generation(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ);
+				}
+				functions::definiteNucleation(main_iterator::Current_ITE_step);
+			}
+			// - voronoi
+			if (voronoi_structure::is_voronoi) {
+				if (voronoi_phis_indexs.size() != 0 && main_field::is_phi_field_on) {
+					std::vector<std::vector<std::vector<double>>> aim_phi;
+					aim_phi.resize(main_field::phase_field.Nx());
+					for (int x = 0; x < main_field::phase_field.Nx(); x++) {
+						aim_phi[x].resize(main_field::phase_field.Ny());
+						for (int y = 0; y < main_field::phase_field.Ny(); y++) {
+							aim_phi[x][y].resize(main_field::phase_field.Nz(), 0);
+							for (int z = 0; z < main_field::phase_field.Nz(); z++) {
+								Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
+								aim_phi[x][y][z] = 0.0;
+								for (size_t index = 0; index < main_field::phi_number; index++)
+									for (size_t phi_index : voronoi_phis_indexs)
+										if (index == phi_index && phi[index] > 1e-6) {
+											aim_phi[x][y][z] += phi[index];
+											phi[index] = 0.0;
+										}
+							}
+						}
+					}
+					voronoi_structure::generate_voronoi_structure_in_phis(aim_phi);
+				}
+				else {
+					voronoi_structure::generate_voronoi_structure();
+				}
+				functions::definiteNucleation(main_iterator::Current_ITE_step);
+			}
+			// - others
+
+			// - boundary condition
+			if (main_field::is_phi_field_on)
+				main_field::phase_field.do_boundary_condition();
+			if (main_field::is_con_field_on)
+				main_field::concentration_field.do_boundary_condition();
+			if (main_field::is_temp_field_on)
+				main_field::temperature_field.do_boundary_condition();
 		}
 		// - 
 		void write_data_pre_iii() {
@@ -580,7 +578,7 @@ namespace pf {
 		void write_data_pos_iii() {
 			if (write_mesh_data::output_frequence == 0)
 				return;
-			if (main_iterator::Current_ITE_step % write_mesh_data::output_frequence != 0)
+			if (main_iterator::Current_ITE_step % write_mesh_data::output_frequence != 0 && main_iterator::Current_ITE_step != main_iterator::ITE_End_Step)
 				return;
 			write_mesh_data::write_dataFile(input_output_files_parameters::WorkingFolder_Path + dirSeparator + write_mesh_data::mainName + "_step" + std::to_string(main_iterator::Current_ITE_step) + write_mesh_data::format);
 		}
@@ -611,38 +609,39 @@ namespace pf {
 					}
 #endif
 				}
-				else {
-					// - init matrix 
-					if (main_field::is_phi_field_on) {
-						std::string matrix_key = "Preprocess.Microstructure.matrix_phi", matrix_string = "(0,1)";
-						WriteDebugFile("# .matrix_phi = ( phi_index, phi_value ) \n");
-						if (InputFileReader::get_instance()->read_string_value(matrix_key, matrix_string, true)) {
-							std::vector<InputValueType> matrix_structure;
-							matrix_structure.push_back(InputValueType::IVType_INT);
-							matrix_structure.push_back(InputValueType::IVType_REAL);
-							std::vector<input_value> matrix_value =
-								InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(matrix_structure, matrix_key, matrix_string, true);
-							geometry_structure::matrix_phi_index = matrix_value[0].int_value;
-							geometry_structure::matrix_phi_value = matrix_value[1].REAL_value;
-							check_phi_index(geometry_structure::matrix_phi_index);
-						}
+				// - init matrix 
+				if (main_field::is_phi_field_on) {
+					std::string matrix_key = "Preprocess.Microstructure.matrix_phi", matrix_string = "(0,1)";
+					WriteDebugFile("# .matrix_phi = ( phi_index, phi_value ) \n");
+					if (InputFileReader::get_instance()->read_string_value(matrix_key, matrix_string, true)) {
+						std::vector<InputValueType> matrix_structure;
+						matrix_structure.push_back(InputValueType::IVType_INT);
+						matrix_structure.push_back(InputValueType::IVType_REAL);
+						std::vector<input_value> matrix_value =
+							InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(matrix_structure, matrix_key, matrix_string, true);
+						geometry_structure::matrix_phi_index = matrix_value[0].int_value;
+						geometry_structure::matrix_phi_value = matrix_value[1].REAL_value;
+						check_phi_index(geometry_structure::matrix_phi_index);
+						geometry_structure::is_matrix_phi = true;
 					}
-					if (main_field::is_con_field_on) {
-						std::string matrix_key = "Preprocess.Microstructure.matrix_con", matrix_string = "()";
-						WriteDebugFile("# .matrix_con = ( con_0_value, con_1_value, ... ) \n");
-						geometry_structure::matrix_con.resize(main_field::con_number, 0);
-						if (InputFileReader::get_instance()->read_string_value(matrix_key, matrix_string, true)) {
-							std::vector<input_value> matrix_value =
-								InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, matrix_key, matrix_string, true);
-							for (int index = 0; index < matrix_value.size(); index++)
-								geometry_structure::matrix_con[index] = matrix_value[index].REAL_value;
-						}
-						check_con_size(geometry_structure::matrix_con.size());
+				}
+				if (main_field::is_con_field_on) {
+					std::string matrix_key = "Preprocess.Microstructure.matrix_con", matrix_string = "()";
+					WriteDebugFile("# .matrix_con = ( con_0_value, con_1_value, ... ) \n");
+					geometry_structure::matrix_con.resize(main_field::con_number, 0);
+					if (InputFileReader::get_instance()->read_string_value(matrix_key, matrix_string, true)) {
+						std::vector<input_value> matrix_value =
+							InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_REAL, matrix_key, matrix_string, true);
+						for (int index = 0; index < matrix_value.size(); index++)
+							geometry_structure::matrix_con[index] = matrix_value[index].REAL_value;
 					}
-					if (main_field::is_temp_field_on) {
-						std::string matrix_key = "Preprocess.Microstructure.matrix_temperature";
-						InputFileReader::get_instance()->read_REAL_value(matrix_key, geometry_structure::matrix_temperature, true);
-					}
+					check_con_size(geometry_structure::matrix_con.size());
+					geometry_structure::is_matrix_con = true;
+				}
+				if (main_field::is_temp_field_on) {
+					std::string matrix_key = "Preprocess.Microstructure.matrix_temperature";
+					InputFileReader::get_instance()->read_REAL_value(matrix_key, geometry_structure::matrix_temperature, true);
+					geometry_structure::is_matrix_temp = true;
 				}
 				// - init geometry structure
 				// geometry structure
