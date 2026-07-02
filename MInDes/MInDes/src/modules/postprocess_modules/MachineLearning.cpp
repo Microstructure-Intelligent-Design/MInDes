@@ -1,10 +1,13 @@
 #include "MachineLearning.h"
+#ifdef _WIN32
 #include "MachineLearning/field_predictor.h"
 #include "../input_modules/inputfiles/InputFileReader.h"
 #include "../Module.h"
+#endif
 namespace pf {
 	namespace machine_learning {
 		void init_machine_learning() {
+#ifdef _WIN32
 			WriteDebugFile("# Postprocess.PCT.MachineLearning.field = (is_phi, is_con, is_temp) \n");
 			std::string field_key = "Postprocess.PCT.MachineLearning.field", field_in = "(false,false,false)";
 			if (infile_reader::read_string_value(field_key, field_in, true)) {
@@ -17,6 +20,7 @@ namespace pf {
 						nullptr, nullptr, nullptr, nullptr);
 				}
 			}
+#endif
 		}
 	}
 }

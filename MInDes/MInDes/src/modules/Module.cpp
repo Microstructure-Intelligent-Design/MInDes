@@ -9,9 +9,9 @@
 #include "postprocess_modules/CpuMemoryUsage.h"
 #include "postprocess_modules/MachineLearning.h"
 // - simlulation models template
-#include "model_modules/Data_Driven_Complex/DDC_Manager.h"
-// - simlulation models 
-#include "model_modules/Grain_Grows_Spinodal/GGS_Manager.h"
+#include "model_modules/data_driven_complex/DDC_Manager.h"
+// - simlulation models
+#include "model_modules/grain_grows_spinodal/GGS_Manager.h"
 #include "model_modules/ddc_calphad_ai/DDCCPAI_Manager.h"
 namespace pf {
 	enum SimulationModels { SM_None, SM_GGS_MODEL, SM_DDC, SM_DDC_CPAI };

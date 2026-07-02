@@ -300,6 +300,12 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="CopyInputPreprocessor" AfterTargets="Build">
+    <MakeDir Directories="$(TargetDir)tools\mindes_preprocess" />
+    <Copy SourceFiles="$(ProjectDir)tools\mindes_preprocess\preprocess_input.py"
+          DestinationFolder="$(TargetDir)tools\mindes_preprocess"
+          SkipUnchangedFiles="true" />
+  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
