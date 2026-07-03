@@ -3,6 +3,11 @@ namespace pf {
 	using namespace std;
 	void InputFileReader::init(string input_file_name, bool debug, int file_max_lines, char split) {
 		input_file.clear();
+		_current_valid_words.clear();
+		_current_valid_lines.clear();
+		_unread_lines.clear();
+		_source_lines.clear();
+		_input_file_name = input_file_name;
 		_split = split;
 		defined_parameters_number = 0;
 		std::fstream fin(input_file_name, std::ios::in);
@@ -10,19 +15,40 @@ namespace pf {
 			cout << "> Failed to read the input_file:" << input_file_name << ", use default value 0 (int, REAL, bool), \"\" (string)" << endl;
 		}
 		else {
-			int line_num = 1;
+			int line_num = 1, physical_line_num = 0, logical_start_line = 0;
 			std::string strline{};
 			std::string temp_line{};
-			while (std::getline(fin, strline)) {
-				while (strline.find("\\\\") != std::string::npos) {
-					str_string_delete(strline, "\\\\");
-					temp_line += strline;
-					std::getline(fin, strline);
+			bool continuing = false;
+			while ((file_max_lines <= 0 || physical_line_num < file_max_lines) && std::getline(fin, strline)) {
+				physical_line_num++;
+				const size_t comment_pos = strline.find('#');
+				if (comment_pos != string::npos)
+					strline.erase(comment_pos);
+				while (!strline.empty() && (strline.back() == ' ' || strline.back() == '\t' || strline.back() == '\r'))
+					strline.pop_back();
+				string check_line = strline;
+				str_clean(check_line);
+				if (check_line.empty())
+					continue;
+				if (temp_line.empty())
+					logical_start_line = physical_line_num;
+				const bool has_continuation = strline.size() >= 2 &&
+					strline.compare(strline.size() - 2, 2, "\\\\") == 0;
+				if (has_continuation)
+					strline.erase(strline.size() - 2);
+				temp_line += strline;
+				continuing = has_continuation;
+				if (!continuing) {
+					input_file.add_string(line_num++, temp_line);
+					_source_lines.push_back(logical_start_line);
+					temp_line.clear();
 				}
-				temp_line += strline; //every lines merge into temp_line
+			}
+			if (!temp_line.empty()) {
 				input_file.add_string(line_num, temp_line);
-				line_num++;
-				temp_line.clear();
+				_source_lines.push_back(logical_start_line);
+				if (continuing)
+					mark_unread_line(line_num);
 			}
 		}
 		fin.close();
@@ -41,18 +67,16 @@ namespace pf {
 			debug_custom_variavle_and_funcs();
 		}
 		// Remove duplicate definitions, last defined key is active.
-		vector<vector<string>> buff_words = _valid_words;
-		_valid_words.clear();
-		for (auto vec1 = buff_words.begin(); vec1 < buff_words.end(); vec1++) {
-			vector<string> words = { (*vec1)[0] ,(*vec1)[1] };
-			if (words[0].compare(infileMath.define_func_key) == 0 || words[0].compare(infileMath.define_variable_key) == 0)
+		for (const auto& words : _current_valid_words) {
+			if (words[0] == infileMath.define_func_key || words[0] == infileMath.define_variable_key)
+				continue;
+			auto old = std::find_if(_valid_words.begin(), _valid_words.end(), [&](const vector<string>& item) {
+				return item[0] == words[0];
+			});
+			if (old == _valid_words.end())
 				_valid_words.push_back(words);
-			bool is_last_defined = true;
-			for (auto vec2 = vec1 + 1; vec2 < buff_words.end(); vec2++)
-				if (words[0].compare((*vec2)[0]) == 0)
-					is_last_defined = false;
-			if (is_last_defined)
-				_valid_words.push_back(words);
+			else
+				*old = words;
 		}
 	}
 
@@ -1029,26 +1053,19 @@ namespace pf {
 
 	void InputFileReader::debug_infile_and_valid_words() {
 		stringstream _cout;
-		vector<int> valid_lines_number;
-		vector<vector<string>> valid_lines;
-		string valid_words = "<read>      ", invalid_words = "<unread>    ", note_words = "<note>      ";
+		string valid_words = "<read>      ", invalid_words = "<unread>    ";
 		_cout << "======================================= D E B U G =======================================" << endl;
 		_cout << "LINE	PROPERTY	|CONTENT" << endl;
 		_cout << "-----------------------------------------------------------------------------------------" << endl;
 		for (int line = 1; line <= input_file.size(); line++) {
 			string out = to_string(line) + "	|	", str = input_file[line], equal = "=";
 			std::vector<std::string> buff = {};
-			InputLineType type = get_valid_word_from_string(str, buff);
-			if (type == InputLineType::ILType_NOTE) {
-				out += note_words + "|" + str;
-			}
-			else if (type == InputLineType::ILType_INACTIVE) {
+			InputLineType type = is_unread_line(line) ? InputLineType::ILType_INACTIVE : get_valid_word_from_string(str, buff);
+			if (type == InputLineType::ILType_INACTIVE) {
 				out += invalid_words + "|" + str;
 			}
 			else if (type == InputLineType::ILType_ACTIVE) {
 				out += valid_words + "|" + str;
-				valid_lines_number.push_back(line);
-				valid_lines.push_back(buff);
 			}
 
 			_cout << out << endl;
@@ -1056,39 +1073,11 @@ namespace pf {
 		_cout << "-----------------------------------------------------------------------------------------" << endl;
 		add_string_to_file(_cout.str(), input_output_files_parameters::DebugFile_Path);
 		_cout.str("");
-		for (int index = 0; index < valid_lines.size(); index++) {
-			if (valid_lines[index][0].compare(infileMath.define_func_key) == 0 || valid_lines[index][0].compare(infileMath.define_variable_key) == 0) {
-				_cout.str("");
-				string out = to_string(valid_lines_number[index]) + "	|   <Custom>    |{\"" + valid_lines[index][0] + "\"}, {\"=\"}, {\"" + valid_lines[index][1] + "\"}";
-				_cout << out << endl;
-				add_string_to_file(_cout.str(), input_output_files_parameters::DebugFile_Path);
-				continue;
-			}
-			bool is_multi_defined_words = false;
-			for (int index2 = index + 1; index2 < valid_lines.size(); index2++)
-				if (valid_lines[index][0].compare(valid_lines[index2][0]) == 0)
-					is_multi_defined_words = true;
-			if (is_multi_defined_words) {
-				_cout.str("");
-				string out = to_string(valid_lines_number[index]) + "	|   <in-valid>  |{\"" + valid_lines[index][0] + "\"}, {\"=\"}, {\"" + valid_lines[index][1] + "\"}";
-				_cout << out << endl;
-				add_string_to_file(_cout.str(), input_output_files_parameters::DebugFile_Path);
-			}
-			else {
-				_cout.str("");
-				string out = to_string(valid_lines_number[index]) + "	|   <valid>     |{\"" + valid_lines[index][0] + "\"}, {\"=\"}, {\"" + valid_lines[index][1] + "\"}";
-				_cout << out << endl;
-				add_string_to_file(_cout.str(), input_output_files_parameters::DebugFile_Path);
-			}
-		}
-		_cout.str("");
 		_cout << "=========================================================================================" << endl;
 		add_string_to_file(_cout.str(), input_output_files_parameters::DebugFile_Path);
 	}
 	void InputFileReader::debug_custom_variavle_and_funcs() {
 		stringstream _cout;
-		vector<int> valid_lines;
-		string valid_words = "<valid>		", invalid_words = "<in-valid>	", note_words = "<note>		";
 		_cout << "======================================= D E B U G =======================================" << endl;
 		_cout << "NO.		VARIABLE	|VALUE" << endl;
 		_cout << "-----------------------------------------------------------------------------------------" << endl;
@@ -1308,128 +1297,134 @@ namespace pf {
 	}
 
 	string InputFileReader::macro_translator(string macro_str) {
-		// read_int_value()
-		// read_REAL_value()
-		string trans_words = "";
 		str_clean(macro_str);
-		size_t str_size = macro_str.size();
-		// - random
-		std::random_device rd; // 高质量随机数种子生成器
-		// std::mt19937 gen(static_cast<unsigned int>(std::time(nullptr))); // 时间戳种子：static_cast<unsigned int>(std::time(nullptr))，或固定的值 int
-		std::mt19937 gen(rd()); // 使用 Mersenne Twister 引擎初始化随机数生成器
-		std::uniform_real_distribution<> real_dist(0.0, 1.0); // [0.0, 1.0] 范围内的浮点数
-		// std::uniform_int_distribution<> int_dist(1, 100); // [1, 100] 范围内的整数
-		// std::normal_distribution<> normal_dist(50.0, 10.0); // 正态分布，均值 50，标准差 10
-		// MACRO: TUBE
-		if (macro_str.at(0) == 'T' && macro_str.at(1) == 'U' && macro_str.at(2) == 'B' && macro_str.at(3) == 'E') {
-			macro_str.erase(macro_str.begin()); // T
-			macro_str.erase(macro_str.begin()); // U
-			macro_str.erase(macro_str.begin()); // B
-			macro_str.erase(macro_str.begin()); // E
-			str_size = macro_str.size();
-			if (macro_str.at(0) == '[' && macro_str.at(str_size - 1) == ']') {
-				macro_str.erase(macro_str.begin()); // [
-				macro_str.erase(macro_str.end() - 1); // ]
-				std::vector<std::string> buff = split_string(macro_str, ',', false);
-				// MACRO: normal tube
-				if (buff.size() == 3) {
-					int index_begin = stoi(buff[0]), index_end = stoi(buff[1]), index_jump = stoi(buff[2]);
-					for (int index = index_begin; index <= index_end; index = index + index_jump) {
-						trans_words += to_string(index);
-						if (index + index_jump <= index_end)
-							trans_words += ",";
-					}
-				}
+		auto arguments = [&](const string& prefix, size_t count) {
+			if (macro_str.size() <= prefix.size() + 2 || macro_str.compare(0, prefix.size(), prefix) != 0 ||
+				macro_str[prefix.size()] != '[' || macro_str.back() != ']')
+				throw runtime_error("invalid macro syntax");
+			vector<string> values = split_string(macro_str.substr(prefix.size() + 1,
+				macro_str.size() - prefix.size() - 2), ',', false);
+			if (values.size() != count)
+				throw runtime_error("invalid macro argument count");
+			for (const auto& value : values)
+				if (value.empty()) throw runtime_error("empty macro argument");
+			return values;
+		};
+		auto parse_int = [](const string& value) {
+			size_t used = 0;
+			int result = stoi(value, &used);
+			if (used != value.size()) throw runtime_error("invalid integer argument");
+			return result;
+		};
+		auto parse_real = [](const string& value) {
+			size_t used = 0;
+			REAL result = REAL(stod(value, &used));
+			if (used != value.size()) throw runtime_error("invalid real argument");
+			return result;
+		};
+
+		if (macro_str.rfind("TUBE", 0) == 0) {
+			auto values = arguments("TUBE", 3);
+			int begin = parse_int(values[0]), end = parse_int(values[1]), step = parse_int(values[2]);
+			if (step == 0) throw runtime_error("TUBE step cannot be zero");
+			if ((begin < end && step < 0) || (begin > end && step > 0))
+				throw runtime_error("TUBE step direction does not reach the end");
+			string result;
+			for (long long value = begin; (step > 0) ? value <= end : value >= end; value += step) {
+				if (!result.empty()) result += ',';
+				result += to_string(value);
 			}
-			// others
-			// -
+			return result;
 		}
-		// MACRO: RAND
-		else if (macro_str.at(0) == 'R' && macro_str.at(1) == 'A' && macro_str.at(2) == 'N' && macro_str.at(3) == 'D') {
-			macro_str.erase(macro_str.begin()); // R
-			macro_str.erase(macro_str.begin()); // A
-			macro_str.erase(macro_str.begin()); // N
-			macro_str.erase(macro_str.begin()); // D
-			str_size = macro_str.size();
-			// MACRO: RAND_INT
-			if (macro_str.at(0) == '_' && macro_str.at(1) == 'I' && macro_str.at(2) == 'N' && macro_str.at(3) == 'T') {
-				macro_str.erase(macro_str.begin()); // _
-				macro_str.erase(macro_str.begin()); // I
-				macro_str.erase(macro_str.begin()); // N
-				macro_str.erase(macro_str.begin()); // T
-				str_size = macro_str.size();
-				if (macro_str.at(0) == '[' && macro_str.at(str_size - 1) == ']') {
-					macro_str.erase(macro_str.begin()); // [
-					macro_str.erase(macro_str.end() - 1); // ]
-					std::vector<std::string> buff = split_string(macro_str, ',', false);
-					if (buff.size() == 2) {
-						int val_min = stoi(buff[0]), val_max = stoi(buff[1]);
-						REAL rand = REAL(real_dist(gen));  // random
-						REAL result = REAL(val_max - val_min) * rand + REAL(val_min);
-						if (result > 0.0)
-							trans_words = to_string(int(result + 0.5));
-						else
-							trans_words = to_string(int(result - 0.5));
-					}
-				}
-			}
-			// MACRO: RAND_DOUBLE
-			else if (macro_str.at(0) == '_' && macro_str.at(1) == 'D' && macro_str.at(2) == 'O' && macro_str.at(3) == 'U' && macro_str.at(4) == 'B' && macro_str.at(5) == 'L' && macro_str.at(6) == 'E') {
-				macro_str.erase(macro_str.begin()); // _
-				macro_str.erase(macro_str.begin()); // D
-				macro_str.erase(macro_str.begin()); // O
-				macro_str.erase(macro_str.begin()); // U
-				macro_str.erase(macro_str.begin()); // B
-				macro_str.erase(macro_str.begin()); // L
-				macro_str.erase(macro_str.begin()); // E
-				str_size = macro_str.size();
-				if (macro_str.at(0) == '[' && macro_str.at(str_size - 1) == ']') {
-					macro_str.erase(macro_str.begin()); // [
-					macro_str.erase(macro_str.end() - 1); // ]
-					std::vector<std::string> buff = split_string(macro_str, ',', false);
-					// MACRO: normal rand REAL
-					if (buff.size() == 2) {
-						REAL val_min = REAL(stod(buff[0])), val_max = REAL(stod(buff[1]));
-						//read_REAL_value(buff[0], val_min, false);
-						//read_REAL_value(buff[1], val_max, false);
-						REAL rand = REAL(real_dist(gen));  // random
-						REAL result = (val_max - val_min) * rand + val_min;
-						trans_words = to_string(result);
-					}
-				}
-			}
-			// others
-			// -
+		if (macro_str.rfind("RAND_INT", 0) == 0) {
+			auto values = arguments("RAND_INT", 2);
+			int minimum = parse_int(values[0]), maximum = parse_int(values[1]);
+			if (minimum > maximum) throw runtime_error("RAND_INT minimum is greater than maximum");
+			return to_string(uniform_int_distribution<int>(minimum, maximum)(_random_engine));
 		}
-		// others
-		// -
-		return trans_words;
+		if (macro_str.rfind("RAND_REAL", 0) == 0) {
+			auto values = arguments("RAND_REAL", 2);
+			REAL minimum = parse_real(values[0]), maximum = parse_real(values[1]);
+			if (minimum > maximum) throw runtime_error("RAND_REAL minimum is greater than maximum");
+			return to_string(uniform_real_distribution<REAL>(minimum, maximum)(_random_engine));
+		}
+		throw runtime_error("unknown macro");
 	}
 
 	void InputFileReader::compile_macros(const char keyword) {
 		for (auto line : input_file) {
-			std::size_t macro_position{ line.value.find(keyword) };
-			std::size_t macro_size{ line.value.substr(macro_position + 1).find(keyword) };
-			while (macro_position != std::string::npos && macro_size != std::string::npos) {
-				string macro = input_file[line.index].substr(macro_position + 1, macro_size);
-				input_file[line.index].replace(macro_position, macro_size + 2, macro_translator(macro));
-				macro_position = input_file[line.index].find(keyword);
-				macro_size = input_file[line.index].substr(macro_position + 1).find(keyword);
-			}
-			if (macro_position != std::string::npos && macro_size == std::string::npos) {
-				string error = "> MACROS COMPILOR ERROR, line number: " + to_string(line.index) + ", only one MACRO key in this line: \n" + line.value + "\n";
+			if (is_unread_line(line.index))
+				continue;
+			string& value = input_file[line.index];
+			str_clean(value);
+			size_t search_position = 0;
+			while (true) {
+				size_t begin = value.find(keyword, search_position);
+				if (begin == string::npos) break;
+				size_t end = value.find(keyword, begin + 1);
+				if (end == string::npos) {
+					const int source_line = size_t(line.index) <= _source_lines.size() ? _source_lines[size_t(line.index - 1)] : line.index;
+					string error = "> MACRO ERROR in " + _input_file_name + ", line " + to_string(source_line) +
+						": unmatched macro delimiter: " + value + "\n";
+					add_string_to_file(error, input_output_files_parameters::DebugFile_Path);
+					cout << error;
+					SYS_PROGRAM_STOP;
+				}
+				string macro = value.substr(begin + 1, end - begin - 1);
+				try {
+					string translated = macro_translator(macro);
+					value.replace(begin, end - begin + 1, translated);
+					search_position = begin + translated.size();
+				}
+				catch (const exception& error_detail) {
+					const int source_line = size_t(line.index) <= _source_lines.size() ? _source_lines[size_t(line.index - 1)] : line.index;
+					string error = "> MACRO ERROR in " + _input_file_name + ", line " + to_string(source_line) +
+						", $" + macro + "$: " + error_detail.what() + "\n";
 				add_string_to_file(error, input_output_files_parameters::DebugFile_Path);
-				exit(0);
+					cout << error;
+					SYS_PROGRAM_STOP;
+				}
 			}
 		}
 	}
 
 	void InputFileReader::get_valid_words() {
 		for (auto line : input_file) {
+			if (is_unread_line(line.index))
+				continue;
 			std::vector<std::string> valid_word = {};
 			InputLineType type = get_valid_word_from_string(line.value, valid_word);
-			if (type == InputLineType::ILType_ACTIVE)
-				_valid_words.push_back(valid_word);
+			if (type == InputLineType::ILType_ACTIVE) {
+				bool definition_is_valid = true;
+				if (valid_word[0] == infileMath.define_variable_key) {
+					const string& value = valid_word[1];
+					const size_t comma = value.find(',');
+					REAL parsed = 0.0;
+					definition_is_valid = comma != string::npos && comma > 0 && comma == value.rfind(',') && comma + 1 < value.size();
+					if (definition_is_valid) {
+						try {
+							definition_is_valid = infile_math_default_funcs::is_string_REAL(value.substr(comma + 1), parsed);
+						}
+						catch (const exception&) {
+							definition_is_valid = false;
+						}
+					}
+				}
+				else if (valid_word[0] == infileMath.define_func_key) {
+					const string& value = valid_word[1];
+					const size_t first = value.find('@'), last = value.rfind('@');
+					definition_is_valid = first != string::npos && first > 0 && first != last &&
+						last == value.size() - 1 && first + 1 < last && value.find('@', first + 1) == last;
+				}
+				if (definition_is_valid) {
+					_current_valid_words.push_back(valid_word);
+					_current_valid_lines.push_back(line.index);
+				}
+				else
+					mark_unread_line(line.index);
+			}
+			else
+				mark_unread_line(line.index);
 		}
 	}
 
@@ -1438,11 +1433,8 @@ namespace pf {
 		if (str.length() == 0) {
 			return InputLineType::ILType_INACTIVE;
 		}
-		if (str.at(0) == '#') {
-			return InputLineType::ILType_NOTE;
-		}
 		std::vector<std::string> buff = split_string(str, '=', false);
-		if (buff.size() == 2) {
+		if (buff.size() == 2 && !buff[0].empty() && !buff[1].empty()) {
 			valid_word = buff;
 			return InputLineType::ILType_ACTIVE;
 		}
@@ -1452,7 +1444,8 @@ namespace pf {
 	}
 
 	void InputFileReader::get_define_func_and_variable() {
-		for (auto valid_word = _valid_words.begin(); valid_word < _valid_words.end(); valid_word++) {
+		for (auto valid_word = _current_valid_words.begin(); valid_word < _current_valid_words.end(); valid_word++) {
+			const int line_index = _current_valid_lines[size_t(valid_word - _current_valid_words.begin())];
 			if ((*valid_word)[0].compare(infileMath.define_func_key) == 0) {
 				defined_parameters_number++;
 				string func_key = "", func_equation = ""; bool equation_begin = false;
@@ -1474,18 +1467,32 @@ namespace pf {
 						}
 					}
 				}
-				if (func_key.size() == 0 || func_equation.size() == 0) {
-					cout << "> error! defined func: " << func_key << " @" << func_equation << "@ " << " cant be translated !" << endl;
-					SYS_PROGRAM_STOP;
+				if (func_key.empty() || func_equation.empty()) {
+					mark_unread_line(line_index);
 				}
 				else {
-					infileMath.add_infile_funcs(func_key, func_equation/*, true*/); // debug input math
+					int existing = -1;
+					if (infileMath.search_func(func_key, existing) && infileMath.infile_funcs[existing].func_str == func_equation)
+						continue;
+					InfileMath candidate = infileMath;
+					if (!candidate.add_infile_funcs(func_key, func_equation/*, true*/)) {
+						mark_unread_line(line_index);
+						continue;
+					}
 					int index = 0;
-					infileMath.search_func(func_key, index);
+					if (!candidate.search_func(func_key, index)) {
+						mark_unread_line(line_index);
+						continue;
+					}
 					vector<int> para_int; vector<REAL> para_REAL;
-					InFileFunc& inFunc = infileMath.infile_funcs[index];
-					REAL val = inFunc.func(para_int, para_REAL, inFunc.func_structure, inFunc.operators, inFunc.terms_type, infileMath.infile_vars, infileMath.infile_funcs);
-					infileMath.add_infile_var(func_key, val);
+					InFileFunc& inFunc = candidate.infile_funcs[index];
+					REAL val = inFunc.func(para_int, para_REAL, inFunc.func_structure, inFunc.operators, inFunc.terms_type, candidate.infile_vars, candidate.infile_funcs);
+					int cache_index = -1;
+					if (candidate.search_var(func_key, cache_index))
+						candidate.infile_vars[cache_index].var = val;
+					else
+						candidate.add_infile_var(func_key, val);
+					infileMath = candidate;
 				}
 			}
 			else if ((*valid_word)[0].compare(infileMath.define_variable_key) == 0) {
@@ -1507,20 +1514,40 @@ namespace pf {
 						}
 					}
 				}
-				if (var_key.size() == 0 || var_value.size() == 0) {
-					cout << "> error! defined func: " << var_key << " |" << var_value << "| " << " cant be translated !" << endl;
-					SYS_PROGRAM_STOP;
+				if (var_key.empty() || var_value.empty()) {
+					mark_unread_line(line_index);
+					continue;
 				}
 				REAL value = 0.0;
 				if (infile_math_default_funcs::is_string_REAL(var_value, value)) {
 					infileMath.add_infile_var(var_key, value);
 				}
-				else {
-					cout << "> error! defined variable: " << var_key << " (" << var_value << ") " << " cant be translate to REAL value !" << endl;
-					SYS_PROGRAM_STOP;
-				}
+				else
+					mark_unread_line(line_index);
 			}
 		}
+		for (auto& inFunc : infileMath.infile_funcs) {
+			if (infileMath.check_default_func(inFunc.key))
+				continue;
+			vector<int> para_int;
+			vector<REAL> para_REAL;
+			REAL value = inFunc.func(para_int, para_REAL, inFunc.func_structure, inFunc.operators,
+				inFunc.terms_type, infileMath.infile_vars, infileMath.infile_funcs);
+			int cache_index = -1;
+			if (infileMath.search_var(inFunc.key, cache_index))
+				infileMath.infile_vars[cache_index].var = value;
+			else
+				infileMath.add_infile_var(inFunc.key, value);
+		}
+	}
+
+	bool InputFileReader::is_unread_line(int line_index) const {
+		return std::find(_unread_lines.begin(), _unread_lines.end(), line_index) != _unread_lines.end();
+	}
+
+	void InputFileReader::mark_unread_line(int line_index) {
+		if (!is_unread_line(line_index))
+			_unread_lines.push_back(line_index);
 	}
 
 	std::vector<std::string> InputFileReader::split_string(std::string str, const char keyword, bool preserve_keyword) {

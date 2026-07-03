@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+#include <stdexcept>
 #include "InputFileMath.h"
 #include "../ioFiles_Params.h"
 namespace pf {
@@ -6,7 +8,7 @@ namespace pf {
 	const char matrix_separator = ',';
 	const char macro_symble = '$';
 	enum InputValueType { IVType_INT, IVType_REAL, IVType_BOOL, IVType_STRING };
-	enum InputLineType { ILType_ACTIVE, ILType_INACTIVE, ILType_NOTE };
+	enum InputLineType { ILType_ACTIVE, ILType_INACTIVE };
 
 	inline void str_clean(std::string& str) {
 		//windows & linux
@@ -119,6 +121,7 @@ namespace pf {
 			defined_parameters_number = 0;
 			_split = ' ';
 			input_file.clear();
+			_random_engine.seed(std::random_device{}());
 		}
 		~InputFileReader() {
 			_split = ' ';
@@ -162,11 +165,19 @@ namespace pf {
 		string_box input_file;
 		// [lines]{name, value}
 		vector<vector<string>> _valid_words;
+		vector<vector<string>> _current_valid_words;
+		vector<int> _current_valid_lines;
+		vector<int> _unread_lines;
+		vector<int> _source_lines;
 		char _split;
 		int defined_parameters_number;
+		string _input_file_name;
+		std::mt19937 _random_engine;
 		char get_first_character_of_line(string line);
 
 		string macro_translator(string macro_str);
+		bool is_unread_line(int line_index) const;
+		void mark_unread_line(int line_index);
 
 		void compile_macros(const char keyword = '$');
 

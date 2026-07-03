@@ -36,11 +36,6 @@ namespace pf {
 				SimuInfo simu_info{ User_StartUp(argc,argv) };
 				input_output_files_parameters::InFile_Path = simu_info.simu_path;
 			}
-			// init InputFileReader
-			std::filesystem::path cwd{ std::filesystem::current_path() };
-			string selected_file_path = infile_path_selector(input_output_files_parameters::InFile_Path);
-			std::filesystem::current_path(cwd);
-			InputFileReader::get_instance()->init(selected_file_path, false, INT_MAX, ' ');
 			// init working folder path and create the folder
 			input_output_files_parameters::WorkingFolder_Path = pf::erase_tail_of_infile(input_output_files_parameters::InFile_Path);
 			input_output_files_parameters::InFileFolder_Path = pf::GetFolderOfPath(input_output_files_parameters::WorkingFolder_Path);
@@ -49,6 +44,11 @@ namespace pf {
 #elif defined(__linux__)
 			mkdir(input_output_files_parameters::WorkingFolder_Path.c_str(), 0777);
 #endif
+			// init InputFileReader
+			std::filesystem::path cwd{ std::filesystem::current_path() };
+			string selected_file_path = infile_path_selector(input_output_files_parameters::InFile_Path);
+			std::filesystem::current_path(cwd);
+			InputFileReader::get_instance()->init(selected_file_path, false, INT_MAX, ' ');
 			// init log and debug files
 			input_output_files_parameters::LogFile_Path = input_output_files_parameters::WorkingFolder_Path + dirSeparator + "log.txt";
 			input_output_files_parameters::DebugFile_Path = input_output_files_parameters::WorkingFolder_Path + dirSeparator + "input_report.txt";
