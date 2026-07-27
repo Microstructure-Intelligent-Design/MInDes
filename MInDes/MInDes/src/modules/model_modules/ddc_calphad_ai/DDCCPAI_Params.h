@@ -236,6 +236,82 @@ namespace pf {
 					phase_miu[index].resize(con_number, 0);
 				}
 			}
+			// 矩阵加法 (+)
+			FIELD_PhaseCon operator+(const FIELD_PhaseCon& other) const {
+				FIELD_PhaseCon result = *this;
+				result += other;
+				return result;
+			}
+			// 矩阵减法 (-)
+			FIELD_PhaseCon operator-(const FIELD_PhaseCon& other) const {
+				FIELD_PhaseCon result = *this;
+				result -= other;
+				return result;
+			}
+			// 矩阵除法 (*) - 逐元素相乘
+			FIELD_PhaseCon operator*(const REAL& other) const {
+				FIELD_PhaseCon result = *this;
+				result *= other;
+				return result;
+			}
+			// 矩阵除法 (/) - 逐元素相除
+			FIELD_PhaseCon operator/(const REAL& other) const {
+				FIELD_PhaseCon result = *this;
+				result /= other;
+				return result;
+			}
+			// 复合赋值运算符 (+=)，可以提升连续运算时的性能
+			FIELD_PhaseCon& operator+=(const FIELD_PhaseCon& other) {
+				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
+				for (size_t i = 0; i < phi_number; ++i) {
+					phase_phi[i] += other.phase_phi[i];
+					phase_old_phi[i] += other.phase_old_phi[i];
+					for (size_t j = 0; j < con_number; ++j) {
+						phase_con[i][j] += other.phase_con[i][j];
+						phase_miu[i][j] += other.phase_miu[i][j];
+					}
+				}
+				return *this;
+			}
+			// 复合赋值运算符 (-=)，可以提升连续运算时的性能
+			FIELD_PhaseCon& operator-=(const FIELD_PhaseCon& other) {
+				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
+				for (size_t i = 0; i < phi_number; ++i) {
+					phase_phi[i] -= other.phase_phi[i];
+					phase_old_phi[i] -= other.phase_old_phi[i];
+					for (size_t j = 0; j < con_number; ++j) {
+						phase_con[i][j] -= other.phase_con[i][j];
+						phase_miu[i][j] -= other.phase_miu[i][j];
+					}
+				}
+				return *this;
+			}
+			// 复合赋值运算符 (*=)，可以提升连续运算时的性能
+			FIELD_PhaseCon& operator*=(const REAL& other) {
+				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
+				for (size_t i = 0; i < phi_number; ++i) {
+					phase_phi[i] *= other;
+					phase_old_phi[i] *= other;
+					for (size_t j = 0; j < con_number; ++j) {
+						phase_con[i][j] *= other;
+						phase_miu[i][j] *= other;
+					}
+				}
+				return *this;
+			}
+			// 复合赋值运算符 (/=)，可以提升连续运算时的性能
+			FIELD_PhaseCon& operator/=(const REAL& other) {
+				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
+				for (size_t i = 0; i < phi_number; ++i) {
+					phase_phi[i] /= other;
+					phase_old_phi[i] /= other;
+					for (size_t j = 0; j < con_number; ++j) {
+						phase_con[i][j] /= other;
+						phase_miu[i][j] /= other;
+					}
+				}
+				return *this;
+			}
 		};
 		namespace parameters {
 			inline REAL Phi_Cut_Off = 0.001;
@@ -272,13 +348,13 @@ namespace pf {
 			// - source functions
 			inline std::vector<REAL(*)(size_t x, size_t y, size_t z, size_t alpha_index, size_t beta_index)> source_alpha_beta;
 			// - anisotropy
+			inline std::vector<Matrix3x3> grain_rotation_matrix;
 			// - mobility
 			inline Matrix2D<REAL> Lij; // <- phi index i j
 			inline Matrix2D<REAL> Qij; // <- phi index i j
 			const REAL R = REAL(8.314);
 			// - interface mobility anisotropy
-			enum Int_Mobility_Anisotropic { IMA_ISO, IMA_CUBIC, IMA_HEX_BOETTGER, IMA_HEX_SUN, IMA_HEX_YANG };
-			inline size_t intMobAniso_phi_property = 0;
+			enum Int_Mobility_Anisotropic { IMA_ISO, IMA_CUBIC, IMA_HEX_BOETTGER, IMA_HEX_SUN, IMA_HEX_YANG, IMA_DENDRITE_YANG };
 			inline Int_Mobility_Anisotropic intMobAniso_model = Int_Mobility_Anisotropic::IMA_ISO;
 			inline REAL intMobAniso_param1;
 			inline REAL intMobAniso_param2;
@@ -292,8 +368,7 @@ namespace pf {
 			inline Matrix2D<REAL> xi_ab; // <- phi property 
 			inline Matrix3D<REAL> xi_abc; // <- phi property 
 			// interface energy anisotropy 
-			enum Int_Energy_Anisotropic { IEA_ISO, IEA_CUBIC, IEA_HEX_BOETTGER, IEA_HEX_SUN, IEA_HEX_YANG };
-			inline size_t intEnAniso_phi_property = 0;
+			enum Int_Energy_Anisotropic { IEA_ISO, IEA_CUBIC, IEA_HEX_BOETTGER, IEA_HEX_SUN, IEA_HEX_YANG, IEA_DENDRITE_YANG	};
 			inline Int_Energy_Anisotropic intEnAniso_model = Int_Energy_Anisotropic::IEA_ISO;
 			inline REAL intEnAniso_param1;
 			inline REAL intEnAniso_param2;
@@ -303,11 +378,10 @@ namespace pf {
 			inline std::vector<REAL> f_bulk_0; // <- phi property 
 			// ===================================================================================================
 			// - parameters con 
+			inline std::pair<REAL, size_t>(*local_concentration_redistribution)(size_t x, size_t y, size_t z);  // { MAX_VARIATION , MAX_ITERATION_STEP }
 			// - moving region method 
 			inline void (*init_con_in_moving_region)(size_t x, size_t y, size_t z, size_t region_index);
 			inline void (*deinit_con_in_moving_region)(size_t x, size_t y, size_t z, size_t region_index);
-			// - local concentration redistribution (for phase-concentration, sublattice model (CALPHAD) or mechine learning method, etc..)
-			inline void (*local_concentration_redistribution)(size_t x, size_t y, size_t z);
 			// - driving force functions 
 			inline std::vector<REAL(*)(size_t x, size_t y, size_t z, size_t region_index, size_t con_index)> delt_Fbulk_delt_con;
 			// - mobility functions 
@@ -336,12 +410,15 @@ namespace pf {
 			inline void (*cal_mob_temp_grad_lap)(size_t x, size_t y, size_t z, Vector3& grad_temp, Vector3& grad_mob, REAL& lap_temp);
 			// - mobility parameters 
 			inline std::vector<REAL> Mtemp;             // [phi property] -> Mtemp
+			// - source term
+			inline std::vector<REAL> Ktemp;             // [phi property] -> Ktemp     Ktemp * dphi / dt
 			// ===================================================================================================
 			// - parameters bulk energy
 			inline std::vector<bool> is_energy_minimization;      // [region index] -> true/false
 			inline size_t max_phasecon_variation_step = 100;
 			inline REAL L_phasecon = 1.0;
 			inline REAL phasecon_epsilon = 1e-4;
+			inline std::pair<REAL, size_t> MAX_MINIMIZATION_RESULTS = {0, 0};
 			// - chemical energy
 			inline REAL (*fchem)(std::vector<REAL> con, REAL temperature, size_t phi_property);
 			inline REAL (*miu)(std::vector<REAL> con, REAL temperature, size_t phi_property, size_t con_index);

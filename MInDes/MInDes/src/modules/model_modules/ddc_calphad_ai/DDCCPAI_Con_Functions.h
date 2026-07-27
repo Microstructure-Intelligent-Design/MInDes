@@ -1,5 +1,6 @@
 #pragma once
 #include "DDCCPAI_Params.h"
+#include "DDCCPAI_BulkEnergy.h"
 #include "../../postprocess_modules/WriteVTS.h"
 namespace pf {
 	namespace ddc_calphad_ai_model {

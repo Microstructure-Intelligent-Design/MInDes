@@ -69,6 +69,16 @@ namespace pf {
 				return Mtemp;
 			}
 
+			REAL temperature_source_phi(size_t x, size_t y, size_t z) {
+				FIELD_PhiTemp& field_var = parameters::PhiTemp_field(x, y, z);
+				REAL Stemp = 0;
+				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER && field_var.active_index[index] != parameters::PAIRWISE_ACC_STOP; index++) {
+					size_t phi_index = field_var.active_index[index];
+					Stemp += (field_var.new_phi[phi_index] - field_var.old_phi[phi_index]) / time_parameters::delt_t * parameters::Ktemp[PhiProperties::instance()[phi_index]];
+				}
+				return Stemp;
+			}
+
 			//========================================================================================================================
 			// - evolution equations
 			void init_temperature_field() {

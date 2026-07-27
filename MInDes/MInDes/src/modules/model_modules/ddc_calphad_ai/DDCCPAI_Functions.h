@@ -11,6 +11,7 @@ namespace pf {
 		void exec_pre_iii();
 		void exec_i();
 		void exec_pos_i();
+		void exec_pos_iii();
 		void deinit();
 	}
 }

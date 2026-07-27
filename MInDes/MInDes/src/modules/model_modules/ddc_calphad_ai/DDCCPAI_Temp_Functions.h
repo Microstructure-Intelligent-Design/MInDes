@@ -12,6 +12,8 @@ namespace pf {
 
 			REAL temperature_mobility_0(size_t x, size_t y, size_t z);
 
+			REAL temperature_source_phi(size_t x, size_t y, size_t z);
+
 			//========================================================================================================================
 			// - evolution equations
 			void init_temperature_field();

@@ -324,63 +324,55 @@ namespace pf {
 			REAL Lij_cubic(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) 
-						* (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * 
-						(1.5 - 2.5 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 *
+					(1.5 - 2.5 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
 				return Lij;
 			};
 			REAL Lij_hex_boettger(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 + parameters::intMobAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
-						15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
-						(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 + parameters::intMobAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
+					15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
+					(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
 				return Lij;
 			};
 			REAL Lij_hex_sun(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
-						- parameters::intMobAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0)
-							- 30.0 * norm[2] * norm[2] + 3.0)
-						- parameters::intMobAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0)
-							- 315.0 * std::pow(norm[2], 4.0) + 105.0 * norm[2] * norm[2] - 5.0)
-						- parameters::intMobAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
-							- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1]
-							+ 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0)
-							- std::pow(norm[1], 6.0)));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
+					- parameters::intMobAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0)
+						- 30.0 * norm[2] * norm[2] + 3.0)
+					- parameters::intMobAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0)
+						- 315.0 * std::pow(norm[2], 4.0) + 105.0 * norm[2] * norm[2] - 5.0)
+					- parameters::intMobAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
+						- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1]
+						+ 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0)
+						- std::pow(norm[1], 6.0)));
 				return Lij;
 			};
 			REAL Lij_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * std::pow((3 * norm[2] * norm[2] - 1.0), 2.0)
-						- parameters::intMobAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
-						* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intMobAniso_param3), 2.0));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * std::pow((3 * norm[2] * norm[2] - 1.0), 2.0)
+					- parameters::intMobAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
+					* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intMobAniso_param3), 2.0));
+				return Lij;
+			};
+			REAL Lij_dendrite_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
+				// to be defined
+				REAL Lij = parameters::Lij(alpha_index, beta_index);
+				// - anisotropic
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad)/*beta_grad*/;
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 *
+					(3.0 + 4.0 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
 				return Lij;
 			};
 			REAL Lij_temp(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
@@ -389,64 +381,57 @@ namespace pf {
 			REAL Lij_temp_cubic(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1
-						* (1.5 - 2.5 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1
+					* (1.5 - 2.5 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
 				return Lij;
 			};
 			REAL Lij_temp_hex_boettger(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 + parameters::intMobAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
-						15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
-						(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 + parameters::intMobAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
+					15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
+					(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
 				return Lij;
 			};
 			REAL Lij_temp_hex_sun(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
-						- parameters::intMobAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0)
-							- 30.0 * norm[2] * norm[2] + 3.0)
-						- parameters::intMobAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0)
-							- 315.0 * std::pow(norm[2], 4.0) + 105.0 * norm[2] * norm[2] - 5.0)
-						- parameters::intMobAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
-							- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1]
-							+ 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0)
-							- std::pow(norm[1], 6.0)));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
+					- parameters::intMobAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0)
+						- 30.0 * norm[2] * norm[2] + 3.0)
+					- parameters::intMobAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0)
+						- 315.0 * std::pow(norm[2], 4.0) + 105.0 * norm[2] * norm[2] - 5.0)
+					- parameters::intMobAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
+						- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1]
+						+ 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0)
+						- std::pow(norm[1], 6.0)));
 				return Lij;
 			};
 			REAL Lij_temp_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				// to be defined
 				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
-				size_t phi_property = PhiProperties::instance()[beta_index];
 				// - anisotropic
-				if (phi_property == parameters::intMobAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * std::pow((3 * norm[2] * norm[2] - 1.0), 2.0)
-						- parameters::intMobAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
-						* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intMobAniso_param3), 2.0));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * std::pow((3 * norm[2] * norm[2] - 1.0), 2.0)
+					- parameters::intMobAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
+					* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intMobAniso_param3), 2.0));
 				return Lij;
 			};
+			REAL Lij_temp_dendrite_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
+				// to be defined
+				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
+				// - anisotropic
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad)/*beta_grad*/;
+				Lij = Lij * REAL(1.0 + parameters::intMobAniso_param1 *
+					(3.0 + 4.0 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
+				return Lij;
+			}
 			// - interface energy
 			REAL xi_ab(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
 				return parameters::xi_ab(PhiProperties::instance()[alpha_index], PhiProperties::instance()[beta_index]);
@@ -455,55 +440,52 @@ namespace pf {
 				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
 				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
 				// - 
-				if (phi_beta_property == parameters::intEnAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * 
-						(1.5 - 2.5 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 *
+					(1.5 - 2.5 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
 				return loc_xi_ab;
 			};
 			REAL xi_ab_hex_boettger(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
 				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
 				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
 				// - 
-				if (phi_beta_property == parameters::intEnAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					loc_xi_ab = loc_xi_ab * REAL(1.0 - parameters::intEnAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
-						15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] +
-						15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
-						(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				loc_xi_ab = loc_xi_ab * REAL(1.0 - parameters::intEnAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
+					15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] +
+					15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
+					(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
 				return loc_xi_ab;
 			};
 			REAL xi_ab_hex_sun(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
 				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
 				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
 				// - 
-				if (phi_beta_property == parameters::intEnAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
-						+ parameters::intEnAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0) - 30.0 * norm[2] * norm[2] + 3.0)
-						+ parameters::intEnAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0) - 315.0 * std::pow(norm[2], 4.0)
-							+ 105.0 * norm[2] * norm[2] - 5.0)
-						+ parameters::intEnAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
-							- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0) - std::pow(norm[1], 6.0)));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
+					+ parameters::intEnAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0) - 30.0 * norm[2] * norm[2] + 3.0)
+					+ parameters::intEnAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0) - 315.0 * std::pow(norm[2], 4.0)
+						+ 105.0 * norm[2] * norm[2] - 5.0)
+					+ parameters::intEnAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
+						- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0) - std::pow(norm[1], 6.0)));
 				return loc_xi_ab;
 			};
 			REAL xi_ab_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
 				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
 				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
 				// - 
-				if (phi_beta_property == parameters::intEnAniso_phi_property) {
-					Vector3 norm = GrainsOrientations::instance().RotationMatrix(beta_index) * (GrainsOrientations::instance().RotationMatrix(alpha_index)
-						* normals(alpha_phi, beta_phi, alpha_grad, beta_grad));
-					loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * std::pow((3.0 * norm[2] * norm[2] - 1.0), 2.0)
-						+ parameters::intEnAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
-						* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intEnAniso_param3), 2.0));
-				}
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
+				loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * std::pow((3.0 * norm[2] * norm[2] - 1.0), 2.0)
+					+ parameters::intEnAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
+					* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intEnAniso_param3), 2.0));
+				return loc_xi_ab;
+			};
+			REAL xi_ab_dendrite_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
+				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
+				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
+				// - 
+				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad)/*beta_grad*/;
+				loc_xi_ab = loc_xi_ab * REAL(1.0 - parameters::intEnAniso_param1 *
+					(3.0 + 4.0 * (std::pow(norm[0], 4.0) + std::pow(norm[1], 4.0) + std::pow(norm[2], 4.0))));
 				return loc_xi_ab;
 			};
 			REAL xi_abc(size_t alpha_index, size_t beta_index, size_t gamma_index) {

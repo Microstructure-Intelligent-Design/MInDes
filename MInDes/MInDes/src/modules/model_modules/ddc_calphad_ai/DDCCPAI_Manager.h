@@ -35,6 +35,12 @@ namespace pf {
 			GrainsOrientations::instance().init();
 			ConRegions::instance().init();
 			// - 
+			Matrix3x3 matrix;
+			matrix.set_to_unity();
+			parameters::grain_rotation_matrix.resize(main_field::phi_number, matrix);
+			for (size_t index = 0; index < main_field::phi_number; index++)
+				parameters::grain_rotation_matrix[index] = GrainsOrientations::instance().RotationMatrix(index);
+			// - 
 			int difference_method = DifferenceMethod::SEVEN_POINT;
 			WriteDebugFile("# Model.DDCCPAI.difference_method : 0 - SEVEN_POINT , 1 - NINETEEN_POINT \n");
 			infile_reader::read_int_value("Model.DDCCPAI.difference_method", difference_method, true);
@@ -207,16 +213,11 @@ namespace pf {
 				}
 			}
 			// - anisotropic
-			WriteDebugFile("# Model.DDCCPAI.Phi.IntMobility.Anisotropic.property = (phi_name, AnisotropicModelIndex)\n");
-			WriteDebugFile("#          AnisotropicModelIndex : 0 - IEA_ISO, 1 - IEA_CUBIC, 2 - IEA_HEX_BOETTGER, 3 - IEA_HEX_SUN, 4 - IEA_HEX_YANG \n");
-			std::string matrix_aniso_key = "Model.DDCCPAI.Phi.IntMobility.Anisotropic.property", matrix_aniso_input = "()";
-			if (infile_reader::read_string_value(matrix_aniso_key, matrix_aniso_input, true)) {
-				std::vector<input_value> matrix_aniso_value =
-					InputFileReader::get_instance()->trans_matrix_1d_array_to_input_value(
-						{ InputValueType::IVType_STRING , InputValueType::IVType_INT }, 
-						matrix_aniso_key, matrix_aniso_input, true);
-				parameters::intMobAniso_phi_property = PhiProperties::instance().phi_property(matrix_aniso_value[0].string_value);
-				parameters::intMobAniso_model = parameters::Int_Mobility_Anisotropic(matrix_aniso_value[1].int_value);
+			WriteDebugFile("# Model.DDCCPAI.Phi.IntMobility.Anisotropic.property = AnisotropicModelIndex \n");
+			WriteDebugFile("#          AnisotropicModelIndex : 0 - ISO, 1 - CUBIC, 2 - HEX_BOETTGER, 3 - HEX_SUN, 4 - HEX_YANG, 5 - DENDRITE_YANG \n");
+			int intMobAniso_model = 0;
+			if (infile_reader::read_int_value("Model.DDCCPAI.Phi.IntMobility.Anisotropic.property", intMobAniso_model, true)) {
+				parameters::intMobAniso_model = parameters::Int_Mobility_Anisotropic(intMobAniso_model);
 				if (parameters::intMobAniso_model == parameters::Int_Mobility_Anisotropic::IMA_CUBIC) {
 					infile_reader::read_real_value("Model.DDCCPAI.Phi.IntMobility.Anisotropic.parameter_1", parameters::intMobAniso_param1, true);
 					if (is_intMob_temp)
@@ -249,6 +250,13 @@ namespace pf {
 						phase_field_functions::_Lij = phase_field_functions::Lij_temp_hex_yang;
 					else
 						phase_field_functions::_Lij = phase_field_functions::Lij_hex_yang;
+				}
+				else if (parameters::intMobAniso_model == parameters::Int_Mobility_Anisotropic::IMA_DENDRITE_YANG) {
+					infile_reader::read_real_value("Model.DDCCPAI.Phi.IntMobility.Anisotropic.parameter_1", parameters::intMobAniso_param1, true);
+					if (is_intMob_temp)
+						phase_field_functions::_Lij = phase_field_functions::Lij_temp_dendrite_yang;
+					else
+						phase_field_functions::_Lij = phase_field_functions::Lij_dendrite_yang;
 				}
 			}
 			// - interface energy
@@ -295,14 +303,11 @@ namespace pf {
 				}
 			}
 
-			WriteDebugFile("# Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.property = (phi_name, AnisotropicModelIndex)\n");
-			WriteDebugFile("#         AnisotropicModelIndex : 0 - IEA_ISO, 1 - IEA_CUBIC, 2 - IEA_HEX_BOETTGER, 3 - IEA_HEX_SUN, 4 - IEA_HEX_YANG \n");
-			std::string matrix_aniso_key2 = "Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.property", matrix_aniso_input2 = "()";
-			if (infile_reader::read_string_value(matrix_aniso_key2, matrix_aniso_input2, true)) {
-				std::vector<input_value> matrix_aniso_value2 = InputFileReader::get_instance()->
-					trans_matrix_1d_array_to_input_value({ InputValueType::IVType_STRING , InputValueType::IVType_INT }, matrix_aniso_key2, matrix_aniso_input2, true);
-				parameters::intEnAniso_phi_property = PhiProperties::instance().phi_property(matrix_aniso_value2[0].string_value);
-				parameters::intEnAniso_model = parameters::Int_Energy_Anisotropic(matrix_aniso_value2[1].int_value);
+			WriteDebugFile("# Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.property = AnisotropicModelIndex \n");
+			WriteDebugFile("#         AnisotropicModelIndex : 0 - ISO, 1 - CUBIC, 2 - HEX_BOETTGER, 3 - HEX_SUN, 4 - HEX_YANG, 5 - DENDRITE_YANG \n"); 
+			int intEnAniso_model = 0;
+			if (infile_reader::read_int_value("Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.property", intEnAniso_model, true)) {
+				parameters::intEnAniso_model = parameters::Int_Energy_Anisotropic(intEnAniso_model);
 				if (parameters::intEnAniso_model == parameters::Int_Energy_Anisotropic::IEA_CUBIC) {
 					phase_field_functions::_xi_ab = phase_field_functions::xi_ab_cubic;
 					infile_reader::read_real_value("Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.parameter_1", parameters::intEnAniso_param1, true);
@@ -323,6 +328,10 @@ namespace pf {
 					infile_reader::read_real_value("Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.parameter_1", parameters::intEnAniso_param1, true);
 					infile_reader::read_real_value("Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.parameter_2", parameters::intEnAniso_param2, true);
 					infile_reader::read_real_value("Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.parameter_3", parameters::intEnAniso_param3, true);
+				}
+				else if (parameters::intEnAniso_model == parameters::Int_Energy_Anisotropic::IEA_DENDRITE_YANG) {
+					phase_field_functions::_xi_ab = phase_field_functions::xi_ab_dendrite_yang;
+					infile_reader::read_real_value("Model.DDCCPAI.Phi.InterfaceEnergy.Anisotropic.parameter_1", parameters::intEnAniso_param1, true);
 				}
 			}
 			WriteDebugFile("# Model.DDCCPAI.Phi.TripleJunctionEnergy.const  = xi_abc \n");
@@ -562,6 +571,27 @@ namespace pf {
 					}
 					parameters::mobility_temp.push_back(temperature_functions::temperature_mobility_0);
 				}
+				{
+					parameters::Ktemp.resize(PhiProperties::instance().phi_property_number(), 0);
+					WriteDebugFile("# Model.DDCCPAI.Temp.Source.dphidtemp  = [(phase name, value), ... ] \n");
+					std::string source_key = "Model.DDCCPAI.Temp.Source.dphidtemp", source_value = "[()]";
+					if (infile_reader::read_string_value(source_key, source_value, true)) {
+						std::vector<std::vector<input_value>> K_value = InputFileReader::get_instance()->trans_matrix_2d_const_array_to_input_value
+						({ InputValueType::IVType_STRING, InputValueType::IVType_REAL }, source_key, source_value, true);
+						for (size_t index = 0; index < K_value.size(); index++) {
+							if (K_value[index].size() != 2) {
+								WriteDebugFile("# ERROR: element in .Source.dphidtemp should be (phase name, value). \n");
+								SYS_PROGRAM_STOP;
+							}
+							if (!PhiProperties::instance().is_phi_property(K_value[index][0].string_value)) {
+								WriteDebugFile("# ERROR: phase name in .Source.dphidtemp has not been defined. \n");
+								SYS_PROGRAM_STOP;
+							}
+							parameters::Ktemp[PhiProperties::instance().phi_property(K_value[index][0].string_value)] = K_value[index][1].REAL_value;
+						}
+						parameters::source_temp.push_back(temperature_functions::temperature_source_phi);
+					}
+				}
 			}
 			// ==========================================================================================================================
 			// - init correlation terms in physics-informed equations
@@ -585,6 +615,7 @@ namespace pf {
 					parameters::temp_orders.resize(PhiProperties::instance().phi_property_number());
 					parameters::terms_number.resize(PhiProperties::instance().phi_property_number(), 0);
 					parameters::temp_terms_number.resize(PhiProperties::instance().phi_property_number());
+					parameters::local_concentration_redistribution = ddc_calphad_ai_model::chemical_energy_functions::local_concentration_redistribution;
 					for (size_t rg_index = 0; rg_index < ConRegions::instance().region_number(); rg_index++)
 						if (parameters::is_energy_minimization[rg_index]) {
 							for (size_t index = 0; index < ConRegions::instance().region_phi_property_number(rg_index); index++) {
@@ -636,6 +667,8 @@ namespace pf {
 					infile_reader::read_real_value("Model.DDCCPAI.ThermoCalc.epsilon", parameters::phasecon_epsilon, true);
 					parameters::fchem = chemical_energy_functions::fchem_polynomial;
 					parameters::miu = chemical_energy_functions::miu_polynomial;
+					parameters::delt_Fbulk_delt_phi.push_back(chemical_energy_functions::delt_Fchem_delt_phi);
+					parameters::delt_Fbulk_delt_con.push_back(chemical_energy_functions::delt_Fchem_delt_con);
 				}
 			}
 			// ==========================================================================================================================
@@ -647,7 +680,7 @@ namespace pf {
 				if (parameters::is_write_thermo_calc_csv) {
 					auto input_error = [](const std::string& message) {
 						WriteLog("> ERROR: " + message + "\n");
-						SYS_PROGRAM_STOP
+						SYS_PROGRAM_STOP;
 					};
 					if (!main_field::is_con_field_on)
 						input_error("DDCCPAI energy-minimization CSV output requires the concentration field.");
@@ -772,7 +805,7 @@ namespace pf {
 				if (infile_reader::read_string_value(energy_key, energy_input, true)) {
 					auto input_error = [](const std::string& message) {
 						WriteLog("> ERROR: " + message + "\n");
-						SYS_PROGRAM_STOP
+						SYS_PROGRAM_STOP;
 					};
 					std::vector<input_value> energy_values = InputFileReader::get_instance()->
 						trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, energy_key, energy_input, true);
@@ -852,7 +885,10 @@ namespace pf {
 			bool buff = false;
 			InputFileReader::get_instance()->read_bool_value("Model.DDCCPAI.Output.VTS.active_phis", buff, true);
 			if (buff)
-				write_vts::load_vts_func(phase_field_functions::write_scalar_active_phi_number);
+				write_vts::load_vts_func(phase_field_functions::write_scalar_active_phi_number); buff = false;
+			InputFileReader::get_instance()->read_bool_value("Model.DDCCPAI.Output.VTS.con_all", buff, true);
+			if (buff)
+				write_vts::load_vts_func(concentration_field_functions::write_scalar_con_all);
 			{
 				WriteDebugFile("# Model.DDCCPAI.Output.VTS.phase_con = [( phase_name, con_name ), ... ]\n");
 				std::string vts_key = "Model.DDCCPAI.Output.VTS.phase_con", vts_input = "[()]";
@@ -972,7 +1008,7 @@ namespace pf {
 			// infile_reader::read_real_value("SimulationModels.DataDrivenComplex.L", parameters::L, true);
 			load_a_new_module(nullptr, exec_pre_ii, exec_pre_iii,  // exec_pre_i   exec_pre_ii    exec_pre_iii
 				exec_i, nullptr, nullptr,  // exec_i   exec_ii   exec_iii
-				exec_pos_i, nullptr, nullptr,   // exec_pos_i   exec_pos_ii   exec_pos_iii
+				exec_pos_i, nullptr, exec_pos_iii,   // exec_pos_i   exec_pos_ii   exec_pos_iii
 				deinit);  // deinit
 		}
 	}

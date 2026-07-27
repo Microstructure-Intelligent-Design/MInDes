@@ -358,14 +358,13 @@ namespace pf {
 								}
 							}
 						}
+				chemical_energy_functions::init_phase_concentration();
+				chemical_energy_functions::calculation_energy_minimazation_pre();
 #pragma omp parallel for
 				for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
 					for (long long y = main_field::concentration_field.COMP_Y_BGN(); y <= main_field::concentration_field.COMP_Y_END(); y++)
 						for (long long z = main_field::concentration_field.COMP_Z_BGN(); z <= main_field::concentration_field.COMP_Z_END(); z++) {
 							FIELD_Con& field_con = parameters::Con_field(x, y, z);
-							// - local concentration redistribution
-							if (parameters::local_concentration_redistribution)
-								parameters::local_concentration_redistribution(x, y, z);
 							// - 
 							for (size_t index = 0; index < ConRegions::instance().region_number(); index++) {
 								if (field_con.new_region[index] > parameters::PhiCon_Cut_Off) {
@@ -382,6 +381,7 @@ namespace pf {
 								}
 							}
 						}
+				parameters::PhaseCon_field.init_boundary_condition();
 				parameters::Con_field.init_boundary_condition();
 			}
 
@@ -418,6 +418,7 @@ namespace pf {
 							}
 						}
 				// - pre_calculation
+				parameters::MAX_MINIMIZATION_RESULTS = { 0, 0 };
 #pragma omp parallel for
 				for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
 					for (long long y = main_field::concentration_field.COMP_Y_BGN(); y <= main_field::concentration_field.COMP_Y_END(); y++)
@@ -425,8 +426,9 @@ namespace pf {
 							Matrix1D<REAL>& con = main_field::concentration_field(x, y, z);
 							FIELD_Con& field_con = parameters::Con_field(x, y, z);
 							// - local concentration redistribution
+							std::pair<REAL, size_t> con_results = { 0, 0 };
 							if (parameters::local_concentration_redistribution)
-								parameters::local_concentration_redistribution(x, y, z);
+								con_results = parameters::local_concentration_redistribution(x, y, z);
 							// - 
 							for (size_t index = 0; index < ConRegions::instance().region_number(); index++) {
 								if (field_con.new_region[index] > parameters::PhiCon_Cut_Off) {
@@ -446,7 +448,17 @@ namespace pf {
 									}
 								}
 							}
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+							{
+								if (con_results.first > parameters::MAX_MINIMIZATION_RESULTS.first)
+									parameters::MAX_MINIMIZATION_RESULTS.first = con_results.first;
+								if (con_results.second > parameters::MAX_MINIMIZATION_RESULTS.second)
+									parameters::MAX_MINIMIZATION_RESULTS.second = con_results.second;
+							}
 						}
+				parameters::PhaseCon_field.do_boundary_condition();
 				parameters::Con_field.do_boundary_condition();
 #pragma omp parallel for
 				for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
@@ -570,7 +582,8 @@ namespace pf {
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 								FIELD_Con& field_con = parameters::Con_field(i, j, k);
-								fout << field_con.new_con[cindex] * field_con.new_region[region_index] << std::endl;
+								Matrix1D<REAL>& con = main_field::concentration_field(i, j, k);
+								fout << con[cindex] * field_con.new_region[region_index] << std::endl;
 							}
 					fout << "</DataArray>" << std::endl;
 				}

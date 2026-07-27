@@ -15,11 +15,13 @@ namespace pf {
 			// - AI
 
 			// - Energy minimization
+			void init_phase_concentration();
+			// { VARIATION , ITERATION_STEP }
 			std::pair<REAL, size_t> energy_minimazation(std::vector<REAL>& phase_phi, std::vector<std::vector<REAL>>& phase_con, std::vector<std::vector<REAL>>& phase_miu, std::vector<size_t> active_phase,
 				size_t active_phase_number, REAL active_phi, REAL temperature, size_t region_index);
-			void init_phase_concentration();
+			// { MAX_VARIATION , MAX_ITERATION_STEP }
+			std::pair<REAL, size_t> local_concentration_redistribution(size_t x, size_t y, size_t z);
 			void calculation_energy_minimazation_pre();
-			void calculation_energy_minimazation_pos();
 			// - output
 			void write_scalar_phasecon(std::ofstream& fout);
 			void write_scalar_con(std::ofstream& fout);

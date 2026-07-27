@@ -35,6 +35,7 @@ namespace pf {
 		add_string_to_file(out.str(), input_output_files_parameters::DebugFile_Path);
 		// parallel
 		infile_reader::read_int_value("Solver.Loop.OpenMP_Thread", main_iterator::OpenMP_Thread_Counts, true);
+		WriteLog("> Simulation OpenMP Thread is " + std::to_string(main_iterator::OpenMP_Thread_Counts) + " \n");
 		// - mesh and time parameters
 		infile_reader::read_int_value("Solver.Loop.begin_step", main_iterator::ITE_Begin_Step, true);
 		infile_reader::read_int_value("Solver.Loop.end_step", main_iterator::ITE_End_Step, true);
@@ -113,6 +114,5 @@ namespace pf {
 			if (main_field::is_temp_field_on)
 				main_field::init_temperature_field();
 		}
-		WriteLog("> MODULE INIT : Input File (.mindes) Ready !\n");
 	}
 }

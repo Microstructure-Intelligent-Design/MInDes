@@ -4,23 +4,23 @@ namespace pf {
 	namespace iterator_times {
 		string print_time_interval() {
 			stringstream report;
-			report << endl;
+			report << std::endl;
 			report << timer::return_cunrrent_time_by_string();
-			report << ">------------------------------------------- Time Interval ------------------------------------------" << endl;
+			report << ">------------------------------------------- Time Interval ------------------------------------------" << std::endl;
 			report << fixed << setprecision(3);
 			report << "> Modules::init()         =  " << main_iterator::t_interval_modules_init << " (sec.)  "
-				<< timer::time_min(main_iterator::t_interval_modules_init) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_init) << " (h.) " << endl;
+				<< timer::time_min(main_iterator::t_interval_modules_init) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_init) << " (h.) " << std::endl;
 			report << "> Modules::pre_exec()     =  " << main_iterator::t_interval_modules_pre_exec << " (sec.)  "
-				<< timer::time_min(main_iterator::t_interval_modules_pre_exec) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_pre_exec) << " (h.) " << endl;
+				<< timer::time_min(main_iterator::t_interval_modules_pre_exec) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_pre_exec) << " (h.) " << std::endl;
 			report << "> Solvers::exec()         =  " << main_iterator::t_interval_modules_exec << " (sec.)  "
-				<< timer::time_min(main_iterator::t_interval_modules_exec) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_exec) << " (h.) " << endl;
+				<< timer::time_min(main_iterator::t_interval_modules_exec) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_exec) << " (h.) " << std::endl;
 			report << "> Modules::pos_exec()     =  " << main_iterator::t_interval_modules_pos_exec << " (sec.)  "
-				<< timer::time_min(main_iterator::t_interval_modules_pos_exec) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_pos_exec) << " (h.) " << endl;
+				<< timer::time_min(main_iterator::t_interval_modules_pos_exec) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_pos_exec) << " (h.) " << std::endl;
 			report << "> Modules::deinit()       =  " << main_iterator::t_interval_modules_deinit << " (sec.)  "
-				<< timer::time_min(main_iterator::t_interval_modules_deinit) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_deinit) << " (h.) " << endl;
+				<< timer::time_min(main_iterator::t_interval_modules_deinit) << " (min.)  " << timer::time_hour(main_iterator::t_interval_modules_deinit) << " (h.) " << std::endl;
 			report << "> Total                   =  " << timer::total_duration_sec(main_iterator::t_total_begin) << " (sec.)  "
-				<< timer::total_duration_min(main_iterator::t_total_begin) << " (min.)  " << timer::total_duration_hour(main_iterator::t_total_begin) << " (h.) " << endl;
-			report << ">----------------------------------------------------------------------------------------------------" << endl;
+				<< timer::total_duration_min(main_iterator::t_total_begin) << " (min.)  " << timer::total_duration_hour(main_iterator::t_total_begin) << " (h.) " << std::endl;
+			report << ">----------------------------------------------------------------------------------------------------" << std::endl;
 			return report.str();
 		}
 	}
@@ -57,14 +57,14 @@ namespace pf {
 			// init modules
 			stringstream modules_output;
 			timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_init);
-			modules_output << endl;
+			modules_output << std::endl;
 			modules_output << timer::return_cunrrent_time_by_string();
-			modules_output << ">------------------------------------------- " << "Modules Init" << " -------------------------------------------" << endl;
+			modules_output << ">------------------------------------------- " << "Modules Init" << " -------------------------------------------" << std::endl;
 			WriteLog(modules_output.str());
 			init_input_modules();
 			register_all_modules();
 			modules_output.str("");
-			modules_output << ">--------------------------------------------" << "------------" << "--------------------------------------------" << endl << endl;
+			modules_output << ">--------------------------------------------" << "------------" << "--------------------------------------------" << std::endl << std::endl;
 			WriteLog(modules_output.str());
 			timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_init);
 		}
@@ -74,9 +74,9 @@ namespace pf {
 			timer::init(main_iterator::t_total_begin);
 			if (main_solver_on) {
 				timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_pre_exec);
-				modules_output << endl;
+				modules_output << std::endl;
 				modules_output << timer::return_cunrrent_time_by_string();
-				modules_output << ">----------------------------------------- " << "Modules Pre-Exec" << " -----------------------------------------" << endl;
+				modules_output << ">----------------------------------------- " << "Modules Pre-Exec" << " -----------------------------------------" << std::endl;
 				WriteLog(modules_output.str());
 				for (auto& module : module_list) {
 					if (module.exec_pre_i) module.exec_pre_i();
@@ -88,7 +88,7 @@ namespace pf {
 					if (module.exec_pre_iii) module.exec_pre_iii();
 				}
 				modules_output.str("");
-				modules_output << ">-------------------------------------------" << "----------------" << "-----------------------------------------" << endl << endl;
+				modules_output << ">-------------------------------------------" << "----------------" << "-----------------------------------------" << std::endl << std::endl;
 				WriteLog(modules_output.str());
 				timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_pre_exec);
 
@@ -141,15 +141,15 @@ namespace pf {
 			}
 			timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_deinit);
 			modules_output.str("");
-			modules_output << endl;
+			modules_output << std::endl;
 			modules_output << timer::return_cunrrent_time_by_string();
-			modules_output << ">------------------------------------------ " << "Modules Deinit" << " ------------------------------------------" << endl;
+			modules_output << ">------------------------------------------ " << "Modules Deinit" << " ------------------------------------------" << std::endl;
 			WriteLog(modules_output.str());
 			for (auto& module : module_list) {
 				if (module.deinit) module.deinit();
 			}
 			modules_output.str("");
-			modules_output << ">-------------------------------------------" << "----------------" << "-----------------------------------------" << endl << endl;
+			modules_output << ">-------------------------------------------" << "----------------" << "-----------------------------------------" << std::endl << std::endl;
 			WriteLog(modules_output.str());
 			timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_deinit);
 			WriteLog(iterator_times::print_time_interval());

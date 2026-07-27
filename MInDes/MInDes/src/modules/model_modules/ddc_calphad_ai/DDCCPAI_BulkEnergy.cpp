@@ -2,6 +2,7 @@
 #include <cmath>
 #include <functional>
 #include <iomanip>
+#include <locale>
 namespace pf {
 	namespace ddc_calphad_ai_model {
 		// - default functions
@@ -125,6 +126,84 @@ namespace pf {
 				return { max_variation , istep };
 			}
 
+			std::pair<REAL, size_t> local_concentration_redistribution(size_t x, size_t y, size_t z) {
+				// { MAX_VARIATION , MAX_ITERATION_STEP }
+				std::pair<REAL, size_t> max_results = { 0, 0 };
+				FIELD_PhaseCon& phase_con = parameters::PhaseCon_field(x, y, z);
+				FIELD_PhiTemp& phi_temp = parameters::PhiTemp_field(x, y, z);
+				FIELD_Con& conf = parameters::Con_field(x, y, z);
+				for (size_t phi_property = 0; phi_property < PhiProperties::instance().phi_property_number(); phi_property++) {
+					phase_con.phase_old_phi[phi_property] = phase_con.phase_phi[phi_property];
+					phase_con.phase_phi[phi_property] = 0;
+				}
+				for (size_t index = 0; index < main_field::phi_number; index++)
+					phase_con.phase_phi[PhiProperties::instance()[index]] += phi_temp.new_phi[index];
+				for (size_t region_index = 0; region_index < ConRegions::instance().region_number(); region_index++) {
+					if (parameters::is_energy_minimization[region_index]) {
+						std::vector<size_t> active_phase(PhiProperties::instance().phi_property_number(), 0);
+						std::vector<REAL> sum_con(main_field::con_number, 0);
+						size_t active_phase_number = 0;
+						REAL active_phi = 0;
+						for (size_t index = 0; index < ConRegions::instance().region_phi_property_number(region_index); index++) {
+							size_t phi_property = ConRegions::instance().region_phi_property(region_index, index);
+							if (phase_con.phase_phi[phi_property] > parameters::PhiCon_Cut_Off) {
+								active_phase[active_phase_number] = phi_property;
+								active_phase_number++;
+								active_phi += phase_con.phase_phi[phi_property];
+								if (phase_con.phase_old_phi[phi_property] <= parameters::PhiCon_Cut_Off) {
+									for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
+										size_t con_index = ConRegions::instance().region_con(region_index, index2);
+										phase_con.phase_con[phi_property][con_index] = conf.new_con[con_index];
+									}
+								}
+								for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
+									size_t con_index = ConRegions::instance().region_con(region_index, index2);
+									sum_con[con_index] += phase_con.phase_con[phi_property][con_index] * phase_con.phase_phi[phi_property];
+								}
+							}
+							else {
+								if (phase_con.phase_old_phi[phi_property] > parameters::PhiCon_Cut_Off) {
+									for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
+										size_t con_index = ConRegions::instance().region_con(region_index, index2);
+										phase_con.phase_con[phi_property][con_index] = 0;
+										phase_con.phase_miu[phi_property][con_index] = 0;
+									}
+								}
+							}
+						}
+						if (active_phase_number == 1) {
+							size_t phi_property = active_phase[0];
+							for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++) {
+								size_t con_index = ConRegions::instance().region_con(region_index, index);
+								phase_con.phase_con[phi_property][con_index] = conf.new_con[con_index];
+							}
+							for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++) {
+								size_t con_index = ConRegions::instance().region_con(region_index, index);
+								phase_con.phase_miu[phi_property][con_index] =
+									parameters::miu(phase_con.phase_con[phi_property], phi_temp.new_temp, phi_property, con_index);
+							}
+						}
+						else {
+							for (size_t index = 0; index < active_phase_number; index++) {
+								size_t phi_property = active_phase[index];
+								for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
+									size_t con_index = ConRegions::instance().region_con(region_index, index2);
+									phase_con.phase_con[phi_property][con_index] *= conf.new_con[con_index] * conf.new_region[region_index] / sum_con[con_index];
+								}
+							}
+							// { VARIATION , ITERATION_STEP } for each region
+							std::pair<REAL, size_t> results =
+								energy_minimazation(phase_con.phase_phi, phase_con.phase_con, phase_con.phase_miu, active_phase, active_phase_number, active_phi, phi_temp.new_temp, region_index);
+							if (results.first > max_results.first)
+								max_results.first = results.first;
+							if (results.second > max_results.second)
+								max_results.second = results.second;
+						}
+					}
+				}
+				return max_results;
+			}
+
 			void calculation_energy_minimazation_pre() {
 				WriteLog("> Do chemical energy minimazation : ");
 #pragma omp parallel for
@@ -237,169 +316,6 @@ namespace pf {
 							parameters::PhaseCon_field.init_boundary_condition();
 						}
 			}
-			void calculation_energy_minimazation_pos() {
-				if (main_iterator::Current_ITE_step % show_loop_information::screen_output_step == 0) {
-					std::pair<REAL, size_t> max_results = { 0, 0 };
-#pragma omp parallel for
-					for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
-						for (long long y = main_field::concentration_field.COMP_Y_BGN(); y <= main_field::concentration_field.COMP_Y_END(); y++)
-							for (long long z = main_field::concentration_field.COMP_Z_BGN(); z <= main_field::concentration_field.COMP_Z_END(); z++) {
-								FIELD_PhaseCon& phase_con = parameters::PhaseCon_field(x, y, z);
-								FIELD_PhiTemp& phi_temp = parameters::PhiTemp_field(x, y, z);
-								FIELD_Con& conf = parameters::Con_field(x, y, z);
-								for (size_t phi_property = 0; phi_property < PhiProperties::instance().phi_property_number(); phi_property++) {
-									phase_con.phase_old_phi[phi_property] = phase_con.phase_phi[phi_property];
-									phase_con.phase_phi[phi_property] = 0;
-								}
-								for (size_t index = 0; index < main_field::phi_number; index++)
-									phase_con.phase_phi[PhiProperties::instance()[index]] += phi_temp.new_phi[index];
-								for (size_t region_index = 0; region_index < ConRegions::instance().region_number(); region_index++) {
-									if (parameters::is_energy_minimization[region_index]) {
-										std::vector<size_t> active_phase(PhiProperties::instance().phi_property_number(), 0);
-										std::vector<REAL> sum_con(main_field::con_number, 0);
-										size_t active_phase_number = 0;
-										REAL active_phi = 0;
-										for (size_t index = 0; index < ConRegions::instance().region_phi_property_number(region_index); index++) {
-											size_t phi_property = ConRegions::instance().region_phi_property(region_index, index);
-											if (phase_con.phase_phi[phi_property] > parameters::PhiCon_Cut_Off) {
-												active_phase[active_phase_number] = phi_property;
-												active_phase_number++;
-												active_phi += phase_con.phase_phi[phi_property];
-												if (phase_con.phase_old_phi[phi_property] <= parameters::PhiCon_Cut_Off) {
-													for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-														size_t con_index = ConRegions::instance().region_con(region_index, index2);
-														phase_con.phase_con[phi_property][con_index] = conf.new_con[con_index];
-													}
-												}
-												for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-													size_t con_index = ConRegions::instance().region_con(region_index, index2);
-													sum_con[con_index] += phase_con.phase_con[phi_property][con_index] * phase_con.phase_phi[phi_property];
-												}
-											}
-											else {
-												if (phase_con.phase_old_phi[phi_property] > parameters::PhiCon_Cut_Off) {
-													for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-														size_t con_index = ConRegions::instance().region_con(region_index, index2);
-														phase_con.phase_con[phi_property][con_index] = 0;
-														phase_con.phase_miu[phi_property][con_index] = 0;
-													}
-												}
-											}
-										}
-										if (active_phase_number == 1) {
-											size_t phi_property = active_phase[0];
-											for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++) {
-												size_t con_index = ConRegions::instance().region_con(region_index, index);
-												phase_con.phase_con[phi_property][con_index] = conf.new_con[con_index];
-											}
-											for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++) {
-												size_t con_index = ConRegions::instance().region_con(region_index, index);
-												phase_con.phase_miu[phi_property][con_index] =
-													parameters::miu(phase_con.phase_con[phi_property], phi_temp.new_temp, phi_property, con_index);
-											}
-										}
-										else {
-											for (size_t index = 0; index < active_phase_number; index++) {
-												size_t phi_property = active_phase[index];
-												for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-													size_t con_index = ConRegions::instance().region_con(region_index, index2);
-													phase_con.phase_con[phi_property][con_index] *= conf.new_con[con_index] * conf.new_region[region_index] / sum_con[con_index];
-												}
-											}
-											std::pair<REAL, size_t> results =
-												energy_minimazation(phase_con.phase_phi, phase_con.phase_con, phase_con.phase_miu, active_phase, active_phase_number, active_phi, phi_temp.new_temp, region_index);
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-											{
-												if (results.first > max_results.first)
-													max_results.first = results.first;
-												if (results.second > max_results.second)
-													max_results.second = results.second;
-											}
-										}
-									}
-								}
-							}
-					stringstream log;
-					log << "> Do chemical energy minimazation, max variation = " << max_results.first << ", max iteration step = " << max_results.second << endl;
-					WriteLog(log.str());
-				}
-				else {
-#pragma omp parallel for
-					for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
-						for (long long y = main_field::concentration_field.COMP_Y_BGN(); y <= main_field::concentration_field.COMP_Y_END(); y++)
-							for (long long z = main_field::concentration_field.COMP_Z_BGN(); z <= main_field::concentration_field.COMP_Z_END(); z++) {
-								FIELD_PhaseCon& phase_con = parameters::PhaseCon_field(x, y, z);
-								FIELD_PhiTemp& phi_temp = parameters::PhiTemp_field(x, y, z);
-								FIELD_Con& conf = parameters::Con_field(x, y, z);
-								for (size_t phi_property = 0; phi_property < PhiProperties::instance().phi_property_number(); phi_property++) {
-									phase_con.phase_old_phi[phi_property] = phase_con.phase_phi[phi_property];
-									phase_con.phase_phi[phi_property] = 0;
-								}
-								for (size_t index = 0; index < main_field::phi_number; index++)
-									phase_con.phase_phi[PhiProperties::instance()[index]] += phi_temp.new_phi[index];
-								for (size_t region_index = 0; region_index < ConRegions::instance().region_number(); region_index++) {
-									if (parameters::is_energy_minimization[region_index]) {
-										std::vector<size_t> active_phase(PhiProperties::instance().phi_property_number(), 0);
-										std::vector<REAL> sum_con(main_field::con_number, 0);
-										size_t active_phase_number = 0;
-										REAL active_phi = 0;
-										for (size_t index = 0; index < ConRegions::instance().region_phi_property_number(region_index); index++) {
-											size_t phi_property = ConRegions::instance().region_phi_property(region_index, index);
-											if (phase_con.phase_phi[phi_property] > parameters::PhiCon_Cut_Off) {
-												active_phase[active_phase_number] = phi_property;
-												active_phase_number++;
-												active_phi += phase_con.phase_phi[phi_property];
-												if (phase_con.phase_old_phi[phi_property] <= parameters::PhiCon_Cut_Off) {
-													for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-														size_t con_index = ConRegions::instance().region_con(region_index, index2);
-														phase_con.phase_con[phi_property][con_index] = conf.new_con[con_index];
-													}
-												}
-												for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-													size_t con_index = ConRegions::instance().region_con(region_index, index2);
-													sum_con[con_index] += phase_con.phase_con[phi_property][con_index] * phase_con.phase_phi[phi_property];
-												}
-											}
-											else {
-												if (phase_con.phase_old_phi[phi_property] > parameters::PhiCon_Cut_Off) {
-													for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-														size_t con_index = ConRegions::instance().region_con(region_index, index2);
-														phase_con.phase_con[phi_property][con_index] = 0;
-														phase_con.phase_miu[phi_property][con_index] = 0;
-													}
-												}
-											}
-										}
-										if (active_phase_number == 1) {
-											size_t phi_property = active_phase[0];
-											for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++) {
-												size_t con_index = ConRegions::instance().region_con(region_index, index);
-												phase_con.phase_con[phi_property][con_index] = conf.new_con[con_index];
-											}
-											for (size_t index = 0; index < ConRegions::instance().region_con_number(region_index); index++) {
-												size_t con_index = ConRegions::instance().region_con(region_index, index);
-												phase_con.phase_miu[phi_property][con_index] =
-													parameters::miu(phase_con.phase_con[phi_property], phi_temp.new_temp, phi_property, con_index);
-											}
-										}
-										else {
-											for (size_t index = 0; index < active_phase_number; index++) {
-												size_t phi_property = active_phase[index];
-												for (size_t index2 = 0; index2 < ConRegions::instance().region_con_number(region_index); index2++) {
-													size_t con_index = ConRegions::instance().region_con(region_index, index2);
-													phase_con.phase_con[phi_property][con_index] *= conf.new_con[con_index] * conf.new_region[region_index] / sum_con[con_index];
-												}
-											}
-											std::pair<REAL, size_t> results =
-												energy_minimazation(phase_con.phase_phi, phase_con.phase_con, phase_con.phase_miu, active_phase, active_phase_number, active_phi, phi_temp.new_temp, region_index);
-										}
-									}
-								}
-							}
-				}
-			}
 			// - 
 			void write_scalar_phasecon(std::ofstream& fout) {
 				for (size_t index = 0; index < parameters::is_write_phase_con.size(); index++) {
@@ -425,8 +341,8 @@ namespace pf {
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-								FIELD_Con& field = parameters::Con_field(i, j, k);
-								fout << field.new_con[con_index] << std::endl;
+								Matrix1D<REAL>& con = main_field::concentration_field(i, j, k);
+								fout << con[con_index] << std::endl;
 							}
 					fout << "</DataArray>" << std::endl;
 				}
@@ -538,8 +454,9 @@ namespace pf {
 					std::ofstream fout(csv_path, std::ios::out | std::ios::trunc);
 					if (!fout.is_open()) {
 						WriteLog("> ERROR: Cannot create DDCCPAI chemical-energy CSV file: " + csv_path + "\n");
-						SYS_PROGRAM_STOP
+						SYS_PROGRAM_STOP;
 					}
+					fout.imbue(std::locale::classic());
 					fout << std::setprecision(std::numeric_limits<REAL>::max_digits10);
 					fout << "sample_id,temperature";
 					for (size_t con_index : con_indices)
@@ -645,8 +562,9 @@ namespace pf {
 				std::ofstream fout(csv_path, std::ios::out | std::ios::trunc);
 				if (!fout.is_open()) {
 					WriteLog("> ERROR: Cannot create DDCCPAI energy-minimization CSV file: " + csv_path + "\n");
-					SYS_PROGRAM_STOP
+					SYS_PROGRAM_STOP;
 				}
+				fout.imbue(std::locale::classic());
 				fout << std::setprecision(std::numeric_limits<REAL>::max_digits10);
 				fout << "sample_id,temperature";
 				for (size_t con_index : con_indices)
