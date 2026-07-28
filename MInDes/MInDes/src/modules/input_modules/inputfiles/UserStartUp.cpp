@@ -435,8 +435,8 @@ namespace pf {
 		pf::printf_color_on_control("　│　Z ＿,＜　／　　 /`ヽ", 33, 40); std::cout << std::endl;
 		pf::printf_color_on_control("　│　　　　　ヽ　　 /　　〉", 33, 40); std::cout << std::endl;
 		pf::printf_color_on_control("　 Y　　　　　`　 /　　/", 33, 40); std::cout << std::endl;
-		pf::printf_color_on_control("   ● .　●　　 () 〈　　/", 33, 40); std::cout << std::endl;
-		pf::printf_color_on_control("　() へ　　　　|　＼〈", 33, 40); std::cout << std::endl;
+		pf::printf_color_on_control("   ● .　●　　  | 〈　　/", 33, 40); std::cout << std::endl;
+		pf::printf_color_on_control("　() へ　 ()　 /　＼〈", 33, 40); std::cout << std::endl;
 		pf::printf_color_on_control("　　>- ,_　 ィ　 │ ／／", 33, 40); std::cout << std::endl;
 		pf::printf_color_on_control("　 / へ　　 /　/＜| ＼＼       Pikachu says: let's go ! it's time to start a simulation !", 33, 40); std::cout << std::endl;
 		pf::printf_color_on_control("　 ヽ_/　　(_／　 │／／", 33, 40); std::cout << std::endl;
