@@ -1,8 +1,11 @@
 x64
+Debug/
+.build/
 libmindes-init/
 !MInDes/MInDes/lib/x64
 .vs
 *.txt
+!MInDesLicenseIssuer/requirements.txt
 *.vts
 *.dat
 *.o
@@ -12,4 +15,10 @@ MInDes/MInDes/*.dll
 !LICENSE.txt
 MInDes/MInDes/infile/
 !MInDes/MInDes/infile/1_Microstructure/
+MInDesLicenseIssuer/private_keys/
+MInDesLicenseIssuer/*.pem
+MInDesLicenseIssuer/*.key
+MInDesLicenseIssuer/*.license
+MInDesLicenseIssuer/*.request
+MInDesLicenseIssuer/__pycache__/
 !MInDes/MInDes/infile/2_PhysicalFields/

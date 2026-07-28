@@ -197,6 +197,9 @@
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_BulkEnergy.cpp">
       <Filter>modules\model\DDC_CP_AI</Filter>
     </ClCompile>
+    <ClCompile Include="src\modules\base\license.cpp">
+      <Filter>modules\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\MainIterator.h" />
@@ -404,6 +407,12 @@
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_BulkEnergy.h">
       <Filter>modules\model\DDC_CP_AI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\license.h">
+      <Filter>modules\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\base\license_public_key.h">
+      <Filter>modules\base</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,8 +2,8 @@
 namespace pf {
 	using namespace std;
 	namespace iterator_times {
-		string print_time_interval() {
-			stringstream report;
+		std::string print_time_interval() {
+			std::stringstream report;
 			report << std::endl;
 			report << timer::return_cunrrent_time_by_string();
 			report << ">------------------------------------------- Time Interval ------------------------------------------" << std::endl;
@@ -31,6 +31,8 @@ namespace pf {
 			// - for UTF-8 output win/linux & screen/file
 			std::locale::global(std::locale(""));  // 使用系统本地化
 			std::wcout.imbue(std::locale(""));
+			License::instance().check_mid_active();
+			License::instance().check_license();
 			// get the infile path
 			if (!Quick_StartUp(input_output_files_parameters::InFile_Path, main_iterator::main_solver_on)) {
 				SimuInfo simu_info{ User_StartUp(argc,argv) };
@@ -55,11 +57,15 @@ namespace pf {
 			write_string_to_file("", input_output_files_parameters::LogFile_Path);
 			write_string_to_file("", input_output_files_parameters::DebugFile_Path);
 			// init modules
-			stringstream modules_output;
+			std::stringstream modules_output;
 			timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_init);
 			modules_output << std::endl;
 			modules_output << timer::return_cunrrent_time_by_string();
 			modules_output << ">------------------------------------------- " << "Modules Init" << " -------------------------------------------" << std::endl;
+			if (!License::instance().is_license())
+			modules_output << ">>>    License activate failed !    <<<" << std::endl;
+			else
+			modules_output << ">>>    License activate success !    <<<" << std::endl;
 			WriteLog(modules_output.str());
 			init_input_modules();
 			register_all_modules();
@@ -70,7 +76,7 @@ namespace pf {
 		}
 
 		void run() {
-			stringstream modules_output;
+			std::stringstream modules_output;
 			timer::init(main_iterator::t_total_begin);
 			if (main_solver_on) {
 				timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_pre_exec);
@@ -93,52 +99,55 @@ namespace pf {
 				timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_pre_exec);
 
 				// main loop;
-				main_iterator::t_interval_modules_exec = 0.0;
-				main_iterator::t_interval_modules_pos_exec = 0.0;
-				timer::interval_begin(main_iterator::t_interval_begin);
-				for (size_t istep = ITE_Begin_Step + 1; istep <= ITE_End_Step; istep++) {
-					main_iterator::Current_ITE_step = istep;
-					// - license
-					if (main_iterator::OpenMP_Thread_Counts >= omp_get_num_procs())
-						main_iterator::OpenMP_Thread_Counts = omp_get_num_procs() - 1;
-					else if (main_iterator::OpenMP_Thread_Counts < 1)
-						main_iterator::OpenMP_Thread_Counts = 1;
-					omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
+				if (License::instance().is_license()) {
+					main_iterator::t_interval_modules_exec = 0.0;
+					main_iterator::t_interval_modules_pos_exec = 0.0;
+					timer::interval_begin(main_iterator::t_interval_begin);
+					for (size_t istep = ITE_Begin_Step + 1; istep <= ITE_End_Step; istep++) {
+						main_iterator::Current_ITE_step = istep;
+						// - license
+						if (main_iterator::OpenMP_Thread_Counts >= omp_get_num_procs())
+							main_iterator::OpenMP_Thread_Counts = omp_get_num_procs() - 1;
+						else if (main_iterator::OpenMP_Thread_Counts < 1)
+							main_iterator::OpenMP_Thread_Counts = 1;
+						omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
 #ifdef _DEBUG
-					omp_set_dynamic(0);
-					omp_set_num_threads(1);
+						omp_set_dynamic(0);
+						omp_set_num_threads(1);
 #endif
-					// - license
+						// - license
 
-					double cal_times = 0.0;
+						double cal_times = 0.0;
 
-					timer::time_interval_precision_secs_begin(cal_times);
-					for (auto& module : module_list) {
-						if (module.exec_i) module.exec_i();
-					}
-					for (auto& module : module_list) {
-						if (module.exec_ii) module.exec_ii();
-					}
-					for (auto& module : module_list) {
-						if (module.exec_iii) module.exec_iii();
-					}
-					timer::time_interval_precision_secs_end(cal_times);
-					main_iterator::t_interval_modules_exec += cal_times;
+						timer::time_interval_precision_secs_begin(cal_times);
+						for (auto& module : module_list) {
+							if (module.exec_i) module.exec_i();
+						}
+						for (auto& module : module_list) {
+							if (module.exec_ii) module.exec_ii();
+						}
+						for (auto& module : module_list) {
+							if (module.exec_iii) module.exec_iii();
+						}
+						timer::time_interval_precision_secs_end(cal_times);
+						main_iterator::t_interval_modules_exec += cal_times;
 
-					timer::time_interval_precision_secs_begin(cal_times);
-					for (auto& module : module_list) {
-						if (module.exec_pos_i) module.exec_pos_i();
+						timer::time_interval_precision_secs_begin(cal_times);
+						for (auto& module : module_list) {
+							if (module.exec_pos_i) module.exec_pos_i();
+						}
+						for (auto& module : module_list) {
+							if (module.exec_pos_ii) module.exec_pos_ii();
+						}
+						for (auto& module : module_list) {
+							if (module.exec_pos_iii) module.exec_pos_iii();
+						}
+						timer::time_interval_precision_secs_end(cal_times);
+						main_iterator::t_interval_modules_pos_exec += cal_times;
 					}
-					for (auto& module : module_list) {
-						if (module.exec_pos_ii) module.exec_pos_ii();
-					}
-					for (auto& module : module_list) {
-						if (module.exec_pos_iii) module.exec_pos_iii();
-					}
-					timer::time_interval_precision_secs_end(cal_times);
-					main_iterator::t_interval_modules_pos_exec += cal_times;
 				}
 			}
+
 			timer::time_interval_precision_secs_begin(main_iterator::t_interval_modules_deinit);
 			modules_output.str("");
 			modules_output << std::endl;
@@ -155,5 +164,4 @@ namespace pf {
 			WriteLog(iterator_times::print_time_interval());
 		}
 	};
-
 }
