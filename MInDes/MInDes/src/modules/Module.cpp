@@ -12,9 +12,10 @@
 #include "model_modules/data_driven_complex/DDC_Manager.h"
 // - simlulation models
 #include "model_modules/grain_grows_spinodal/GGS_Manager.h"
+#include "model_modules/dendritic_solidification/DS_Manager.h"
 #include "model_modules/ddc_calphad_ai/DDCCPAI_Manager.h"
 namespace pf {
-	enum SimulationModels { SM_None, SM_GGS_MODEL, SM_DDC, SM_DDC_CPAI };
+	enum SimulationModels { SM_None, SM_GGS, SM_DS, SM_DDC, SM_DDC_CPAI };
 	void register_all_modules() {
 		// - basic functions
 		automatic_change_delt_time::init_auto_time();
@@ -25,8 +26,9 @@ namespace pf {
 		WriteDebugFile("========================================================================================= \n");
 		WriteDebugFile("# SimulationModels.model =  0 - None \n");
 		WriteDebugFile("#                           1 - Grain Grows Spinodal , PCT = (N,1,false) \n");
-		WriteDebugFile("#                           2 - Data Driven Complex Model , PCT = (N > 0, K, true/false) \n");
-		WriteDebugFile("#                           3 - Data Driven Complex Model - coupled with CALPHAD & AI , PCT = (N > 0, K, true) \n");
+		WriteDebugFile("#                           2 - Dendritic Solidification , PCT = (1,0,true) \n");
+		WriteDebugFile("#                           3 - Data Driven Complex Model , PCT = (N > 0, K, true/false) \n");
+		WriteDebugFile("#                           4 - Data Driven Complex Model - coupled with CALPHAD & AI , PCT = (N > 0, K, true) \n");
 		int sm_model = SimulationModels::SM_None;
 		infile_reader::read_int_value("SimulationModels.model", sm_model, true);
 		switch (SimulationModels(sm_model)) {
@@ -34,9 +36,14 @@ namespace pf {
 			// - model settings
 			break;
 		}
-		case SimulationModels::SM_GGS_MODEL: {
+		case SimulationModels::SM_GGS: {
 			// - model settings
 			grain_grows_spinodal_model::init_model_modules();
+			break;
+		}
+		case SimulationModels::SM_DS: {
+			// - model settings
+			dendritic_solidification_model::init_model_modules();
 			break;
 		}
 		case SimulationModels::SM_DDC: {

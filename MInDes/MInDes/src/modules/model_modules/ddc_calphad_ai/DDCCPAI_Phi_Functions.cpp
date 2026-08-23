@@ -491,6 +491,24 @@ namespace pf {
 			REAL xi_abc(size_t alpha_index, size_t beta_index, size_t gamma_index) {
 				return parameters::xi_abc(PhiProperties::instance()[alpha_index], PhiProperties::instance()[beta_index], PhiProperties::instance()[gamma_index]);
 			};
+			// - source
+			REAL noise_pairwise_acc(size_t x, size_t y, size_t z, size_t alpha_index, size_t beta_index) {
+				REAL noise = 0.0;
+				if (main_iterator::Current_ITE_step < parameters::phi_noise_begin ||
+					main_iterator::Current_ITE_step > parameters::phi_noise_end)
+					return noise;
+				if (main_iterator::Current_ITE_step % parameters::phi_noise_frequency != 0)
+					return noise;
+				if (parameters::is_phi_noise[alpha_index] && parameters::is_phi_noise[beta_index]) {
+#ifdef _OPENMP
+#pragma omp critical(phi_noise_random_number)
+#endif
+					{
+						noise = parameters::phi_noise_amplitude * parameters::phi_noise_real_dist(parameters::phi_noise_gen);
+					}
+				}
+				return noise;
+			}
 			// - interface energy model
 			REAL dfint_dphi_grad_S1996_acc(FIELD_PhiTemp& point, size_t phi_index) {
 				REAL grad = 0.0;
@@ -616,6 +634,11 @@ namespace pf {
 			}
 			//=========================================================================================================================================
 			void init_phi_pair_wise() {
+				if (parameters::is_phi_noise_rand)
+					parameters::phi_noise_gen.seed(parameters::phi_noise_rd());
+				else
+					parameters::phi_noise_gen.seed(static_cast<std::mt19937::result_type>(parameters::phi_noise_seed));
+
 				for (long long x = 0; x < main_field::phase_field.Nx(); x++)
 					for (long long y = 0; y < main_field::phase_field.Ny(); y++)
 						for (long long z = 0; z < main_field::phase_field.Nz(); z++) {

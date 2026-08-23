@@ -52,6 +52,7 @@ namespace pf {
 		bool check_license(
 			bool debug = true,
 			const std::filesystem::path& license_file = {});
+		bool update_last_seen(bool debug = true);
 
 		bool get_machine_identity(MachineIdentity& result);
 		std::string get_machine_code();

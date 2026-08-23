@@ -110,6 +110,17 @@ Module.h 定义 Solver_Module 结构体（函数指针集合），通过 load_a_
 
 ---
 
+### 会话 #003 — 2026-08-20
+
+**目标**：统一 DDCCPAI 能量最小化 CSV 的浓度与相分数扫描入口。
+
+**已完成的工作**：
+- 将 `Model.DDCCPAI.Output.CSV.EnergyMinimization.concentration` 改为公共 `(start, end, step)` 三元组，并应用于所选 region 的全部组分
+- 将 `phase_fraction` 改为公共三元组，只扫描内部顺序的前 N-1 个相，最后一个相按 `1 - sum(phi[0:N-1])` 补足
+- 支持单相 region 固定相分数为 1，并对补足值进行浮点容差修正和 `[0,1]` 合法性过滤
+- 保持温度入口、CSV 列结构、活跃相截断和能量最小化逻辑不变；旧的逐名称列表语法不再兼容
+- MSVC x64/Release 构建验证通过（0 警告、0 错误），并完成单相、两相、三相和越界补足行为断言
+
 ### 会话 #002 — 2026-06-22
 
 **目标**：扩展 DDCCPAI 模块，在 Pre-Exec III 阶段生成可配置的能量最小化 CSV 扫描数据。

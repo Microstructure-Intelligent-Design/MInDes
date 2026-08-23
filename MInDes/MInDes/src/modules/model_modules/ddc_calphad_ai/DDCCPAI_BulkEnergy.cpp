@@ -204,6 +204,7 @@ namespace pf {
 				return max_results;
 			}
 
+			// calculate energy minimization in domain
 			void calculation_energy_minimazation_pre() {
 				WriteLog("> Do chemical energy minimazation : ");
 #pragma omp parallel for
@@ -554,7 +555,7 @@ namespace pf {
 				for (size_t con_index : con_indices)
 					con_axes.push_back(scan_values(parameters::thermo_calc_con_ranges[con_index]));
 				std::vector<std::vector<REAL>> phi_axes;
-				for (size_t index = 0; index < parameters::thermo_calc_phases.size(); index++)
+				for (size_t index = 0; index + 1 < parameters::thermo_calc_phases.size(); index++)
 					phi_axes.push_back(scan_values(parameters::thermo_calc_phi_ranges[parameters::thermo_calc_phases[index]]));
 				std::vector<REAL> temperature_axis = scan_values(parameters::thermo_calc_temp_range);
 
@@ -586,29 +587,25 @@ namespace pf {
 				std::vector<REAL> total_con(con_indices.size(), 0);
 				std::vector<REAL> selected_phi(parameters::thermo_calc_phases.size(), 0);
 				size_t sample_id = 0;
-				size_t skipped_composition = 0;
 				size_t skipped_phase_fraction = 0;
 
 				auto calculate_and_write = [&](REAL temperature) {
-					REAL con_sum = 0;
-					for (REAL concentration : total_con)
-						con_sum += concentration;
-					if (!(con_sum <= REAL(1))) {
-						skipped_composition++;
-						return;
-					}
+					REAL scanned_phi_sum = 0;
+					for (size_t index = 0; index + 1 < selected_phi.size(); index++)
+						scanned_phi_sum += selected_phi[index];
+					REAL residual_phi = REAL(1) - scanned_phi_sum;
+					const REAL phi_tolerance = std::numeric_limits<REAL>::epsilon() * REAL(16);
+					if (residual_phi < REAL(0) && residual_phi >= -phi_tolerance)
+						residual_phi = REAL(0);
+					else if (residual_phi > REAL(1) && residual_phi <= REAL(1) + phi_tolerance)
+						residual_phi = REAL(1);
+					selected_phi.back() = residual_phi;
 
-					REAL active_phi = 0;
 					for (REAL phi : selected_phi) {
-						if (!(phi > parameters::PhiCon_Cut_Off)) {
+						if (phi < REAL(0) || phi > REAL(1)) {
 							skipped_phase_fraction++;
 							return;
 						}
-						active_phi += phi;
-					}
-					if (!(active_phi <= REAL(1))) {
-						skipped_phase_fraction++;
-						return;
 					}
 
 					std::vector<REAL> phase_phi(PhiProperties::instance().phi_property_number(), 0);
@@ -617,12 +614,24 @@ namespace pf {
 					std::vector<std::vector<REAL>> phase_miu(PhiProperties::instance().phi_property_number(),
 						std::vector<REAL>(main_field::con_number, 0));
 					std::vector<size_t> active_phase;
+					REAL active_phi = 0;
 					for (size_t index = 0; index < parameters::thermo_calc_phases.size(); index++) {
 						size_t phi_property = parameters::thermo_calc_phases[index];
 						phase_phi[phi_property] = selected_phi[index];
-						active_phase.push_back(phi_property);
-						for (size_t con_position = 0; con_position < con_indices.size(); con_position++)
-							phase_con[phi_property][con_indices[con_position]] = total_con[con_position];
+						if (phase_phi[phi_property] > parameters::PhiCon_Cut_Off) {
+							active_phase.push_back(phi_property);
+							active_phi += phase_phi[phi_property];
+							for (size_t con_position = 0; con_position < con_indices.size(); con_position++)
+								phase_con[phi_property][con_indices[con_position]] = total_con[con_position];
+						}
+						else {
+							for (size_t con_position = 0; con_position < con_indices.size(); con_position++)
+								phase_con[phi_property][con_indices[con_position]] = 0;
+						}
+					}
+					if (active_phi < REAL(0) || active_phi > REAL(1)) {
+						skipped_phase_fraction++;
+						return;
 					}
 
 					std::pair<REAL, size_t> result = { 0, 0 };
@@ -632,7 +641,7 @@ namespace pf {
 							phase_miu[phi_property][con_index] =
 								parameters::miu(phase_con[phi_property], temperature, phi_property, con_index);
 					}
-					else {
+					else if (active_phase.size() > 1) {
 						result = energy_minimazation(phase_phi, phase_con, phase_miu, active_phase,
 							active_phase.size(), active_phi, temperature, region_index);
 					}
@@ -650,7 +659,7 @@ namespace pf {
 						for (size_t con_index : con_indices)
 							fout << ',' << phase_miu[phi_property][con_index];
 					for (size_t phi_property : parameters::thermo_calc_phases) {
-						if (phase_phi[phi_property] > 0)
+						if (phase_phi[phi_property] > parameters::PhiCon_Cut_Off)
 							fout << ',' << parameters::fchem(phase_con[phi_property], temperature, phi_property);
 						else
 							fout << ",0";
@@ -716,8 +725,7 @@ namespace pf {
 				scan_con(0);
 				fout.close();
 				WriteLog("> DDCCPAI energy-minimization CSV output finished: " + std::to_string(sample_id) +
-					" samples, " + std::to_string(skipped_composition) + " composition combinations skipped, " +
-					std::to_string(skipped_phase_fraction) + " phase-fraction combinations skipped.\n");
+					" samples, " + std::to_string(skipped_phase_fraction) + " phase-fraction combinations skipped.\n");
 			}
 		}
 	}

@@ -45,6 +45,8 @@ namespace pf {
 			REAL xi_ab_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad);
 			REAL xi_ab_dendrite_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad);
 			REAL xi_abc(size_t alpha_index, size_t beta_index, size_t gamma_index);
+			// - source
+			REAL noise_pairwise_acc(size_t x, size_t y, size_t z, size_t alpha_index, size_t beta_index);
 			// - 
 			inline REAL(*_Lij)(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature);
 			inline REAL(*_xi_ab)(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad);

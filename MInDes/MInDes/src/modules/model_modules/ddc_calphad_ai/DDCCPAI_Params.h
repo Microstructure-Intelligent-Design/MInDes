@@ -5,6 +5,7 @@
 #include "../PhiProperties.h"
 #include "../ConRegions.h"
 #include "../GrainsOrientations.h"
+#include <random>
 namespace pf {
 	namespace ddc_calphad_ai_model {
 		// Statement
@@ -376,6 +377,17 @@ namespace pf {
 			inline REAL intEnAniso_param4;
 			// const bulk energy density
 			inline std::vector<REAL> f_bulk_0; // <- phi property 
+			// phi noise
+			inline std::vector<bool> is_phi_noise;      // [phi index] -> true/false
+			inline size_t phi_noise_begin = 0;
+			inline size_t phi_noise_end = 0;
+			inline size_t phi_noise_frequency = 100;
+			inline REAL phi_noise_amplitude = 0;
+			inline bool is_phi_noise_rand = true;
+			inline size_t phi_noise_seed = 0;
+			inline std::random_device phi_noise_rd;   // > random-number generator
+			inline std::mt19937 phi_noise_gen;   // > random-number generator
+			inline std::uniform_real_distribution<REAL> phi_noise_real_dist(REAL(-1.0), REAL(1.0));   // > random-number generator
 			// ===================================================================================================
 			// - parameters con 
 			inline std::pair<REAL, size_t>(*local_concentration_redistribution)(size_t x, size_t y, size_t z);  // { MAX_VARIATION , MAX_ITERATION_STEP }

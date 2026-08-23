@@ -965,6 +965,63 @@ namespace pf {
 		is_license_init_ = true; return true;
 	}
 
+	bool License::update_last_seen(bool debug) {
+		if (!is_license_init_) {
+			report(debug, "The license was not validated in this process; activation time was not updated");
+			return false;
+		}
+
+		Bytes active_data;
+		ActiveRecord active;
+		if (!read_file(activate_path_, active_data)) {
+			report(debug, "Unable to read activation file: " + activate_path_.string());
+			return false;
+		}
+		if (!parse_active(active_data, active) || !valid_binding_combination(active.common, active.public_key)) {
+			report(debug, "Invalid V2 activation file: " + activate_path_.string());
+			return false;
+		}
+
+		BindingMaterial current;
+		std::string error;
+		if (!get_runtime_binding(active.common.binding_type, current, error)) {
+			report(debug, error);
+			return false;
+		}
+		if (current.identity.device_key_algorithm != active.common.key_algorithm
+			|| current.identity.machine_hash != active.common.machine_hash
+			|| current.identity.device_public_key != active.public_key) {
+			report(debug, "Activation machine binding mismatch");
+			return false;
+		}
+		if (active.common.binding_type == BindingType::Tpm2Key
+			&& !verify_device_signature(active.common.key_algorithm, active.public_key, active.signed_body, active.signature)) {
+			report(debug, "Activation state signature is invalid");
+			return false;
+		}
+
+		const auto now = unix_time_now();
+		if (active.created_at > now || active.last_seen > now) {
+			report(debug, "Local clock is earlier than activation state");
+			return false;
+		}
+
+		active.last_seen = now;
+		++active.sequence;
+		active.signature.clear();
+		active.signed_body = serialize_active_body(active);
+		if (active.common.binding_type == BindingType::Tpm2Key
+			&& !sign_device_body(active.key_reference, active.signed_body, active.signature, error)) {
+			report(debug, error);
+			return false;
+		}
+		if (!atomic_write(activate_path_, serialize_active(active), error)) {
+			report(debug, error);
+			return false;
+		}
+		return true;
+	}
+
 	bool License::get_machine_identity(MachineIdentity& result) {
 		Bytes data; ActiveRecord active;
 		if (!read_file(activate_path_, data) || !parse_active(data, active)) return false;

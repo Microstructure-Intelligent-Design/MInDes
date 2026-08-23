@@ -29,8 +29,9 @@ namespace pf {
 
 		void init_modules(int argc, char* argv[]) {
 			// - for UTF-8 output win/linux & screen/file
-			std::locale::global(std::locale(""));  // 使用系统本地化
+			std::locale::global(std::locale(""));  // Use the system locale.
 			std::wcout.imbue(std::locale(""));
+			// - license
 			License::instance().check_mid_active();
 			License::instance().check_license();
 			// get the infile path
@@ -105,7 +106,6 @@ namespace pf {
 					timer::interval_begin(main_iterator::t_interval_begin);
 					for (size_t istep = ITE_Begin_Step + 1; istep <= ITE_End_Step; istep++) {
 						main_iterator::Current_ITE_step = istep;
-						// - license
 						if (main_iterator::OpenMP_Thread_Counts >= omp_get_num_procs())
 							main_iterator::OpenMP_Thread_Counts = omp_get_num_procs() - 1;
 						else if (main_iterator::OpenMP_Thread_Counts < 1)
@@ -115,7 +115,6 @@ namespace pf {
 						omp_set_dynamic(0);
 						omp_set_num_threads(1);
 #endif
-						// - license
 
 						double cal_times = 0.0;
 
@@ -162,6 +161,8 @@ namespace pf {
 			WriteLog(modules_output.str());
 			timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_deinit);
 			WriteLog(iterator_times::print_time_interval());
+			// - license
+			License::instance().update_last_seen();
 		}
 	};
 }
