@@ -1,4 +1,3 @@
-#pragma once
 #include "DDC_Functions.h"
 namespace pf {
 	namespace data_driven_complex_model {

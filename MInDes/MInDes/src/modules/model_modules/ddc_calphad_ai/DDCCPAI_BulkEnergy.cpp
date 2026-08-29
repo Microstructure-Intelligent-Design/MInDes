@@ -206,7 +206,7 @@ namespace pf {
 
 			// calculate energy minimization in domain
 			void calculation_energy_minimazation_pre() {
-				WriteLog("> Do chemical energy minimazation : ");
+				WriteLog("> Do chemical energy minimazation : \n");
 #pragma omp parallel for
 				for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
 					for (long long y = main_field::concentration_field.COMP_Y_BGN(); y <= main_field::concentration_field.COMP_Y_END(); y++)

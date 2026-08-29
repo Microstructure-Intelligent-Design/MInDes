@@ -1,4 +1,5 @@
 #include "DDC_Phi_Functions.h"
+#include <cmath>
 namespace pf {
 	namespace data_driven_complex_model {
 		namespace phase_field_functions {
@@ -718,7 +719,7 @@ namespace pf {
 									phi_increment[alpha_index] += int_incre_b_a;
 									phi_increment[beta_index] -= int_incre_b_a;
 #ifdef _DEBUG
-									if (_isnan(int_incre_b_a)) {
+									if (std::isnan(int_incre_b_a)) {
 										std::cout << "DEBUG: interface energy (pair-wise functions) error !" << std::endl;
 										SYS_PROGRAM_STOP;
 									}
@@ -781,7 +782,7 @@ namespace pf {
 											MAX_PHI_INCREMENT = abs(field_var.old_phi[phi_index] - field_var.new_phi[phi_index]);
 									}
 #ifdef _DEBUG
-									if (_isnan(field_var.new_phi[phi_index])) {
+									if (std::isnan(field_var.new_phi[phi_index])) {
 										std::string error_report = "ERROR : Phase fraction is NaN in x = " + std::to_string(x) + " , y = " + std::to_string(y)
 											+ " , z = " + std::to_string(z) + " position, the phase index is " + std::to_string(phi_index) + "\n";
 										std::cout << error_report << std::endl;

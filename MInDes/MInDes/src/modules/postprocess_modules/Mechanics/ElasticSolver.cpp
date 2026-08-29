@@ -205,8 +205,8 @@ namespace pf {
 					|| mesh_parameters::z_up != pf::BoundaryCondition::PERIODIC)
 					bc_z = pf::BoundaryCondition::ZEROFLUX;
 				mechanical_field_solver_im.init(int(mesh_parameters::MESH_NX), int(mesh_parameters::MESH_NY), int(mesh_parameters::MESH_NZ), 
-					bc_x, bc_y, bc_z, main_field::elastic_field);
-				main_field::is_mech_field_elas_on = true;
+					bc_x, bc_y, bc_z, external_physical_field::elastic_field);
+				external_physical_field::is_mech_field_on = true;
 				mechanical_field_solver_im.cal_stiffness = cal_stiffness;
 				mechanical_field_solver_im.cal_eigenstrain = cal_eigenstrain;
 				if (infile_reader::read_bool_value("Postprocess.SolidMechanics.restart_iterator_in_loop", restart_iterator_in_loop, true))
@@ -326,8 +326,8 @@ namespace pf {
 					|| mesh_parameters::z_up != pf::BoundaryCondition::PERIODIC)
 					bc_z = pf::BoundaryCondition::ZEROFLUX;
 				mechanical_field_solver_im.init(int(mesh_parameters::MESH_NX), int(mesh_parameters::MESH_NY), int(mesh_parameters::MESH_NZ)
-					, bc_x, bc_y, bc_z, main_field::elastic_field);
-				main_field::is_mech_field_elas_on = true;
+					, bc_x, bc_y, bc_z, external_physical_field::elastic_field);
+				external_physical_field::is_mech_field_on = true;
 				mechanical_field_solver_im.cal_stiffness = cal_stiffness;
 				mechanical_field_solver_im.cal_eigenstrain = cal_eigenstrain;
 				infile_reader::read_real_value("Postprocess.SolidMechanics.VisualStrain.L_ijkl", virtual_strain_iterate_rate, true);
@@ -483,7 +483,7 @@ namespace pf {
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 							if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 								&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-								ElasticPoint& point = main_field::elastic_field(i - 1, j - 1, k - 1);
+								ElasticPoint& point = external_physical_field::elastic_field(i - 1, j - 1, k - 1);
 								fout << point.Stress[ele_index] << std::endl;
 							}
 							else {
@@ -502,7 +502,7 @@ namespace pf {
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 							if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 								&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-								ElasticPoint& point = main_field::elastic_field(i - 1, j - 1, k - 1);
+								ElasticPoint& point = external_physical_field::elastic_field(i - 1, j - 1, k - 1);
 								fout << point.Strain[ele_index] << std::endl;
 							}
 							else {
@@ -521,7 +521,7 @@ namespace pf {
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 							if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 								&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-								ElasticPoint& point = main_field::elastic_field(i - 1, j - 1, k - 1);
+								ElasticPoint& point = external_physical_field::elastic_field(i - 1, j - 1, k - 1);
 								fout << point.EffectiveEigenStrain[ele_index] << std::endl;
 							}
 							else {
@@ -537,7 +537,7 @@ namespace pf {
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 						if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 							&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-							ElasticPoint& point = main_field::elastic_field(i - 1, j - 1, k - 1);
+							ElasticPoint& point = external_physical_field::elastic_field(i - 1, j - 1, k - 1);
 							fout << point.Stress.J1() << std::endl;
 						}
 						else {
@@ -552,7 +552,7 @@ namespace pf {
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 						if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 							&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-							ElasticPoint& point = main_field::elastic_field(i - 1, j - 1, k - 1);
+							ElasticPoint& point = external_physical_field::elastic_field(i - 1, j - 1, k - 1);
 							fout << point.Stress.Mises() << std::endl;
 						}
 						else {

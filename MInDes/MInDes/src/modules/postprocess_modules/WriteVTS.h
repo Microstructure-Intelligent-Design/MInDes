@@ -17,7 +17,7 @@ namespace pf {
 		inline size_t y_end = 0;
 		inline size_t z_end = 0;
 		inline std::vector<void(*)(std::ofstream& fout)> write_vts_list;
-		inline void load_vts_func(void(*buff)(std::ofstream& fout));
+		void load_vts_func(void(*buff)(std::ofstream& fout));
 		namespace default_functions {
 			void open_vts_file(std::ofstream& fout, std::string tail);
 			void write_scalar_grains(std::ofstream& fout);

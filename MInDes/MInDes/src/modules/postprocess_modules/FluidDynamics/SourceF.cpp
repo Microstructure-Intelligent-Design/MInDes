@@ -4,22 +4,22 @@ namespace pf {
 		namespace force_funcs {
 			// fluid force
 			Vector3 Fluid_Force_Gravity(long long x, long long y, long long z) {
-				return gravitational_acceleration * (main_field::lbm_field(x, y, z).mass - ref_density);
+				return gravitational_acceleration * (external_physical_field::lbm_field(x, y, z).mass - ref_density);
 			}
 			Vector3 Fluid_Force_H_Liang_Surface_Tension(long long x, long long y, long long z) {
-				double phi = main_field::lbm_field(x, y, z).F_MACRO,
-					lap_phi = (main_field::lbm_field(x + 1, y, z).F_MACRO + main_field::lbm_field(x - 1, y, z).F_MACRO
-						+ main_field::lbm_field(x, y + 1, z).F_MACRO + main_field::lbm_field(x, y - 1, z).F_MACRO
-						+ main_field::lbm_field(x, y, z + 1).F_MACRO + main_field::lbm_field(x, y, z - 1).F_MACRO - 6.0 * phi)
-					/ main_field::lbm_field.DeltR() / main_field::lbm_field.DeltR();
-				Vector3 grad_phi = Vector3((main_field::lbm_field(x + 1, y, z).F_MACRO - main_field::lbm_field(x - 1, y, z).F_MACRO) / 2 / main_field::lbm_field.DeltR(),
-					(main_field::lbm_field(x, y + 1, z).F_MACRO - main_field::lbm_field(x, y - 1, z).F_MACRO) / 2 / main_field::lbm_field.DeltR(),
-					(main_field::lbm_field(x, y, z + 1).F_MACRO - main_field::lbm_field(x, y, z - 1).F_MACRO) / 2 / main_field::lbm_field.DeltR());
+				double phi = external_physical_field::lbm_field(x, y, z).F_MACRO,
+					lap_phi = (external_physical_field::lbm_field(x + 1, y, z).F_MACRO + external_physical_field::lbm_field(x - 1, y, z).F_MACRO
+						+ external_physical_field::lbm_field(x, y + 1, z).F_MACRO + external_physical_field::lbm_field(x, y - 1, z).F_MACRO
+						+ external_physical_field::lbm_field(x, y, z + 1).F_MACRO + external_physical_field::lbm_field(x, y, z - 1).F_MACRO - 6.0 * phi)
+					/ external_physical_field::lbm_field.DeltR() / external_physical_field::lbm_field.DeltR();
+				Vector3 grad_phi = Vector3((external_physical_field::lbm_field(x + 1, y, z).F_MACRO - external_physical_field::lbm_field(x - 1, y, z).F_MACRO) / 2 / external_physical_field::lbm_field.DeltR(),
+					(external_physical_field::lbm_field(x, y + 1, z).F_MACRO - external_physical_field::lbm_field(x, y - 1, z).F_MACRO) / 2 / external_physical_field::lbm_field.DeltR(),
+					(external_physical_field::lbm_field(x, y, z + 1).F_MACRO - external_physical_field::lbm_field(x, y, z - 1).F_MACRO) / 2 / external_physical_field::lbm_field.DeltR());
 				return grad_phi * (4.0 * beta * phi * (phi - 1) * (phi - 0.5) - kappa * lap_phi);
 			}
 			Vector3 Fluid_Force_Thermal_Expansion(long long x, long long y, long long z) {
 				return gravitational_acceleration * thermal_expansion_parameter
-					* (ref_temp - main_field::temperature_field(x, y, z)) * main_field::lbm_field(x, y, z).mass;
+					* (ref_temp - main_field::temperature_field(x, y, z)) * external_physical_field::lbm_field(x, y, z).mass;
 			}
 
 			// fluid force model
@@ -36,31 +36,31 @@ namespace pf {
 				return LBM_d3q19_w[LBM_i] * (LBM_d3q19_w_vec[LBM_i] * force) / Cs2;
 			}
 			static double Fluid_Modified_GZS_d2q9_Force_i(long long x, long long y, long long z, double tau, size_t LBM_i) {
-				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d2q9_w_vec[LBM_i], u = main_field::lbm_field(x, y, z).velocity;
+				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d2q9_w_vec[LBM_i], u = external_physical_field::lbm_field(x, y, z).velocity;
 				for (auto f = fluid_force_list.begin(); f < fluid_force_list.end(); f++)
 					force += (*f)(x, y, z);
 				return (1.0 - 1.0 / 2.0 / tau) * LBM_d2q9_w[LBM_i] * (((ci - u) / Cs2 + ci * (ci * u) / Cs4 / 2.0) * force);
 			}
 			static double Fluid_Modified_GZS_d3q19_Force_i(long long x, long long y, long long z, double tau, size_t LBM_i) {
-				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d3q19_w_vec[LBM_i], u = main_field::lbm_field(x, y, z).velocity;
+				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d3q19_w_vec[LBM_i], u = external_physical_field::lbm_field(x, y, z).velocity;
 				for (auto f = fluid_force_list.begin(); f < fluid_force_list.end(); f++)
 					force += (*f)(x, y, z);
 				return (1.0 - 1.0 / 2.0 / tau) * LBM_d3q19_w[LBM_i] * (((ci - u) / Cs2 + ci * (ci * u) / Cs4 / 2.0) * force);
 			}
 			static double Fluid_Modified_HL_d2q9_Force_i(long long x, long long y, long long z, double tau, size_t LBM_i) {
-				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d2q9_w_vec[LBM_i], u = main_field::lbm_field(x, y, z).velocity,
-					grad_density = Vector3((main_field::lbm_field(x + 1, y, z).mass - main_field::lbm_field(x - 1, y, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y + 1, z).mass - main_field::lbm_field(x, y - 1, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y, z + 1).mass - main_field::lbm_field(x, y, z - 1).mass) / 2 / main_field::lbm_field.DeltR()) * (-1.0);
+				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d2q9_w_vec[LBM_i], u = external_physical_field::lbm_field(x, y, z).velocity,
+					grad_density = Vector3((external_physical_field::lbm_field(x + 1, y, z).mass - external_physical_field::lbm_field(x - 1, y, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y + 1, z).mass - external_physical_field::lbm_field(x, y - 1, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y, z + 1).mass - external_physical_field::lbm_field(x, y, z - 1).mass) / 2 / external_physical_field::lbm_field.DeltR()) * (-1.0);
 				for (auto f = fluid_force_list.begin(); f < fluid_force_list.end(); f++)
 					force += (*f)(x, y, z);
 				return (1.0 - 1.0 / 2.0 / tau) * LBM_d2q9_w[LBM_i] * ((ci * force) / Cs2 + (u * ci) * (grad_density * ci) / Cs2);
 			}
 			static double Fluid_Modified_HL_d3q19_Force_i(long long x, long long y, long long z, double tau, size_t LBM_i) {
-				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d3q19_w_vec[LBM_i], u = main_field::lbm_field(x, y, z).velocity,
-					grad_density = Vector3((main_field::lbm_field(x + 1, y, z).mass - main_field::lbm_field(x - 1, y, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y + 1, z).mass - main_field::lbm_field(x, y - 1, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y, z + 1).mass - main_field::lbm_field(x, y, z - 1).mass) / 2 / main_field::lbm_field.DeltR()) * (-1.0);
+				Vector3 force(0.0, 0.0, 0.0), ci = LBM_d3q19_w_vec[LBM_i], u = external_physical_field::lbm_field(x, y, z).velocity,
+					grad_density = Vector3((external_physical_field::lbm_field(x + 1, y, z).mass - external_physical_field::lbm_field(x - 1, y, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y + 1, z).mass - external_physical_field::lbm_field(x, y - 1, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y, z + 1).mass - external_physical_field::lbm_field(x, y, z - 1).mass) / 2 / external_physical_field::lbm_field.DeltR()) * (-1.0);
 				for (auto f = fluid_force_list.begin(); f < fluid_force_list.end(); f++)
 					force += (*f)(x, y, z);
 				return (1.0 - 1.0 / 2.0 / tau) * LBM_d3q19_w[LBM_i] * ((ci * force) / Cs2 + (u * ci) * (grad_density * ci) / Cs2);

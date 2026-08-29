@@ -1,4 +1,5 @@
 #include "DDC_Con_Functions.h"
+#include <cmath>
 namespace pf {
 	namespace data_driven_complex_model {
 		// - default functions
@@ -466,7 +467,7 @@ namespace pf {
 										size_t con_index = ConRegions::instance().region_con(index, index2);
 										REAL diffusion_flux = grad_mob[con_index] * grad_miu[con_index] + field_con.mob_con[con_index] * lap_miu[con_index];
 #ifdef _DEBUG
-										if (_isnan(diffusion_flux)) {
+										if (std::isnan(diffusion_flux)) {
 											std::cout << "DEBUG: Diffusion flux on position x = " << x << " ,y = " << y << " , z = " << z << 
 												" , con index = " << con_index << " is NaN !" << std::endl;
 											SYS_PROGRAM_STOP;
@@ -475,7 +476,7 @@ namespace pf {
 										// surface reaction flux
 										REAL reaction_flux1 = abs_grad_region * surface_reaction_flux(x, y, z, index, con_index);
 #ifdef _DEBUG
-										if (_isnan(reaction_flux1)) {
+										if (std::isnan(reaction_flux1)) {
 											std::cout << "DEBUG: Surface reaction flux on position x = " << x << " ,y = " << y << " , z = " << z <<
 												" , con index = " << con_index << " is NaN !" << std::endl;
 											SYS_PROGRAM_STOP;
@@ -484,7 +485,7 @@ namespace pf {
 										// bulk reaction flux
 										REAL reaction_flux2 = field_con.new_region[index] * bulk_reaction_flux(x, y, z, index, con_index);
 #ifdef _DEBUG
-										if (_isnan(reaction_flux2)) {
+										if (std::isnan(reaction_flux2)) {
 											std::cout << "DEBUG: Bulk reaction flux on position x = " << x << " ,y = " << y << " , z = " << z <<
 												" , con index = " << con_index << " is NaN !" << std::endl;
 											SYS_PROGRAM_STOP;
@@ -494,7 +495,7 @@ namespace pf {
 										REAL moving_surface_flux = -field_con.old_con[con_index]
 											* (field_con.new_region[index] - field_con.old_region[index]) / time_parameters::delt_t;
 #ifdef _DEBUG
-										if (_isnan(moving_surface_flux)) {
+										if (std::isnan(moving_surface_flux)) {
 											std::cout << "DEBUG: Moving surface flux on position x = " << x << " ,y = " << y << " , z = " << z <<
 												" , con index = " << con_index << " is NaN !" << std::endl;
 											SYS_PROGRAM_STOP;

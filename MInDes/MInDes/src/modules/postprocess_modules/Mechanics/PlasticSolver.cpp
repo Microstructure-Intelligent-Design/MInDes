@@ -12,7 +12,7 @@ namespace pf {
 				}
 			}
 			static void cal_plasticstrain(long long x, long long y, long long z, vStrain& eigenstrain) {
-				PlasticPoint& point = main_field::plastic_field(x, y, z);
+				PlasticPoint& point = external_physical_field::plastic_field(x, y, z);
 				eigenstrain += point.PlasticStrain;
 			}
 		}
@@ -31,8 +31,8 @@ namespace pf {
 			for (int x = 0; x < int(mesh_parameters::MESH_NX); x++)
 				for (int y = 0; y < int(mesh_parameters::MESH_NY); y++)
 					for (int z = 0; z < int(mesh_parameters::MESH_NZ); z++) {
-						ElasticPoint& elastic_point = main_field::elastic_field(x, y, z);
-						PlasticPoint& plastic_point = main_field::plastic_field(x, y, z);
+						ElasticPoint& elastic_point = external_physical_field::elastic_field(x, y, z);
+						PlasticPoint& plastic_point = external_physical_field::plastic_field(x, y, z);
 						Vector6 deviatoric_stress = elastic_point.Stress;
 						double mean_stress = (deviatoric_stress[0] + deviatoric_stress[1] + deviatoric_stress[2]) / 3.0, 
 							yield_stress = 0.0, hardening_modulus = 0.0, shear_modulus = 0.0;
@@ -100,14 +100,14 @@ namespace pf {
 				phi_hardening_modulus[index] = phase_hardening_modulus[PhiProperties::instance().phi_property(index)];
 				phi_shear_modulus[index] = phase_shear_modulus[PhiProperties::instance().phi_property(index)];
 			}
-			main_field::init_plastic_field();
-			main_field::is_mech_field_plas_on = true;
+			external_physical_field::init_plastic_field();
+			external_physical_field::is_mech_plastic_field_on = true;
 			stiffness_eigenstrain::eigenstrain_list.push_back(default_functions::cal_plasticstrain);
 			WriteLog("> MODULE INIT : Plastic Explicit \n");
 		}
 
 		void deinit() {
-			main_field::plastic_field.clear();
+			external_physical_field::plastic_field.clear();
 		}
 
 		void write_scalar(std::ofstream& fout) {
@@ -122,7 +122,7 @@ namespace pf {
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 							if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 								&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-								PlasticPoint& point = main_field::plastic_field(i - 1, j - 1, k - 1);
+								PlasticPoint& point = external_physical_field::plastic_field(i - 1, j - 1, k - 1);
 								fout << point.PlasticStrain[ele_index] << std::endl;
 							}
 							else {
@@ -139,7 +139,7 @@ namespace pf {
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 						if (i > 0 && i <= mesh_parameters::MESH_NX && j > 0 && j <= mesh_parameters::MESH_NY
 							&& k > 0 && k <= mesh_parameters::MESH_NZ) {
-							PlasticPoint& point = main_field::plastic_field(i - 1, j - 1, k - 1);
+							PlasticPoint& point = external_physical_field::plastic_field(i - 1, j - 1, k - 1);
 							fout << point.AvePlasticStrain << std::endl;
 						}
 						else {

@@ -32,7 +32,7 @@ namespace pf {
 			}
 
 			static void cal_macro_variables_d2q9_standard(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					point.F_MACRO = 0.0;
 					point.FV_MACRO.set_to_zero();
@@ -57,7 +57,7 @@ namespace pf {
 				}
 			}
 			static void cal_macro_variables_d3q19_standard(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					point.F_MACRO = 0.0;
 					point.FV_MACRO.set_to_zero();
@@ -85,7 +85,7 @@ namespace pf {
 				return -w0_d2q9 * (U * U) / Cs2 / 2.0;
 			}
 			static void cal_macro_variables_d2q9_H_Liang(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					double buff = 0.0, density = lbm_boundary_condition::density(x, y, z);
 					point.F_MACRO = density;
@@ -101,9 +101,9 @@ namespace pf {
 					Vector3 Velocity = point.FV_MACRO / density;
 					point.velocity = Velocity;
 					point.mass = density;
-					Vector3 grad_density = Vector3((main_field::lbm_field(x + 1, y, z).mass - main_field::lbm_field(x - 1, y, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y + 1, z).mass - main_field::lbm_field(x, y - 1, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y, z + 1).mass - main_field::lbm_field(x, y, z - 1).mass) / 2 / main_field::lbm_field.DeltR());
+					Vector3 grad_density = Vector3((external_physical_field::lbm_field(x + 1, y, z).mass - external_physical_field::lbm_field(x - 1, y, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y + 1, z).mass - external_physical_field::lbm_field(x, y - 1, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y, z + 1).mass - external_physical_field::lbm_field(x, y, z - 1).mass) / 2 / external_physical_field::lbm_field.DeltR());
 					buff -= point.F[LBM_0];
 					point.pressure = Cs2 / (1.0 - w0_d2q9)
 						* (buff + time_parameters::delt_t * 0.5 * (Velocity * grad_density) + density * s_0_d2q9_two_phase_flow(Velocity));
@@ -120,7 +120,7 @@ namespace pf {
 				return -w0_d3q19 * (U * U) / Cs2 / 2.0;
 			}
 			static void cal_macro_variables_d3q19_H_Liang(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					double buff = 0.0, density = lbm_boundary_condition::density(x, y, z);
 					point.F_MACRO = density;
@@ -136,9 +136,9 @@ namespace pf {
 					Vector3 Velocity = point.FV_MACRO / density;
 					point.velocity = Velocity;
 					point.mass = density;
-					Vector3 grad_density = Vector3((main_field::lbm_field(x + 1, y, z).mass - main_field::lbm_field(x - 1, y, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y + 1, z).mass - main_field::lbm_field(x, y - 1, z).mass) / 2 / main_field::lbm_field.DeltR(),
-						(main_field::lbm_field(x, y, z + 1).mass - main_field::lbm_field(x, y, z - 1).mass) / 2 / main_field::lbm_field.DeltR());
+					Vector3 grad_density = Vector3((external_physical_field::lbm_field(x + 1, y, z).mass - external_physical_field::lbm_field(x - 1, y, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y + 1, z).mass - external_physical_field::lbm_field(x, y - 1, z).mass) / 2 / external_physical_field::lbm_field.DeltR(),
+						(external_physical_field::lbm_field(x, y, z + 1).mass - external_physical_field::lbm_field(x, y, z - 1).mass) / 2 / external_physical_field::lbm_field.DeltR());
 					buff -= point.F[LBM_0];
 					point.pressure = Cs2 / (1.0 - w0_d3q19)
 						* (buff + time_parameters::delt_t * 0.5 * (Velocity * grad_density) + density * s_0_d3q19_two_phase_flow(Velocity));
@@ -152,7 +152,7 @@ namespace pf {
 				}
 			}
 			static void cal_macro_variables_d2q9_two_phase(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				point.F_MACRO = 0.0;
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					for (size_t index = LBM_LATTICE_ELEMENT::LBM_0; index <= LBM_LATTICE_ELEMENT::LBM_8; index++)
@@ -160,7 +160,7 @@ namespace pf {
 				}
 			}
 			static void cal_macro_variables_d3q19_two_phase(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				point.F_MACRO = 0.0;
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					for (size_t index = LBM_LATTICE_ELEMENT::LBM_0; index <= LBM_LATTICE_ELEMENT::LBM_18; index++)

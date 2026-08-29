@@ -1,4 +1,5 @@
 #include "WriteVTS.h"
+#include <locale>
 namespace pf {
 
 	namespace write_vts {
@@ -9,6 +10,7 @@ namespace pf {
 			void open_vts_file(std::ofstream& fout, std::string tail) {
 				std::string fname;
 				fname = input_output_files_parameters::WorkingFolder_Path + dirSeparator + "SimData_" + tail + ".vts";
+				fout.imbue(std::locale::classic());
 				fout.open(fname);
 				if (!fout) {
 					std::cout << "Failed to write the vtk file..." << std::endl;

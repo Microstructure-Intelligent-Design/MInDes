@@ -1,10 +1,13 @@
 #include "CpuMemoryUsage.h"
+#include <cstdlib>
+#include <cstring>
+
 namespace pf {
     namespace cpu_memory_usage {
         // get current process pid
         int GetCurrentPid() {
             //return _getpid();
-#ifdef WIN32
+#ifdef _WIN32
             return _getpid();
 #else
             return getpid();
@@ -15,7 +18,7 @@ namespace pf {
 // the info line num in /proc/{pid}/status file
 #define VMRSS_LINE 22
 #define PROCESS_ITEM 14
-#ifdef WIN32
+#ifdef _WIN32
         uint64_t convert_time_format(const FILETIME* ftime) {
             LARGE_INTEGER li;
             li.LowPart = ftime->dwLowDateTime;
@@ -26,9 +29,9 @@ namespace pf {
         const char* get_items(const char* buffer, unsigned int item) {
             // read from buffer by offset
             const char* p = buffer;
-            int len = strlen(buffer);
+            const std::size_t len = std::strlen(buffer);
             int count = 0;
-            for (int i = 0; i < len; i++)
+            for (std::size_t i = 0; i < len; i++)
             {
                 if (' ' == *p)
                 {
@@ -46,28 +49,34 @@ namespace pf {
         unsigned long get_cpu_total_occupy() {
             // get total cpu use time
             // different mode cpu occupy time
-            unsigned long user_time;
-            unsigned long nice_time;
-            unsigned long system_time;
-            unsigned long idle_time;
+            unsigned long user_time = 0;
+            unsigned long nice_time = 0;
+            unsigned long system_time = 0;
+            unsigned long idle_time = 0;
             FILE* fd;
             char buff[1024] = { 0 };
             fd = fopen("/proc/stat", "r");
             if (nullptr == fd)
                 return 0;
-            fgets(buff, sizeof(buff), fd);
+            if (fgets(buff, sizeof(buff), fd) == nullptr) {
+                fclose(fd);
+                return 0;
+            }
             char name[64] = { 0 };
-            sscanf(buff, "%s %ld %ld %ld %ld", name, &user_time, &nice_time, &system_time, &idle_time);
+            if (sscanf(buff, "%63s %lu %lu %lu %lu", name, &user_time, &nice_time, &system_time, &idle_time) != 5) {
+                fclose(fd);
+                return 0;
+            }
             fclose(fd);
             return (user_time + nice_time + system_time + idle_time);
         }
         unsigned long get_cpu_proc_occupy(int pid) {
             // get specific pid cpu use time
-            unsigned int tmp_pid;
-            unsigned long utime;  // user time
-            unsigned long stime;  // kernel time
-            unsigned long cutime; // all user time
-            unsigned long cstime; // all dead time
+            unsigned int tmp_pid = 0;
+            unsigned long utime = 0;  // user time
+            unsigned long stime = 0;  // kernel time
+            unsigned long cutime = 0; // all user time
+            unsigned long cstime = 0; // all dead time
             char file_name[64] = { 0 };
             FILE* fd;
             char line_buff[1024] = { 0 };
@@ -75,16 +84,25 @@ namespace pf {
             fd = fopen(file_name, "r");
             if (nullptr == fd)
                 return 0;
-            fgets(line_buff, sizeof(line_buff), fd);
-            sscanf(line_buff, "%u", &tmp_pid);
+            if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
+                fclose(fd);
+                return 0;
+            }
+            if (sscanf(line_buff, "%u", &tmp_pid) != 1) {
+                fclose(fd);
+                return 0;
+            }
             const char* q = get_items(line_buff, PROCESS_ITEM);
-            sscanf(q, "%ld %ld %ld %ld", &utime, &stime, &cutime, &cstime);
+            if (sscanf(q, "%lu %lu %lu %lu", &utime, &stime, &cutime, &cstime) != 4) {
+                fclose(fd);
+                return 0;
+            }
             fclose(fd);
             return (utime + stime + cutime + cstime);
         }
 #endif
         float GetCpuUsageRatio(int pid) {
-#ifdef WIN32
+#ifdef _WIN32
             FILETIME now;
             FILETIME creation_time;
             FILETIME exit_time;
@@ -182,7 +200,7 @@ namespace pf {
 
             // 
             while (fgets(line, sizeof(line), fd)) {
-                if (strncmp(line, "VmRSS:", 6) == 0) {
+                if (std::strncmp(line, "VmRSS:", 6) == 0) {
                     // 
                     char* value_str = line + 6;
                     vmrss = std::atoi(value_str); // 

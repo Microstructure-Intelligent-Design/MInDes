@@ -1,4 +1,5 @@
 #include "DDC_Temp_Functions.h"
+#include <cmath>
 namespace pf {
 	namespace data_driven_complex_model {
 		// - default functions
@@ -131,7 +132,7 @@ namespace pf {
 									MAX_T_INCREMENT = abs(field_temp.new_temp - field_temp.old_temp);
 							}
 #ifdef _DEBUG
-							if (_isnan(field_temp.new_temp)) {
+							if (std::isnan(field_temp.new_temp)) {
 								std::cout << "DEBUG: temperature NaN on position x = " << x << " ,y = " << y << " , z = " << z << std::endl;
 								SYS_PROGRAM_STOP;
 							}

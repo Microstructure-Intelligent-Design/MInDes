@@ -1,4 +1,3 @@
-#pragma once
 #include "DDCCPAI_Functions.h"
 namespace pf {
 	namespace ddc_calphad_ai_model {

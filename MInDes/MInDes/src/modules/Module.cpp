@@ -18,7 +18,6 @@ namespace pf {
 	enum SimulationModels { SM_None, SM_GGS, SM_DS, SM_DDC, SM_DDC_CPAI };
 	void register_all_modules() {
 		// - basic functions
-		automatic_change_delt_time::init_auto_time();
 		microstructure_init::init_microstructure();
 		pretreatment::init_pretreatment();
 		// - models
@@ -59,6 +58,7 @@ namespace pf {
 		}
 		WriteDebugFile("========================================================================================= \n");
 		// - other method
+		automatic_change_delt_time::init_auto_time();
 		machine_learning::init_machine_learning();
 		// - tail
 		WriteDebugFile("========================================================================================= \n");

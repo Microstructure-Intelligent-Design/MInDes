@@ -15,11 +15,11 @@ namespace pf {
 				double f_eq = 0.0, f_neq = 0.0, _tau = tau(x, y, z);
 				Vector3 U;
 				// LBM_f_0
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				point.F[LBM_0] = 0.0;
 				LBMPoint* near_point;
 				// LBM_f_1
-				near_point = &main_field::lbm_field(x + 1, y, z);
+				near_point = &external_physical_field::lbm_field(x + 1, y, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -29,7 +29,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_1] - f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, U);
@@ -42,7 +42,7 @@ namespace pf {
 					point.F[LBM_1] = 0.0;
 				}
 				// LBM_f_2
-				near_point = &main_field::lbm_field(x, y + 1, z);
+				near_point = &external_physical_field::lbm_field(x, y + 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -52,7 +52,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_2] - f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y + 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, U);
@@ -65,7 +65,7 @@ namespace pf {
 					point.F[LBM_2] = 0.0;
 				}
 				// LBM_f_3
-				near_point = &main_field::lbm_field(x - 1, y, z);
+				near_point = &external_physical_field::lbm_field(x - 1, y, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -75,7 +75,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_3] - f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, U);
@@ -88,7 +88,7 @@ namespace pf {
 					point.F[LBM_3] = 0.0;
 				}
 				// LBM_f_4
-				near_point = &main_field::lbm_field(x, y - 1, z);
+				near_point = &external_physical_field::lbm_field(x, y - 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -98,7 +98,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_4] - f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y - 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, U);
@@ -111,7 +111,7 @@ namespace pf {
 					point.F[LBM_4] = 0.0;
 				}
 				// LBM_f_5
-				near_point = &main_field::lbm_field(x + 1, y + 1, z);
+				near_point = &external_physical_field::lbm_field(x + 1, y + 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -121,7 +121,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_5] - f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y + 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, U);
@@ -134,7 +134,7 @@ namespace pf {
 					point.F[LBM_5] = 0.0;
 				}
 				// LBM_f_6
-				near_point = &main_field::lbm_field(x - 1, y + 1, z);
+				near_point = &external_physical_field::lbm_field(x - 1, y + 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -144,7 +144,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_6] - f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y + 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, U);
@@ -157,7 +157,7 @@ namespace pf {
 					point.F[LBM_6] = 0.0;
 				}
 				// LBM_f_7
-				near_point = &main_field::lbm_field(x - 1, y - 1, z);
+				near_point = &external_physical_field::lbm_field(x - 1, y - 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -167,7 +167,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_7] - f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y - 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, U);
@@ -180,7 +180,7 @@ namespace pf {
 					point.F[LBM_7] = 0.0;
 				}
 				// LBM_f_8
-				near_point = &main_field::lbm_field(x + 1, y - 1, z);
+				near_point = &external_physical_field::lbm_field(x + 1, y - 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -190,7 +190,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_8] - f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y - 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, U);
@@ -206,8 +206,8 @@ namespace pf {
 			namespace lbm_bc_d2q9 {
 				// FDBC_Wall_No_Slip
 				static void wall_no_slip_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_1] = point.F[LBM_3];
 						point.F[LBM_5] = point.F[LBM_7] * roughness + point.F[LBM_6] * (1.0 - roughness);
@@ -215,8 +215,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_3] = point.F[LBM_1];
 						point.F[LBM_6] = point.F[LBM_8] * roughness + point.F[LBM_5] * (1.0 - roughness);
@@ -224,8 +224,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_2] = point.F[LBM_4];
 						point.F[LBM_5] = point.F[LBM_7] * roughness + point.F[LBM_8] * (1.0 - roughness);
@@ -233,8 +233,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_4] = point.F[LBM_2];
 						point.F[LBM_7] = point.F[LBM_5] * roughness + point.F[LBM_6] * (1.0 - roughness);
@@ -243,8 +243,8 @@ namespace pf {
 				}
 				// FDBC_Wall_Slip
 				static void wall_slip_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double loc_density = point.F[LBM_0] + point.F[LBM_2] + point.F[LBM_4]
 							+ 2 * (point.F[LBM_3] + point.F[LBM_6] + point.F[LBM_7]),
 							tail = loc_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed] / 6.0,
@@ -255,8 +255,8 @@ namespace pf {
 					}
 				}
 				static void wall_slip_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double loc_density = point.F[LBM_0] + point.F[LBM_2] + point.F[LBM_4]
 							+ 2 * (point.F[LBM_1] + point.F[LBM_5] + point.F[LBM_8]),
 							tail = loc_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallSpeed] / 6.0,
@@ -267,8 +267,8 @@ namespace pf {
 					}
 				}
 				static void wall_slip_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double loc_density = point.F[LBM_0] + point.F[LBM_1] + point.F[LBM_3]
 							+ 2 * (point.F[LBM_4] + point.F[LBM_7] + point.F[LBM_8]),
 							tail = loc_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed] / 6.0,
@@ -279,8 +279,8 @@ namespace pf {
 					}
 				}
 				static void wall_slip_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double loc_density = point.F[LBM_0] + point.F[LBM_1] + point.F[LBM_3]
 							+ 2 * (point.F[LBM_2] + point.F[LBM_6] + point.F[LBM_5]),
 							tail = loc_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallSpeed] / 6.0,
@@ -292,36 +292,36 @@ namespace pf {
 				}
 				// FDBC_Period
 				static void period_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_x_down = main_field::lbm_field(x - 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_x_down = external_physical_field::lbm_field(x - 1, y, z);
 						point.F[LBM_1] = point_x_down.F[LBM_1];
 						point.F[LBM_5] = point_x_down.F[LBM_5];
 						point.F[LBM_8] = point_x_down.F[LBM_8];
 					}
 				}
 				static void period_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_x_up = main_field::lbm_field(x + 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_x_up = external_physical_field::lbm_field(x + 1, y, z);
 						point.F[LBM_3] = point_x_up.F[LBM_3];
 						point.F[LBM_7] = point_x_up.F[LBM_7];
 						point.F[LBM_6] = point_x_up.F[LBM_6];
 					}
 				}
 				static void period_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_y_down = main_field::lbm_field(x, y - 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_y_down = external_physical_field::lbm_field(x, y - 1, z);
 						point.F[LBM_2] = point_y_down.F[LBM_2];
 						point.F[LBM_5] = point_y_down.F[LBM_5];
 						point.F[LBM_6] = point_y_down.F[LBM_6];
 					}
 				}
 				static void period_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_y_up = main_field::lbm_field(x, y - 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_y_up = external_physical_field::lbm_field(x, y - 1, z);
 						point.F[LBM_4] = point_y_up.F[LBM_4];
 						point.F[LBM_7] = point_y_up.F[LBM_7];
 						point.F[LBM_8] = point_y_up.F[LBM_8];
@@ -329,36 +329,36 @@ namespace pf {
 				}
 				// FDBC_Free
 				static void free_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_x_up = main_field::lbm_field(x + 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_x_up = external_physical_field::lbm_field(x + 1, y, z);
 						point.F[LBM_1] = point_x_up.F[LBM_1];
 						point.F[LBM_5] = point_x_up.F[LBM_5];
 						point.F[LBM_8] = point_x_up.F[LBM_8];
 					}
 				}
 				static void free_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_x_down = main_field::lbm_field(x - 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_x_down = external_physical_field::lbm_field(x - 1, y, z);
 						point.F[LBM_3] = point_x_down.F[LBM_3];
 						point.F[LBM_7] = point_x_down.F[LBM_7];
 						point.F[LBM_6] = point_x_down.F[LBM_6];
 					}
 				}
 				static void free_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_y_up = main_field::lbm_field(x, y - 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_y_up = external_physical_field::lbm_field(x, y - 1, z);
 						point.F[LBM_2] = point_y_up.F[LBM_2];
 						point.F[LBM_5] = point_y_up.F[LBM_5];
 						point.F[LBM_6] = point_y_up.F[LBM_6];
 					}
 				}
 				static void free_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& point_y_down = main_field::lbm_field(x, y - 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& point_y_down = external_physical_field::lbm_field(x, y - 1, z);
 						point.F[LBM_4] = point_y_down.F[LBM_4];
 						point.F[LBM_7] = point_y_down.F[LBM_7];
 						point.F[LBM_8] = point_y_down.F[LBM_8];
@@ -366,8 +366,8 @@ namespace pf {
 				}
 				// FDBC_Pressure
 				static void pressure_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double pu = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] - (point.F[LBM_0] + point.F[LBM_2] +
 							point.F[LBM_4] + 2.0 * point.F[LBM_6] + 2.0 * point.F[LBM_7]),
 							diff = (point.F[LBM_4] - point.F[LBM_2]) / 2.0;
@@ -377,8 +377,8 @@ namespace pf {
 					}
 				}
 				static void pressure_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double pu = point.F[LBM_0] + point.F[LBM_2] +
 							point.F[LBM_4] + 2.0 * point.F[LBM_5] + 2.0 * point.F[LBM_8] - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue],
 							diff = (point.F[LBM_4] - point.F[LBM_2]) / 2.0;
@@ -388,8 +388,8 @@ namespace pf {
 					}
 				}
 				static void pressure_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double pu = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] - (point.F[LBM_0] + point.F[LBM_1] +
 							point.F[LBM_3] + 2.0 * point.F[LBM_7] + 2.0 * point.F[LBM_8]),
 							diff = (point.F[LBM_3] - point.F[LBM_1]) / 2.0;
@@ -399,8 +399,8 @@ namespace pf {
 					}
 				}
 				static void pressure_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double pu = (point.F[LBM_0] + point.F[LBM_1] +
 							point.F[LBM_3] + 2.0 * point.F[LBM_5] + 2.0 * point.F[LBM_6]) - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue],
 							diff = (point.F[LBM_3] - point.F[LBM_1]) / 2.0;
@@ -411,8 +411,8 @@ namespace pf {
 				}
 				// FDBC_Normal_Micro_Flow
 				static void normal_micro_flow_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double local_density = (point.F[LBM_0] + point.F[LBM_2] + point.F[LBM_4]
 							+ 2 * (point.F[LBM_3] + point.F[LBM_6] + point.F[LBM_7])) / (1.0 - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed]),
 							tail = local_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed];
@@ -422,8 +422,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double local_density = (point.F[LBM_0] + point.F[LBM_2] + point.F[LBM_4]
 							+ 2 * (point.F[LBM_1] + point.F[LBM_5] + point.F[LBM_8])) / (1.0 - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed]),
 							tail = local_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed];
@@ -433,8 +433,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double local_density = (point.F[LBM_0] + point.F[LBM_1] + point.F[LBM_3]
 							+ 2 * (point.F[LBM_4] + point.F[LBM_7] + point.F[LBM_8])) / (1.0 - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed]),
 							tail = local_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed];
@@ -444,8 +444,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double local_density = (point.F[LBM_0] + point.F[LBM_1] + point.F[LBM_3]
 							+ 2 * (point.F[LBM_2] + point.F[LBM_5] + point.F[LBM_6])) / (1.0 - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed]),
 							tail = local_density * fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed];
@@ -460,11 +460,11 @@ namespace pf {
 				double f_eq = 0.0, f_neq = 0.0, _tau = tau(x, y, z);
 				Vector3 U;
 				// LBM_f_0
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				point.F[LBM_0] = 0.0;
 				LBMPoint* near_point;
 				// LBM_f_1
-				near_point = &main_field::lbm_field(x + 1, y, z);
+				near_point = &external_physical_field::lbm_field(x + 1, y, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -474,7 +474,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_1] - f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, U);
@@ -487,7 +487,7 @@ namespace pf {
 					point.F[LBM_1] = 0.0;
 				}
 				// LBM_f_2
-				near_point = &main_field::lbm_field(x, y + 1, z);
+				near_point = &external_physical_field::lbm_field(x, y + 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -497,7 +497,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_2] - f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y + 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, U);
@@ -510,7 +510,7 @@ namespace pf {
 					point.F[LBM_2] = 0.0;
 				}
 				// LBM_f_3
-				near_point = &main_field::lbm_field(x - 1, y, z);
+				near_point = &external_physical_field::lbm_field(x - 1, y, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -520,7 +520,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_3] - f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, U);
@@ -533,7 +533,7 @@ namespace pf {
 					point.F[LBM_3] = 0.0;
 				}
 				// LBM_f_4
-				near_point = &main_field::lbm_field(x, y - 1, z);
+				near_point = &external_physical_field::lbm_field(x, y - 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -543,7 +543,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_4] - f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y - 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, U);
@@ -556,7 +556,7 @@ namespace pf {
 					point.F[LBM_4] = 0.0;
 				}
 				// LBM_f_5
-				near_point = &main_field::lbm_field(x, y, z + 1);
+				near_point = &external_physical_field::lbm_field(x, y, z + 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -566,7 +566,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_5] - f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y, z + 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, U);
@@ -579,7 +579,7 @@ namespace pf {
 					point.F[LBM_5] = 0.0;
 				}
 				// LBM_f_6
-				near_point = &main_field::lbm_field(x, y, z - 1);
+				near_point = &external_physical_field::lbm_field(x, y, z - 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -589,7 +589,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_6] - f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y, z - 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, U);
@@ -602,7 +602,7 @@ namespace pf {
 					point.F[LBM_6] = 0.0;
 				}
 				// LBM_f_7
-				near_point = &main_field::lbm_field(x + 1, y + 1, z);
+				near_point = &external_physical_field::lbm_field(x + 1, y + 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -612,7 +612,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_7] - f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y + 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, U);
@@ -625,7 +625,7 @@ namespace pf {
 					point.F[LBM_7] = 0.0;
 				}
 				// LBM_f_8
-				near_point = &main_field::lbm_field(x - 1, y + 1, z);
+				near_point = &external_physical_field::lbm_field(x - 1, y + 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -635,7 +635,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_8] - f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y + 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, U);
@@ -648,7 +648,7 @@ namespace pf {
 					point.F[LBM_8] = 0.0;
 				}
 				// LBM_f_9
-				near_point = &main_field::lbm_field(x - 1, y - 1, z);
+				near_point = &external_physical_field::lbm_field(x - 1, y - 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -658,7 +658,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_9] - f_eq_a_virtual_d2q9(LBM_9, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y - 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_9, near_point->F_MACRO, U);
@@ -671,7 +671,7 @@ namespace pf {
 					point.F[LBM_9] = 0.0;
 				}
 				// LBM_f_10
-				near_point = &main_field::lbm_field(x + 1, y - 1, z);
+				near_point = &external_physical_field::lbm_field(x + 1, y - 1, z);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -681,7 +681,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_10] - f_eq_a_virtual_d2q9(LBM_10, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y - 2, z);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_10, near_point->F_MACRO, U);
@@ -694,7 +694,7 @@ namespace pf {
 					point.F[LBM_10] = 0.0;
 				}
 				// LBM_f_11
-				near_point = &main_field::lbm_field(x + 1, y, z + 1);
+				near_point = &external_physical_field::lbm_field(x + 1, y, z + 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -704,7 +704,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_11] - f_eq_a_virtual_d2q9(LBM_11, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y, z + 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_11, near_point->F_MACRO, U);
@@ -717,7 +717,7 @@ namespace pf {
 					point.F[LBM_11] = 0.0;
 				}
 				// LBM_f_12
-				near_point = &main_field::lbm_field(x - 1, y, z + 1);
+				near_point = &external_physical_field::lbm_field(x - 1, y, z + 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -727,7 +727,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_12] - f_eq_a_virtual_d2q9(LBM_12, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y, z + 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_12, near_point->F_MACRO, U);
@@ -740,7 +740,7 @@ namespace pf {
 					point.F[LBM_12] = 0.0;
 				}
 				// LBM_f_13
-				near_point = &main_field::lbm_field(x - 1, y, z - 1);
+				near_point = &external_physical_field::lbm_field(x - 1, y, z - 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -750,7 +750,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_13] - f_eq_a_virtual_d2q9(LBM_13, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x - 2, y, z - 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_13, near_point->F_MACRO, U);
@@ -763,7 +763,7 @@ namespace pf {
 					point.F[LBM_13] = 0.0;
 				}
 				// LBM_f_14
-				near_point = &main_field::lbm_field(x + 1, y, z - 1);
+				near_point = &external_physical_field::lbm_field(x + 1, y, z - 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -773,7 +773,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_14] - f_eq_a_virtual_d2q9(LBM_14, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x + 2, y, z - 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_14, near_point->F_MACRO, U);
@@ -786,7 +786,7 @@ namespace pf {
 					point.F[LBM_14] = 0.0;
 				}
 				// LBM_f_15
-				near_point = &main_field::lbm_field(x, y + 1, z + 1);
+				near_point = &external_physical_field::lbm_field(x, y + 1, z + 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -796,7 +796,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_15] - f_eq_a_virtual_d2q9(LBM_15, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y + 2, z + 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_15, near_point->F_MACRO, U);
@@ -809,7 +809,7 @@ namespace pf {
 					point.F[LBM_15] = 0.0;
 				}
 				// LBM_f_16
-				near_point = &main_field::lbm_field(x, y - 1, z + 1);
+				near_point = &external_physical_field::lbm_field(x, y - 1, z + 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -819,7 +819,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_16] - f_eq_a_virtual_d2q9(LBM_16, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y - 2, z + 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_16, near_point->F_MACRO, U);
@@ -832,7 +832,7 @@ namespace pf {
 					point.F[LBM_16] = 0.0;
 				}
 				// LBM_f_17
-				near_point = &main_field::lbm_field(x, y - 1, z - 1);
+				near_point = &external_physical_field::lbm_field(x, y - 1, z - 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -842,7 +842,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_17] - f_eq_a_virtual_d2q9(LBM_17, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y - 2, z - 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_17, near_point->F_MACRO, U);
@@ -855,7 +855,7 @@ namespace pf {
 					point.F[LBM_17] = 0.0;
 				}
 				// LBM_f_18
-				near_point = &main_field::lbm_field(x, y + 1, z - 1);
+				near_point = &external_physical_field::lbm_field(x, y + 1, z - 1);
 				if (near_point->fluid_region >= solid_liquid_interface_threshold) {
 					//double qqq = (solid_liquid_interface_threshold - near_point->solid_region) / (point.solid_region - near_point->solid_region);
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
@@ -865,7 +865,7 @@ namespace pf {
 						f_neq = near_point->F[LBM_18] - f_eq_a_virtual_d2q9(LBM_18, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
-						LBMPoint& near_near_point = main_field::lbm_field.at2(x, y + 2, z - 2);
+						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
 						f_eq = f_eq_a_virtual_d2q9(LBM_18, near_point->F_MACRO, U);
@@ -881,8 +881,8 @@ namespace pf {
 			namespace lbm_bc_d3q19 {
 				// FDBC_Wall_No_Slip
 				static void wall_no_slip_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_1] = point.F[LBM_2];
 						point.F[LBM_7] = point.F[LBM_9] * roughness + point.F[LBM_8] * (1.0 - roughness);
@@ -892,8 +892,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_2] = point.F[LBM_1];
 						point.F[LBM_8] = point.F[LBM_10] * roughness + point.F[LBM_7] * (1.0 - roughness);
@@ -903,8 +903,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_3] = point.F[LBM_4];
 						point.F[LBM_7] = point.F[LBM_9] * roughness + point.F[LBM_10] * (1.0 - roughness);
@@ -914,8 +914,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_4] = point.F[LBM_3];
 						point.F[LBM_9] = point.F[LBM_7] * roughness + point.F[LBM_8] * (1.0 - roughness);
@@ -925,8 +925,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_z_down(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_5] = point.F[LBM_6];
 						point.F[LBM_11] = point.F[LBM_13] * roughness + point.F[LBM_14] * (1.0 - roughness);
@@ -936,8 +936,8 @@ namespace pf {
 					}
 				}
 				static void wall_no_slip_z_up(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (z == external_physical_field::lbm_field.COMP_Z_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double roughness = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_WallRoughness];
 						point.F[LBM_6] = point.F[LBM_5];
 						point.F[LBM_13] = point.F[LBM_11] * roughness + point.F[LBM_12] * (1.0 - roughness);
@@ -948,9 +948,9 @@ namespace pf {
 				}
 				// FDBC_Period
 				static void period_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x - 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x - 1, y, z);
 						point.F[LBM_1] = near_point.F[LBM_1];
 						point.F[LBM_7] = near_point.F[LBM_7];
 						point.F[LBM_10] = near_point.F[LBM_10];
@@ -959,9 +959,9 @@ namespace pf {
 					}
 				}
 				static void period_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x + 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x + 1, y, z);
 						point.F[LBM_2] = near_point.F[LBM_2];
 						point.F[LBM_8] = near_point.F[LBM_8];
 						point.F[LBM_9] = near_point.F[LBM_9];
@@ -970,9 +970,9 @@ namespace pf {
 					}
 				}
 				static void period_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y - 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y - 1, z);
 						point.F[LBM_3] = near_point.F[LBM_3];
 						point.F[LBM_7] = near_point.F[LBM_7];
 						point.F[LBM_8] = near_point.F[LBM_8];
@@ -981,9 +981,9 @@ namespace pf {
 					}
 				}
 				static void period_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y + 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y + 1, z);
 						point.F[LBM_4] = near_point.F[LBM_4];
 						point.F[LBM_9] = near_point.F[LBM_9];
 						point.F[LBM_10] = near_point.F[LBM_10];
@@ -992,9 +992,9 @@ namespace pf {
 					}
 				}
 				static void period_z_down(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y, z - 1);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y, z - 1);
 						point.F[LBM_5] = near_point.F[LBM_5];
 						point.F[LBM_11] = near_point.F[LBM_11];
 						point.F[LBM_12] = near_point.F[LBM_12];
@@ -1003,9 +1003,9 @@ namespace pf {
 					}
 				}
 				static void period_z_up(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y, z + 1);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y, z + 1);
 						point.F[LBM_6] = near_point.F[LBM_6];
 						point.F[LBM_13] = near_point.F[LBM_13];
 						point.F[LBM_14] = near_point.F[LBM_14];
@@ -1015,9 +1015,9 @@ namespace pf {
 				}
 				// FDBC_Free
 				static void free_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x + 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x + 1, y, z);
 						point.F[LBM_1] = near_point.F[LBM_1];
 						point.F[LBM_7] = near_point.F[LBM_7];
 						point.F[LBM_10] = near_point.F[LBM_10];
@@ -1026,9 +1026,9 @@ namespace pf {
 					}
 				}
 				static void free_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x - 1, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x - 1, y, z);
 						point.F[LBM_2] = near_point.F[LBM_2];
 						point.F[LBM_8] = near_point.F[LBM_8];
 						point.F[LBM_9] = near_point.F[LBM_9];
@@ -1037,9 +1037,9 @@ namespace pf {
 					}
 				}
 				static void free_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y + 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y + 1, z);
 						point.F[LBM_3] = near_point.F[LBM_3];
 						point.F[LBM_7] = near_point.F[LBM_7];
 						point.F[LBM_8] = near_point.F[LBM_8];
@@ -1048,9 +1048,9 @@ namespace pf {
 					}
 				}
 				static void free_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y - 1, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y - 1, z);
 						point.F[LBM_4] = near_point.F[LBM_4];
 						point.F[LBM_9] = near_point.F[LBM_9];
 						point.F[LBM_10] = near_point.F[LBM_10];
@@ -1059,9 +1059,9 @@ namespace pf {
 					}
 				}
 				static void free_z_down(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y, z + 1);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y, z + 1);
 						point.F[LBM_5] = near_point.F[LBM_5];
 						point.F[LBM_11] = near_point.F[LBM_11];
 						point.F[LBM_12] = near_point.F[LBM_12];
@@ -1070,9 +1070,9 @@ namespace pf {
 					}
 				}
 				static void free_z_up(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
-						LBMPoint& near_point = main_field::lbm_field(x, y, z - 1);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
+						LBMPoint& near_point = external_physical_field::lbm_field(x, y, z - 1);
 						point.F[LBM_6] = near_point.F[LBM_6];
 						point.F[LBM_13] = near_point.F[LBM_13];
 						point.F[LBM_14] = near_point.F[LBM_14];
@@ -1082,8 +1082,8 @@ namespace pf {
 				}
 				// FDBC_Pressure
 				static void pressure_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
 								+ point.F[LBM_3] + point.F[LBM_4] + point.F[LBM_5] + point.F[LBM_6]
@@ -1098,8 +1098,8 @@ namespace pf {
 					}
 				}
 				static void pressure_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
 								+ point.F[LBM_3] + point.F[LBM_4] + point.F[LBM_5] + point.F[LBM_6]
@@ -1114,8 +1114,8 @@ namespace pf {
 					}
 				}
 				static void pressure_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_5] + point.F[LBM_6]
@@ -1130,8 +1130,8 @@ namespace pf {
 					}
 				}
 				static void pressure_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_5] + point.F[LBM_6]
@@ -1146,8 +1146,8 @@ namespace pf {
 					}
 				}
 				static void pressure_z_down(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_3] + point.F[LBM_4]
@@ -1162,8 +1162,8 @@ namespace pf {
 					}
 				}
 				static void pressure_z_up(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_3] + point.F[LBM_4]
@@ -1179,8 +1179,8 @@ namespace pf {
 				}
 				// FDBC_Normal_Micro_Flow
 				static void normal_micro_flow_x_down(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
 								+ point.F[LBM_3] + point.F[LBM_4] + point.F[LBM_5] + point.F[LBM_6]
@@ -1195,8 +1195,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_x_up(long long x, long long y, long long z) {
-					if (x == main_field::lbm_field.COMP_X_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (x == external_physical_field::lbm_field.COMP_X_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
 								+ point.F[LBM_3] + point.F[LBM_4] + point.F[LBM_5] + point.F[LBM_6]
@@ -1211,8 +1211,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_y_down(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_5] + point.F[LBM_6]
@@ -1227,8 +1227,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_y_up(long long x, long long y, long long z) {
-					if (y == main_field::lbm_field.COMP_Y_END()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_5] + point.F[LBM_6]
@@ -1243,8 +1243,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_z_down(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_3] + point.F[LBM_4]
@@ -1259,8 +1259,8 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_z_up(long long x, long long y, long long z) {
-					if (z == main_field::lbm_field.COMP_Z_BGN()) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
 								+ point.F[LBM_1] + point.F[LBM_2] + point.F[LBM_3] + point.F[LBM_4]
@@ -1282,7 +1282,7 @@ namespace pf {
 			d2q9_domain_boundary_x_up(x, y, z);
 			d2q9_domain_boundary_y_down(x, y, z);
 			d2q9_domain_boundary_y_up(x, y, z);
-			if (main_field::lbm_field(x, y, z).fluid_region < solid_liquid_interface_threshold)
+			if (external_physical_field::lbm_field(x, y, z).fluid_region < solid_liquid_interface_threshold)
 				d2q9_fluid_solid_boundary(x, y, z);
 		}
 
@@ -1293,16 +1293,16 @@ namespace pf {
 			d3q19_domain_boundary_y_up(x, y, z);
 			d3q19_domain_boundary_z_down(x, y, z);
 			d3q19_domain_boundary_z_up(x, y, z);
-			if (main_field::lbm_field(x, y, z).fluid_region < solid_liquid_interface_threshold)
+			if (external_physical_field::lbm_field(x, y, z).fluid_region < solid_liquid_interface_threshold)
 				d3q19_fluid_solid_boundary(x, y, z);
 		}
 
 		void cal_fluid_domain() {
 #pragma omp parallel for
-			for (long long x = 0; x < main_field::lbm_field.Nx(); x++)
-				for (long long y = 0; y < main_field::lbm_field.Ny(); y++)
-					for (long long z = 0; z < main_field::lbm_field.Nz(); z++) {
-						LBMPoint& fluid_point = main_field::lbm_field(x, y, z);
+			for (long long x = 0; x < external_physical_field::lbm_field.Nx(); x++)
+				for (long long y = 0; y < external_physical_field::lbm_field.Ny(); y++)
+					for (long long z = 0; z < external_physical_field::lbm_field.Nz(); z++) {
+						LBMPoint& fluid_point = external_physical_field::lbm_field(x, y, z);
 						Matrix1D<REAL>& phi_point = main_field::phase_field(x, y, z);
 						fluid_point.fluid_region = 0.0;
 						for (size_t index = 0; index < main_field::phi_number; index++)

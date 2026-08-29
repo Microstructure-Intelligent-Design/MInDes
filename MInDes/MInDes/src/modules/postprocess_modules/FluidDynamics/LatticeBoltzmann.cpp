@@ -5,7 +5,7 @@ namespace pf {
 			// fluid flow
 			// fi = fi + mi
 			static void collision_SRT_d2q9(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					double tau = lbm_boundary_condition::tau(x, y, z);
 					for (size_t index = LBM_LATTICE_ELEMENT::LBM_0; index <= LBM_LATTICE_ELEMENT::LBM_8; index++) {
@@ -20,7 +20,7 @@ namespace pf {
 				}
 			}
 			static void collision_SRT_d3q19(long long x, long long y, long long z) {
-				LBMPoint& point = main_field::lbm_field(x, y, z);
+				LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 				if (point.fluid_region >= lbm_boundary_condition::solid_liquid_interface_threshold) {
 					double tau = lbm_boundary_condition::tau(x, y, z);
 					for (size_t index = LBM_LATTICE_ELEMENT::LBM_0; index <= LBM_LATTICE_ELEMENT::LBM_18; index++) {
@@ -37,10 +37,10 @@ namespace pf {
 		}
 		void init_distribution_functions_d2q9() {
 #pragma omp parallel for
-			for (long long x = main_field::lbm_field.COMP_X_BGN(); x <= main_field::lbm_field.COMP_X_END(); x++)
-				for (long long y = main_field::lbm_field.COMP_Y_BGN(); y <= main_field::lbm_field.COMP_Y_END(); y++)
-					for (long long z = main_field::lbm_field.COMP_Z_BGN(); z <= main_field::lbm_field.COMP_Z_END(); z++) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+			for (long long x = external_physical_field::lbm_field.COMP_X_BGN(); x <= external_physical_field::lbm_field.COMP_X_END(); x++)
+				for (long long y = external_physical_field::lbm_field.COMP_Y_BGN(); y <= external_physical_field::lbm_field.COMP_Y_END(); y++)
+					for (long long z = external_physical_field::lbm_field.COMP_Z_BGN(); z <= external_physical_field::lbm_field.COMP_Z_END(); z++) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double density = lbm_boundary_condition::density(x, y, z);
 						point.mass = density;
 						point.F_MACRO = density;
@@ -50,10 +50,10 @@ namespace pf {
 		}
 		void init_distribution_functions_d3q19() {
 #pragma omp parallel for
-			for (long long x = main_field::lbm_field.COMP_X_BGN(); x <= main_field::lbm_field.COMP_X_END(); x++)
-				for (long long y = main_field::lbm_field.COMP_Y_BGN(); y <= main_field::lbm_field.COMP_Y_END(); y++)
-					for (long long z = main_field::lbm_field.COMP_Z_BGN(); z <= main_field::lbm_field.COMP_Z_END(); z++) {
-						LBMPoint& point = main_field::lbm_field(x, y, z);
+			for (long long x = external_physical_field::lbm_field.COMP_X_BGN(); x <= external_physical_field::lbm_field.COMP_X_END(); x++)
+				for (long long y = external_physical_field::lbm_field.COMP_Y_BGN(); y <= external_physical_field::lbm_field.COMP_Y_END(); y++)
+					for (long long z = external_physical_field::lbm_field.COMP_Z_BGN(); z <= external_physical_field::lbm_field.COMP_Z_END(); z++) {
+						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double density = lbm_boundary_condition::density(x, y, z);
 						point.mass = density;
 						point.F_MACRO = density;
@@ -68,7 +68,7 @@ namespace pf {
 			lbm_macro_variable::lbm_properties_automatically_change();
 		}
 		void init() {
-			fluid_lbm_solver.init(main_field::lbm_field, mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
+			fluid_lbm_solver.init(external_physical_field::lbm_field, mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
 				mesh_parameters::delt_r, mesh_parameters::x_down, mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up,
 				mesh_parameters::z_down, mesh_parameters::z_up);
 			infile_reader::read_int_value("Postprocess.FluidDynamics.LatticeBoltzmann.max_iterate_steps", max_iterate_steps, true);
@@ -191,7 +191,7 @@ namespace pf {
 			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						LBMPoint& point = main_field::lbm_field(i, j, k);
+						LBMPoint& point = external_physical_field::lbm_field(i, j, k);
 						fout << point.velocity[0] << " "
 							<< point.velocity[1] << " "
 							<< point.velocity[2] << std::endl;
@@ -204,7 +204,7 @@ namespace pf {
 			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						fout << main_field::lbm_field(i, j, k).velocity.abs() << std::endl;
+						fout << external_physical_field::lbm_field(i, j, k).velocity.abs() << std::endl;
 					}
 			fout << "</DataArray>" << std::endl;
 		}
@@ -214,7 +214,7 @@ namespace pf {
 			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						fout << main_field::lbm_field(i, j, k).pressure << std::endl;
+						fout << external_physical_field::lbm_field(i, j, k).pressure << std::endl;
 					}
 			fout << "</DataArray>" << std::endl;
 		}
@@ -224,7 +224,7 @@ namespace pf {
 			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						fout << main_field::lbm_field(i, j, k).mass << std::endl;
+						fout << external_physical_field::lbm_field(i, j, k).mass << std::endl;
 					}
 			fout << "</DataArray>" << std::endl;
 		}

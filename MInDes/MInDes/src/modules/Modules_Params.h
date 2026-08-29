@@ -81,23 +81,28 @@ namespace pf {
 					for (long long x = 0; x < temperature_field.Nx(); x++)
 						temperature_field(x, y, z) = 0;
 		}
-
-		// main mesh for mechanical field
-		inline bool is_mech_field_elas_on = false;
-		inline Mesh<ElasticPoint> elastic_field;
-		inline bool is_mech_field_plas_on = false;
-		inline Mesh<PlasticPoint> plastic_field;
+	}
+	namespace external_physical_field {
+		// external physical mesh for mechanical field
+		inline bool is_mech_field_on = false;
+		inline Mesh_Boundry<ElasticPoint> elastic_field;
+		inline bool is_mech_plastic_field_on = false;
+		inline Mesh_Boundry<PlasticPoint> plastic_field;
+		inline void init_elastic_field() {
+			elastic_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r,
+				BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC);
+		}
 		inline void init_plastic_field() {
-			plastic_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r);
-			for (long long z = 0; z < plastic_field.Nz(); z++)
-				for (long long y = 0; y < plastic_field.Ny(); y++)
-					for (long long x = 0; x < plastic_field.Nx(); x++)
-						plastic_field(x, y, z).AvePlasticStrain = 0;
+			plastic_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r,
+				BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC);
 		}
 
-		// main mesh for fluid field
+		// external physical meshfor fluid field
 		inline bool is_fluid_field_on = false;
 		inline Mesh_Boundry<LBMPoint> lbm_field;
-
+		inline void init_fluid_field() {
+			lbm_field.init(mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ, mesh_parameters::delt_r,
+				mesh_parameters::x_down, mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up, mesh_parameters::z_down, mesh_parameters::z_up);
+		}
 	}
 }
