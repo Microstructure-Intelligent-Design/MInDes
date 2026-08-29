@@ -11,3 +11,8 @@ MInDes/MInDes/_init
 MInDes/MInDes/*.dll
 !LICENSE.txt
 /MInDes/MInDes/infile
+/build-windows
+/MInDes/Debug
+/MInDes/MInDes/.build
+/MInDes/MInDes/Debug
+/MInDes/MInDes/out
