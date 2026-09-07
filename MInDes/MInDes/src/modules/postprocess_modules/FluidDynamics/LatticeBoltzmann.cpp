@@ -68,18 +68,22 @@ namespace pf {
 			lbm_macro_variable::lbm_properties_automatically_change();
 		}
 		void init() {
+			if (!external_physical_field::is_fluid_field_on)
+				return;
 			fluid_lbm_solver.init(external_physical_field::lbm_field, mesh_parameters::MESH_NX, mesh_parameters::MESH_NY, mesh_parameters::MESH_NZ,
 				mesh_parameters::delt_r, mesh_parameters::x_down, mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up,
 				mesh_parameters::z_down, mesh_parameters::z_up);
-			infile_reader::read_int_value("Postprocess.FluidDynamics.LatticeBoltzmann.max_iterate_steps", max_iterate_steps, true);
-			if (infile_reader::read_bool_value("Postprocess.FluidDynamics.LatticeBoltzmann.debug_solver", debug_solver, true))
-				infile_reader::read_int_value("Postprocess.FluidDynamics.LatticeBoltzmann.debug_output_step", debug_output_step, true);
-			infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.momentum_accuracy", momentum_accuracy, true);
+			WriteDebugFile("# Parameters in FluidDynamics module : \n");
+			infile_reader::read_int_value("Postprocess.FluidDynamics.max_iterate_steps", max_iterate_steps, true);
+			if (infile_reader::read_int_value("Postprocess.FluidDynamics.debug_output_step", debug_output_step, true))
+				if (debug_output_step > 0)
+					debug_solver = true;
+			infile_reader::read_real_value("Postprocess.FluidDynamics.momentum_accuracy", momentum_accuracy, true);
 			lbm_boundary_condition::init(fluid_lbm_solver);
 			lbm_source::init(fluid_lbm_solver);
 			lbm_equilibrium_distribution_function::init(fluid_lbm_solver);
 			lbm_macro_variable::init(fluid_lbm_solver);
-			InputFileReader::get_instance()->read_bool_value("Postprocess.FluidDynamics.LatticeBoltzmann.two_phase_flow", is_two_phase_flow, true);
+			// InputFileReader::get_instance()->read_bool_value("Postprocess.FluidDynamics.two_phase_flow", is_two_phase_flow, true);
 			if (is_two_phase_flow) {
 				// 
 			}
@@ -91,9 +95,15 @@ namespace pf {
 			else if (fluid_lbm_solver.lbm_lattice_model == LBM_LATTICE_MODEL::LBM_D3Q19) {
 				fluid_lbm_solver._collision = default_functions::collision_SRT_d3q19;
 			}
+			// ==========================================================================================================================
+			load_a_new_module(nullptr, nullptr, exec_pre,  // exec_pre_i   exec_pre_ii    exec_pre_iii
+				nullptr, nullptr, nullptr,  // exec_i   exec_ii   exec_iii
+				exec_loop, nullptr, nullptr,   // exec_pos_i   exec_pos_ii   exec_pos_iii
+				deinit);  // deinit
 		}
 		void exec_pre() {
 			stringstream output;
+			lbm_properties_automatically_change();
 			if (fluid_lbm_solver.lbm_lattice_model == LBM_LATTICE_MODEL::LBM_D2Q9) {
 				init_distribution_functions_d2q9();
 			}
@@ -101,6 +111,7 @@ namespace pf {
 				init_distribution_functions_d3q19();
 			}
 			lbm_boundary_condition::cal_fluid_domain();
+			fluid_lbm_solver.lbm_field->do_boundary_condition();
 			fluid_lbm_solver.do_boundary_condition();
 			fluid_lbm_solver.cal_macro_variables();
 			if (is_two_phase_flow) {
@@ -149,7 +160,7 @@ namespace pf {
 			// 	output << "		TWO_PHASE_VARIATION   = " << MAX_F_MACRO_CHANGE << endl;
 			WriteLog(output.str());
 		}
-		std::string exec_loop() {
+		void exec_loop() {
 			lbm_properties_automatically_change();
 			stringstream report;
 			MACRO_MAX_VARIATION MAX_CHANGE;
@@ -180,53 +191,11 @@ namespace pf {
 			report << "		MAX_MOMENTUM_CHANGE_Z = " << MAX_CHANGE.FV_MACRO_MAX_VARIATION[2] << std::endl;
 			// if (is_two_phase_flow)
 			// 	report << "		TWO_PHASE_VARIATION   = " << MAX_F_MACRO_CHANGE << endl;
-			return report.str();
+			WriteLog(report.str());
 		}
 		void deinit() {
 			fluid_lbm_solver.free();
 			lbm_boundary_condition::deinit();
-		}
-		void write_velocity(std::ofstream& fout) {
-			fout << "<DataArray type = \"Float64\" Name = \"fluid_velocity\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
-			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
-				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
-					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						LBMPoint& point = external_physical_field::lbm_field(i, j, k);
-						fout << point.velocity[0] << " "
-							<< point.velocity[1] << " "
-							<< point.velocity[2] << std::endl;
-					}
-			fout << "</DataArray>" << std::endl;
-		}
-		void write_abs_velocity(std::ofstream& fout) {
-			fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_abs_velocity" <<
-				"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
-			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
-				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
-					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						fout << external_physical_field::lbm_field(i, j, k).velocity.abs() << std::endl;
-					}
-			fout << "</DataArray>" << std::endl;
-		}
-		void write_pressure(std::ofstream& fout) {
-			fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_pressure" <<
-				"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
-			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
-				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
-					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						fout << external_physical_field::lbm_field(i, j, k).pressure << std::endl;
-					}
-			fout << "</DataArray>" << std::endl;
-		}
-		void write_density(std::ofstream& fout) {
-			fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_density" <<
-				"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
-			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
-				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
-					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-						fout << external_physical_field::lbm_field(i, j, k).mass << std::endl;
-					}
-			fout << "</DataArray>" << std::endl;
 		}
 	}
 }

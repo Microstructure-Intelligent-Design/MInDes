@@ -4,29 +4,20 @@ namespace pf {
 		namespace macro_variable_funcs {
 			void load_forces() {
 				fluid_force_list.clear();
-				std::string force_key = "Postprocess.FluidDynamics.LatticeBoltzmann.force", force_input = "()";
-				infile_reader::read_string_value(force_key, force_input, false);
-				std::vector<input_value> force_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, force_key, force_input, false);
-				for (auto force = force_value.begin(); force < force_value.end(); force++) {
-					bool is_already_load = false;
-					for (auto old_force = force_value.begin(); old_force < force; old_force++)
-						if (force->int_value == old_force->int_value)
-							is_already_load = true;
-					if (!is_already_load) {
-						switch (LBM_Force_Type(force->int_value))
-						{
-						case LBM_FM_ThermalExpansion:
-							fluid_force_list.push_back(lbm_source::force_funcs::Fluid_Force_Thermal_Expansion);
-							break;
-						case LBM_FM_Gravity:
-							fluid_force_list.push_back(lbm_source::force_funcs::Fluid_Force_Gravity);
-							break;
-						case LBM_FM_H_Liang_SurfaceTension:
-							fluid_force_list.push_back(lbm_source::force_funcs::Fluid_Force_H_Liang_Surface_Tension);
-							break;
-						default:
-							break;
-						}
+				for (auto force : lbm_source::lbm_force) {
+					switch (force)
+					{
+					case LBM_FM_ThermalExpansion:
+						fluid_force_list.push_back(lbm_source::force_funcs::Fluid_Force_Thermal_Expansion);
+						break;
+					case LBM_FM_ConExpansion:
+						fluid_force_list.push_back(lbm_source::force_funcs::Fluid_Force_Con_Expansion);
+						break;
+					case LBM_FM_Gravity:
+						fluid_force_list.push_back(lbm_source::force_funcs::Fluid_Force_Gravity);
+						break;
+					default:
+						break;
 					}
 				}
 			}
@@ -172,7 +163,7 @@ namespace pf {
 		void lbm_properties_automatically_change() {
 			double cc = mesh_parameters::delt_r / time_parameters::delt_t;
 			Cs2 = cc * cc / 3.0;
-			Cs4 = cc * cc / 9.0;
+			Cs4 = cc * cc * cc * cc / 9.0;
 		}
 
 		void init(LBM& fluid_lbm_solver) {

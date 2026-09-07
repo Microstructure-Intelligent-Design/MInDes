@@ -31,6 +31,29 @@ namespace pf {
 		}
 	}
 
+	void PhiProperties::init(std::vector<std::string> default_phi) {
+		if (!_is_init && main_field::is_phi_field_on && main_field::phi_number > 0 && default_phi.size() != 0) {
+			_phi_property.clear();
+			_phi_property.resize(main_field::phi_number, 0);
+			WriteDebugFile("# Model.PhiProperties.property_name = (phi_index_0, phi_index_1, ... ) \n");
+			for (size_t property_index = 0; property_index < default_phi.size(); property_index++) {
+				add_property_name(default_phi[property_index]);
+				std::string grains_key = "Model.PhiProperties." + default_phi[property_index], grains_input = "()";
+				infile_reader::read_string_value(grains_key, grains_input, true);
+				std::vector<input_value> grains_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, grains_key, grains_input, true);
+				for (size_t i = 0; i < grains_value.size(); i++) {
+					int phi_index = grains_value[i].int_value;
+					if (phi_index < main_field::phi_number)
+						_phi_property[phi_index] = property_index;
+				}
+			}
+			_property_phi.resize(_phi_property_number);
+			for (size_t index = 0; index < main_field::phi_number; index++)
+				_property_phi[_phi_property[index]].push_back(index);
+			_is_init = true;
+		}
+	}
+
 	PhiProperties& PhiProperties::instance() {
 		static PhiProperties inst;
 		return inst;

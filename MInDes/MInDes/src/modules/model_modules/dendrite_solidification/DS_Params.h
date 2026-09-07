@@ -2,7 +2,7 @@
 #include "../../base/Mesh_0.h"
 #include "../../Modules_Params.h"
 namespace pf {
-	namespace dendritic_solidification_model {
+	namespace dendrite_solidification_model {
 		enum FIELD { MOB, DFDCON, NUM };
 		namespace parameters {
 			// - field

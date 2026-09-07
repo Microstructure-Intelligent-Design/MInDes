@@ -391,6 +391,7 @@ namespace pf {
 			}
 			// ==========================================================================================================================
 			// - init con equation
+			bool is_dfdcon_con = false;
 			if (main_field::is_con_field_on) {
 				parameters::init_con_in_moving_region = concentration_field_functions::init_con_in_moving_region_default;
 				parameters::deinit_con_in_moving_region = concentration_field_functions::deinit_con_in_moving_region_default;
@@ -536,7 +537,6 @@ namespace pf {
 						parameters::mobility.push_back(concentration_field_functions::interphase_diffusion_mobility);
 				}
 				{
-					bool is_dfdcon_con = false;
 					WriteDebugFile("# Model.DDCCPAI.Con.DiffusionPotential.con : \\nabla Mii \\cdot \\nabla con_i \n");
 					if (infile_reader::read_bool_value("Model.DDCCPAI.Con.DiffusionPotential.con", is_dfdcon_con, true))
 						if (is_dfdcon_con)
@@ -689,8 +689,11 @@ namespace pf {
 					parameters::fchem = chemical_energy_functions::fchem_polynomial;
 					parameters::miu = chemical_energy_functions::miu_polynomial;
 					parameters::delt_Fbulk_delt_phi.push_back(chemical_energy_functions::delt_Fchem_delt_phi);
-					parameters::delt_Fbulk_delt_con.push_back(chemical_energy_functions::delt_Fchem_delt_con);
+					if (!is_dfdcon_con)
+						parameters::delt_Fbulk_delt_con.push_back(chemical_energy_functions::delt_Fchem_delt_con);
 				}
+				// - 
+
 			}
 			// ==========================================================================================================================
 			// - output a standalone thermodynamic energy-minimization scan

@@ -31,8 +31,9 @@ namespace pf {
 	}
 
 	void LBM::do_streaming() {
+		external_physical_field::lbm_field.do_boundary_condition();
 		if (lbm_lattice_model == LBM_LATTICE_MODEL::LBM_D2Q9) {
-			long long z = 0;
+			long long z = 1;
 #pragma omp parallel sections// OMP BEGIN
 			{
 #pragma omp section

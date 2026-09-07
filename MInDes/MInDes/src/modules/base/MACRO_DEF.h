@@ -26,7 +26,7 @@ inline double REAL_MAX() { return std::numeric_limits<double>::max(); };
 #define AngleToRadians(angle) double(angle/180.0*PI)
 
 #ifdef _DEBUG
-#define SYS_PROGRAM_STOP while(1){getchar();}
+#define SYS_PROGRAM_STOP while(1){char c = getchar();}
 #else
 #define SYS_PROGRAM_STOP std::exit(1)
 #endif

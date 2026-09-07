@@ -321,7 +321,7 @@ namespace pf {
 				static void period_y_up(long long x, long long y, long long z) {
 					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
-						LBMPoint& point_y_up = external_physical_field::lbm_field(x, y - 1, z);
+						LBMPoint& point_y_up = external_physical_field::lbm_field(x, y + 1, z);
 						point.F[LBM_4] = point_y_up.F[LBM_4];
 						point.F[LBM_7] = point_y_up.F[LBM_7];
 						point.F[LBM_8] = point_y_up.F[LBM_8];
@@ -349,7 +349,7 @@ namespace pf {
 				static void free_y_down(long long x, long long y, long long z) {
 					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
-						LBMPoint& point_y_up = external_physical_field::lbm_field(x, y - 1, z);
+						LBMPoint& point_y_up = external_physical_field::lbm_field(x, y + 1, z);
 						point.F[LBM_2] = point_y_up.F[LBM_2];
 						point.F[LBM_5] = point_y_up.F[LBM_5];
 						point.F[LBM_6] = point_y_up.F[LBM_6];
@@ -368,8 +368,8 @@ namespace pf {
 				static void pressure_x_down(long long x, long long y, long long z) {
 					if (x == external_physical_field::lbm_field.COMP_X_BGN()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
-						double pu = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] - (point.F[LBM_0] + point.F[LBM_2] +
-							point.F[LBM_4] + 2.0 * point.F[LBM_6] + 2.0 * point.F[LBM_7]),
+						double pu = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] 
+							- (point.F[LBM_0] + point.F[LBM_2] + point.F[LBM_4] + 2.0 * (point.F[LBM_3] + point.F[LBM_6] + point.F[LBM_7])),
 							diff = (point.F[LBM_4] - point.F[LBM_2]) / 2.0;
 						point.F[LBM_1] = point.F[LBM_3] + 2.0 / 3.0 * pu;
 						point.F[LBM_5] = point.F[LBM_7] + diff + pu / 6.0;
@@ -379,8 +379,8 @@ namespace pf {
 				static void pressure_x_up(long long x, long long y, long long z) {
 					if (x == external_physical_field::lbm_field.COMP_X_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
-						double pu = point.F[LBM_0] + point.F[LBM_2] +
-							point.F[LBM_4] + 2.0 * point.F[LBM_5] + 2.0 * point.F[LBM_8] - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue],
+						double pu = point.F[LBM_0] + point.F[LBM_2] + point.F[LBM_4] + 2.0 * (point.F[LBM_1] + point.F[LBM_5] + point.F[LBM_8])
+							- fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue],
 							diff = (point.F[LBM_4] - point.F[LBM_2]) / 2.0;
 						point.F[LBM_3] = point.F[LBM_1] - 2.0 / 3.0 * pu;
 						point.F[LBM_6] = point.F[LBM_8] + diff - pu / 6.0;
@@ -390,8 +390,8 @@ namespace pf {
 				static void pressure_y_down(long long x, long long y, long long z) {
 					if (y == external_physical_field::lbm_field.COMP_Y_BGN()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
-						double pu = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] - (point.F[LBM_0] + point.F[LBM_1] +
-							point.F[LBM_3] + 2.0 * point.F[LBM_7] + 2.0 * point.F[LBM_8]),
+						double pu = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] 
+							- (point.F[LBM_0] + point.F[LBM_1] + point.F[LBM_3] + 2.0 * (point.F[LBM_4] + point.F[LBM_7] + point.F[LBM_8])),
 							diff = (point.F[LBM_3] - point.F[LBM_1]) / 2.0;
 						point.F[LBM_2] = point.F[LBM_4] + 2.0 / 3.0 * pu;
 						point.F[LBM_5] = point.F[LBM_7] + diff + pu / 6.0;
@@ -401,8 +401,8 @@ namespace pf {
 				static void pressure_y_up(long long x, long long y, long long z) {
 					if (y == external_physical_field::lbm_field.COMP_Y_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
-						double pu = (point.F[LBM_0] + point.F[LBM_1] +
-							point.F[LBM_3] + 2.0 * point.F[LBM_5] + 2.0 * point.F[LBM_6]) - fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue],
+						double pu = (point.F[LBM_0] + point.F[LBM_1] + point.F[LBM_3] + 2.0 * (point.F[LBM_2] + point.F[LBM_5] + point.F[LBM_6]))
+							- fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue],
 							diff = (point.F[LBM_3] - point.F[LBM_1]) / 2.0;
 						point.F[LBM_4] = point.F[LBM_2] - 2.0 / 3.0 * pu;
 						point.F[LBM_7] = point.F[LBM_5] - diff - pu / 6.0;
@@ -470,16 +470,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_1] - f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_1, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_1] - f_eq_a_virtual_d3q19(LBM_1, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_1] - f_eq_a_virtual_d2q9(LBM_1, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_1] - f_eq_a_virtual_d2q9(LBM_1, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_1, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_1] - f_eq_a_virtual_d3q19(LBM_1, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_1] - f_eq_a_virtual_d3q19(LBM_1, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_1] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -493,16 +493,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_2] - f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_2, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_2] - f_eq_a_virtual_d3q19(LBM_2, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_2] - f_eq_a_virtual_d2q9(LBM_2, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_2] - f_eq_a_virtual_d2q9(LBM_2, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_2, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_2] - f_eq_a_virtual_d3q19(LBM_2, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_2] - f_eq_a_virtual_d3q19(LBM_2, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_2] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -516,16 +516,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_3] - f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_3, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_3] - f_eq_a_virtual_d3q19(LBM_3, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_3] - f_eq_a_virtual_d2q9(LBM_3, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_3] - f_eq_a_virtual_d2q9(LBM_3, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_3, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_3] - f_eq_a_virtual_d3q19(LBM_3, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_3] - f_eq_a_virtual_d3q19(LBM_3, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_3] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -539,16 +539,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_4] - f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_4, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_4] - f_eq_a_virtual_d3q19(LBM_4, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_4] - f_eq_a_virtual_d2q9(LBM_4, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_4] - f_eq_a_virtual_d2q9(LBM_4, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_4, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_4] - f_eq_a_virtual_d3q19(LBM_4, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_4] - f_eq_a_virtual_d3q19(LBM_4, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_4] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -562,16 +562,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_5] - f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_5, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_5] - f_eq_a_virtual_d3q19(LBM_5, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_5] - f_eq_a_virtual_d2q9(LBM_5, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_5] - f_eq_a_virtual_d2q9(LBM_5, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_5, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_5] - f_eq_a_virtual_d3q19(LBM_5, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_5] - f_eq_a_virtual_d3q19(LBM_5, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_5] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -585,16 +585,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_6] - f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_6, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_6] - f_eq_a_virtual_d3q19(LBM_6, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_6] - f_eq_a_virtual_d2q9(LBM_6, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_6] - f_eq_a_virtual_d2q9(LBM_6, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_6, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_6] - f_eq_a_virtual_d3q19(LBM_6, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_6] - f_eq_a_virtual_d3q19(LBM_6, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_6] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -608,16 +608,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_7] - f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_7, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_7] - f_eq_a_virtual_d3q19(LBM_7, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_7] - f_eq_a_virtual_d2q9(LBM_7, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_7] - f_eq_a_virtual_d2q9(LBM_7, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_7, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_7] - f_eq_a_virtual_d3q19(LBM_7, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_7] - f_eq_a_virtual_d3q19(LBM_7, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_7] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -631,16 +631,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_8] - f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_8, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_8] - f_eq_a_virtual_d3q19(LBM_8, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y + 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_8] - f_eq_a_virtual_d2q9(LBM_8, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_8] - f_eq_a_virtual_d2q9(LBM_8, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_8, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_8] - f_eq_a_virtual_d3q19(LBM_8, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_8] - f_eq_a_virtual_d3q19(LBM_8, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_8] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -654,16 +654,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_9, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_9] - f_eq_a_virtual_d2q9(LBM_9, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_9, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_9] - f_eq_a_virtual_d3q19(LBM_9, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_9, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_9] - f_eq_a_virtual_d2q9(LBM_9, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_9] - f_eq_a_virtual_d2q9(LBM_9, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_9, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_9] - f_eq_a_virtual_d3q19(LBM_9, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_9] - f_eq_a_virtual_d3q19(LBM_9, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_9] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -677,16 +677,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_10, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_10] - f_eq_a_virtual_d2q9(LBM_10, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_10, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_10] - f_eq_a_virtual_d3q19(LBM_10, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y - 2, z);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_10, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_10] - f_eq_a_virtual_d2q9(LBM_10, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_10] - f_eq_a_virtual_d2q9(LBM_10, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_10, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_10] - f_eq_a_virtual_d3q19(LBM_10, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_10] - f_eq_a_virtual_d3q19(LBM_10, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_10] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -700,16 +700,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_11, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_11] - f_eq_a_virtual_d2q9(LBM_11, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_11, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_11] - f_eq_a_virtual_d3q19(LBM_11, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_11, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_11] - f_eq_a_virtual_d2q9(LBM_11, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_11] - f_eq_a_virtual_d2q9(LBM_11, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_11, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_11] - f_eq_a_virtual_d3q19(LBM_11, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_11] - f_eq_a_virtual_d3q19(LBM_11, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_11] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -723,16 +723,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_12, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_12] - f_eq_a_virtual_d2q9(LBM_12, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_12, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_12] - f_eq_a_virtual_d3q19(LBM_12, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_12, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_12] - f_eq_a_virtual_d2q9(LBM_12, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_12] - f_eq_a_virtual_d2q9(LBM_12, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_12, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_12] - f_eq_a_virtual_d3q19(LBM_12, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_12] - f_eq_a_virtual_d3q19(LBM_12, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_12] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -746,16 +746,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_13, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_13] - f_eq_a_virtual_d2q9(LBM_13, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_13, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_13] - f_eq_a_virtual_d3q19(LBM_13, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x - 2, y, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_13, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_13] - f_eq_a_virtual_d2q9(LBM_13, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_13] - f_eq_a_virtual_d2q9(LBM_13, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_13, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_13] - f_eq_a_virtual_d3q19(LBM_13, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_13] - f_eq_a_virtual_d3q19(LBM_13, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_13] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -769,16 +769,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_14, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_14] - f_eq_a_virtual_d2q9(LBM_14, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_14, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_14] - f_eq_a_virtual_d3q19(LBM_14, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x + 2, y, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_14, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_14] - f_eq_a_virtual_d2q9(LBM_14, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_14] - f_eq_a_virtual_d2q9(LBM_14, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_14, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_14] - f_eq_a_virtual_d3q19(LBM_14, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_14] - f_eq_a_virtual_d3q19(LBM_14, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_14] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -792,16 +792,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_15, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_15] - f_eq_a_virtual_d2q9(LBM_15, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_15, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_15] - f_eq_a_virtual_d3q19(LBM_15, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_15, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_15] - f_eq_a_virtual_d2q9(LBM_15, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_15] - f_eq_a_virtual_d2q9(LBM_15, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_15, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_15] - f_eq_a_virtual_d3q19(LBM_15, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_15] - f_eq_a_virtual_d3q19(LBM_15, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_15] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -815,16 +815,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_16, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_16] - f_eq_a_virtual_d2q9(LBM_16, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_16, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_16] - f_eq_a_virtual_d3q19(LBM_16, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z + 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_16, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_16] - f_eq_a_virtual_d2q9(LBM_16, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_16] - f_eq_a_virtual_d2q9(LBM_16, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_16, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_16] - f_eq_a_virtual_d3q19(LBM_16, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_16] - f_eq_a_virtual_d3q19(LBM_16, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_16] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -838,16 +838,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_17, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_17] - f_eq_a_virtual_d2q9(LBM_17, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_17, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_17] - f_eq_a_virtual_d3q19(LBM_17, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y - 2, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_17, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_17] - f_eq_a_virtual_d2q9(LBM_17, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_17] - f_eq_a_virtual_d2q9(LBM_17, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_17, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_17] - f_eq_a_virtual_d3q19(LBM_17, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_17] - f_eq_a_virtual_d3q19(LBM_17, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_17] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -861,16 +861,16 @@ namespace pf {
 					double qqq = 1.0 - (solid_liquid_interface_threshold - point.fluid_region) / (near_point->fluid_region - point.fluid_region);
 					if (qqq >= q_c) {
 						U = (point.velocity + near_point->velocity * (qqq - 1.0)) / qqq;
-						f_eq = f_eq_a_virtual_d2q9(LBM_18, near_point->F_MACRO, U);
-						f_neq = near_point->F[LBM_18] - f_eq_a_virtual_d2q9(LBM_18, near_point->F_MACRO, near_point->velocity);
+						f_eq = f_eq_a_virtual_d3q19(LBM_18, near_point->F_MACRO, U);
+						f_neq = near_point->F[LBM_18] - f_eq_a_virtual_d3q19(LBM_18, near_point->F_MACRO, near_point->velocity);
 					}
 					else {
 						LBMPoint& near_near_point = external_physical_field::lbm_field.at2(x, y + 2, z - 2);
 						U = point.velocity + near_point->velocity * (qqq - 1.0)
 							+ (point.velocity * 2.0 + near_near_point.velocity * (qqq - 1.0)) * (1.0 - qqq) / (1.0 + qqq);
-						f_eq = f_eq_a_virtual_d2q9(LBM_18, near_point->F_MACRO, U);
-						f_neq = (near_point->F[LBM_18] - f_eq_a_virtual_d2q9(LBM_18, near_point->F_MACRO, near_point->velocity)) * qqq
-							+ (near_near_point.F[LBM_18] - f_eq_a_virtual_d2q9(LBM_18, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
+						f_eq = f_eq_a_virtual_d3q19(LBM_18, near_point->F_MACRO, U);
+						f_neq = (near_point->F[LBM_18] - f_eq_a_virtual_d3q19(LBM_18, near_point->F_MACRO, near_point->velocity)) * qqq
+							+ (near_near_point.F[LBM_18] - f_eq_a_virtual_d3q19(LBM_18, near_near_point.F_MACRO, near_near_point.velocity)) * (1.0 - qqq);
 					}
 					point.F[LBM_18] = f_eq + (1.0 - 1.0 / _tau) * f_neq;
 				}
@@ -1003,7 +1003,7 @@ namespace pf {
 					}
 				}
 				static void period_z_up(long long x, long long y, long long z) {
-					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+					if (z == external_physical_field::lbm_field.COMP_Z_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						LBMPoint& near_point = external_physical_field::lbm_field(x, y, z + 1);
 						point.F[LBM_6] = near_point.F[LBM_6];
@@ -1070,7 +1070,7 @@ namespace pf {
 					}
 				}
 				static void free_z_up(long long x, long long y, long long z) {
-					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+					if (z == external_physical_field::lbm_field.COMP_Z_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						LBMPoint& near_point = external_physical_field::lbm_field(x, y, z - 1);
 						point.F[LBM_6] = near_point.F[LBM_6];
@@ -1162,7 +1162,7 @@ namespace pf {
 					}
 				}
 				static void pressure_z_up(long long x, long long y, long long z) {
-					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+					if (z == external_physical_field::lbm_field.COMP_Z_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locDensity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue],
 							u = 1.0 - (point.F[LBM_0]
@@ -1259,7 +1259,7 @@ namespace pf {
 					}
 				}
 				static void normal_micro_flow_z_up(long long x, long long y, long long z) {
-					if (z == external_physical_field::lbm_field.COMP_Z_BGN()) {
+					if (z == external_physical_field::lbm_field.COMP_Z_END()) {
 						LBMPoint& point = external_physical_field::lbm_field(x, y, z);
 						double locVelocity = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed],
 							locDensity = (point.F[LBM_0]
@@ -1298,26 +1298,27 @@ namespace pf {
 		}
 
 		void cal_fluid_domain() {
+			if (main_field::is_phi_field_on) {
 #pragma omp parallel for
-			for (long long x = 0; x < external_physical_field::lbm_field.Nx(); x++)
-				for (long long y = 0; y < external_physical_field::lbm_field.Ny(); y++)
-					for (long long z = 0; z < external_physical_field::lbm_field.Nz(); z++) {
-						LBMPoint& fluid_point = external_physical_field::lbm_field(x, y, z);
-						Matrix1D<REAL>& phi_point = main_field::phase_field(x, y, z);
-						fluid_point.fluid_region = 0.0;
-						for (size_t index = 0; index < main_field::phi_number; index++)
-							if (is_solid_phases[index])
-								fluid_point.fluid_region += phi_point[index];
-						if (fluid_point.fluid_region > 1.0)
-							fluid_point.fluid_region = 1.0;
-						else if (fluid_point.fluid_region < 0.0)
+				for (long long x = 0; x < external_physical_field::lbm_field.Nx(); x++)
+					for (long long y = 0; y < external_physical_field::lbm_field.Ny(); y++)
+						for (long long z = 0; z < external_physical_field::lbm_field.Nz(); z++) {
+							LBMPoint& fluid_point = external_physical_field::lbm_field(x, y, z);
+							Matrix1D<REAL>& phi_point = main_field::phase_field(x, y, z);
 							fluid_point.fluid_region = 0.0;
-						fluid_point.fluid_region = 1.0 - fluid_point.fluid_region;
-					}
+							for (size_t index = 0; index < main_field::phi_number; index++)
+								if (is_solid_phases[index])
+									fluid_point.fluid_region += phi_point[index];
+							if (fluid_point.fluid_region > 1.0)
+								fluid_point.fluid_region = 1.0;
+							else if (fluid_point.fluid_region < 0.0)
+								fluid_point.fluid_region = 0.0;
+							fluid_point.fluid_region = 1.0 - fluid_point.fluid_region;
+						}
+			}
 		}
 
 		void init(LBM& fluid_lbm_solver) {
-			PhiProperties::instance().init();
 			tau = tau_const;
 			viscosity = viscosity_one_phase;
 			density = density_one_phase;
@@ -1326,27 +1327,21 @@ namespace pf {
 			Cs4 = cc * cc / 9.0;
 			bool is_solid_phase_in_simulation = false;
 			fluid_boundary_condition.resize(Fluid_Boundary_Condition::FBC_SIZE, std::vector<REAL>(Fluid_Boundary_Property::FBP_SIZE, 0));
-			WriteDebugFile("# Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases = (phase_name, ... ) \n");
-			std::string fluid_phase_key = "Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases", fluid_phase_input = "()";
-			infile_reader::read_string_value(fluid_phase_key, fluid_phase_input, true);
-			std::vector<input_value> fluid_phase_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, fluid_phase_key, fluid_phase_input, true);
-			is_solid_phases.resize(main_field::phi_number, false);
-			for (auto fluid_name = fluid_phase_value.begin(); fluid_name < fluid_phase_value.end(); fluid_name++) {
-				size_t property = 0;
-				if (PhiProperties::instance().is_phi_property(fluid_name->string_value))
-					property = PhiProperties::instance().phi_property(fluid_name->string_value);
-				else {
-					WriteDebugFile("# ERROR , phase name in Postprocess.FluidDynamics.LatticeBoltzmann.solid_phases is not defined in phi property ! \n");
-					SYS_PROGRAM_STOP;
-				}
-				is_solid_phase_in_simulation = true;
-				for (size_t index = 0; index < main_field::phi_number; index++)
-					if (PhiProperties::instance().phi_property(index) == property)
+			if (main_field::is_phi_field_on) {
+				WriteDebugFile("# Postprocess.FluidDynamics.solid_phi_index = ( index_0, ... ) \n");
+				std::string fluid_phase_key = "Postprocess.FluidDynamics.solid_phi_index", fluid_phase_input = "()";
+				infile_reader::read_string_value(fluid_phase_key, fluid_phase_input, true);
+				std::vector<input_value> fluid_phase_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, fluid_phase_key, fluid_phase_input, true);
+				is_solid_phases.resize(main_field::phi_number, false);
+				for (int index = 0; index < fluid_phase_value.size(); index++) {
+					size_t phi_index = size_t(fluid_phase_value[index].int_value);
+					if (phi_index < main_field::phi_number)
 						is_solid_phases[index] = true;
+				}
 			}
 			WriteDebugFile("# tau = viscosity / fluid_dt / Cs2 + 0.5 \n");
-			infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.liquid_viscosity", viscosity_liquid, true);
-			infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.liquid_density", density_liquid, true);
+			infile_reader::read_real_value("Postprocess.FluidDynamics.liquid_viscosity", viscosity_liquid, true);
+			infile_reader::read_real_value("Postprocess.FluidDynamics.liquid_density", density_liquid, true);
 			_tau_const = viscosity_liquid / time_parameters::delt_t / Cs2 + 0.5;
 
 			if (fluid_lbm_solver.lbm_lattice_model == LBM_LATTICE_MODEL::LBM_D2Q9) {
@@ -1356,58 +1351,28 @@ namespace pf {
 					d2q9_fluid_solid_boundary = bc_funcs::d2q9_fluid_solid_boundary_Guo2002;
 				else
 					d2q9_fluid_solid_boundary = bc_funcs::default_domain_boundary_condition;
-				WriteDebugFile("# .LatticeBoltzmann.boundary_condition = (down_x,up_x,down_y,up_y) \n");
-				WriteDebugFile("#                                        0 - Wall, 1 - Period, 2 - Free, 3 - Pressure, 4 - Normal_Flow \n");
-				WriteDebugFile("#                            .pressure = p0 , density0 = p0 / Cs^2 , Cs = 1 / sqrt(3) \n");
-				std::string bc_key = "Postprocess.FluidDynamics.LatticeBoltzmann.boundary_condition", bc_input = "(0,0,0,0)";
-				infile_reader::read_string_value(bc_key, bc_input, true);
-				std::vector<input_value> bc_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, bc_key, bc_input, true);
-				switch (Fluid_Domain_Boundary_Condition(bc_value[0].int_value)) // down_x
-				{
-				case FDBC_Wall:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed] = 0.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed], true);
-					if (isTwoREALEquality(fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed], 0.0))
-						d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::wall_no_slip_x_down;
-					else
-						d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::wall_slip_x_down;
-					break;
-				case FDBC_Period:
-					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::period_x_down;
-					break;
-				case FDBC_Free:
-					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::free_x_down;
-					break;
-				case FDBC_Pressure:
-					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::pressure_x_down;
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue], true);
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
-					break;
-				case FDBC_Normal_Flow:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
-					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::normal_micro_flow_x_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
-					break;
-				default:
-					break;
-				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[1].int_value)) // up_x
+				int bc_x_down = 1;
+				int bc_x_up = 1;
+				int bc_y_down = 1;
+				int bc_y_up = 1;
+				WriteDebugFile("# Postprocess.FluidDynamics.BoundaryCondition.[direction] = [BC] \n");
+				WriteDebugFile("#                           [direction] = x_up , x_down , y_up , y_down \n");
+				WriteDebugFile("#                           [BC] = 0 - Wall, 1 - Period, 2 - Free, 3 - Pressure, 4 - Normal_Flow \n");
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.x_up", bc_x_up, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_x_up)) // up_x
 				{
 				case FDBC_Wall:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallSpeed] = 0.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallSpeed], true);
 					if (isTwoREALEquality(fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallSpeed], 0.0))
 						d2q9_domain_boundary_x_up = bc_funcs::lbm_bc_d2q9::wall_no_slip_x_up;
 					else
 						d2q9_domain_boundary_x_up = bc_funcs::lbm_bc_d2q9::wall_slip_x_up;
 					break;
 				case FDBC_Period:
-					d2q9_domain_boundary_x_up = bc_funcs::lbm_bc_d2q9::period_x_up;
+					d2q9_domain_boundary_x_up = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
 					d2q9_domain_boundary_x_up = bc_funcs::lbm_bc_d2q9::free_x_up;
@@ -1415,63 +1380,65 @@ namespace pf {
 				case FDBC_Pressure:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
 					d2q9_domain_boundary_x_up = bc_funcs::lbm_bc_d2q9::pressure_x_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue], true);
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
 					d2q9_domain_boundary_x_up = bc_funcs::lbm_bc_d2q9::normal_micro_flow_x_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
 				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[2].int_value)) // down_y
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.x_down", bc_x_down, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_x_down)) // down_x
 				{
 				case FDBC_Wall:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed] = 0.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed], true);
-					if (isTwoREALEquality(fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed], 0.0))
-						d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::wall_no_slip_y_down;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed] = 0.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed], true);
+					if (isTwoREALEquality(fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallSpeed], 0.0))
+						d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::wall_no_slip_x_down;
 					else
-						d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::wall_slip_y_down;
+						d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::wall_slip_x_down;
 					break;
 				case FDBC_Period:
-					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::period_y_down;
+					d2q9_domain_boundary_x_down = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
-					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::free_y_down;
+					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::free_x_down;
 					break;
 				case FDBC_Pressure:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
-					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::pressure_y_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
+					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::pressure_x_down;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
-					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::normal_micro_flow_y_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
+					d2q9_domain_boundary_x_down = bc_funcs::lbm_bc_d2q9::normal_micro_flow_x_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
 				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[3].int_value)) // up_y
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.y_up", bc_y_up, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_y_up)) // up_y
 				{
 				case FDBC_Wall:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallSpeed] = 0.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallSpeed], true);
 					if (isTwoREALEquality(fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallSpeed], 0.0))
 						d2q9_domain_boundary_y_up = bc_funcs::lbm_bc_d2q9::wall_no_slip_y_up;
 					else
 						d2q9_domain_boundary_y_up = bc_funcs::lbm_bc_d2q9::wall_slip_y_up;
 					break;
 				case FDBC_Period:
-					d2q9_domain_boundary_y_up = bc_funcs::lbm_bc_d2q9::period_y_up;
+					d2q9_domain_boundary_y_up = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
 					d2q9_domain_boundary_y_up = bc_funcs::lbm_bc_d2q9::free_y_up;
@@ -1479,13 +1446,46 @@ namespace pf {
 				case FDBC_Pressure:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
 					d2q9_domain_boundary_y_up = bc_funcs::lbm_bc_d2q9::pressure_y_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
 					d2q9_domain_boundary_y_up = bc_funcs::lbm_bc_d2q9::normal_micro_flow_y_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					break;
+				default:
+					break;
+				}
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.y_down", bc_y_down, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_y_down)) // down_y
+				{
+				case FDBC_Wall:
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed] = 0.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.wall_speed", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed], true);
+					if (isTwoREALEquality(fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallSpeed], 0.0))
+						d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::wall_no_slip_y_down;
+					else
+						d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::wall_slip_y_down;
+					break;
+				case FDBC_Period:
+					d2q9_domain_boundary_y_down = bc_funcs::default_domain_boundary_condition;
+					break;
+				case FDBC_Free:
+					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::free_y_down;
+					break;
+				case FDBC_Pressure:
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
+					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::pressure_y_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
+					break;
+				case FDBC_Normal_Flow:
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
+					d2q9_domain_boundary_y_down = bc_funcs::lbm_bc_d2q9::normal_micro_flow_y_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
@@ -1498,48 +1498,25 @@ namespace pf {
 				else
 					d3q19_fluid_solid_boundary = bc_funcs::default_domain_boundary_condition;
 				// load boundary condition
-				WriteDebugFile("# .LatticeBoltzmann.boundary_condition = (down_x,up_x,down_y,up_y,down_z,up_z) \n");
-				WriteDebugFile("#                                        0 - Wall, 1 - Period, 2 - Free, 3 - Pressure, 4 - Normal_Flow \n");
-				WriteDebugFile("#                            .pressure = p0 , density0 = p0 / Cs^2 , Cs = 1 / sqrt(3) \n");
-				std::string bc_key = "Postprocess.FluidDynamics.LatticeBoltzmann.boundary_condition", bc_input = "(0,0,0,0,0,0)";
-				infile_reader::read_string_value(bc_key, bc_input, true);
-				std::vector<input_value> bc_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, bc_key, bc_input, true);
-				switch (Fluid_Domain_Boundary_Condition(bc_value[0].int_value)) // down_x
-				{
-				case FDBC_Wall:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::wall_no_slip_x_down;
-					break;
-				case FDBC_Period:
-					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::period_x_down;
-					break;
-				case FDBC_Free:
-					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::free_x_down;
-					break;
-				case FDBC_Pressure:
-					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::pressure_x_down;
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue], true);
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
-					break;
-				case FDBC_Normal_Flow:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
-					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::normal_micro_flow_x_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_X.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
-					break;
-				default:
-					break;
-				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[1].int_value)) // up_x
+				int bc_x_down = 1;
+				int bc_x_up = 1;
+				int bc_y_down = 1;
+				int bc_y_up = 1;
+				int bc_z_down = 1;
+				int bc_z_up = 1;
+				WriteDebugFile("# Postprocess.FluidDynamics.BoundaryCondition.[direction] = [BC] \n");
+				WriteDebugFile("#                           [direction] = x_up , x_down , y_up , y_down , z_up , z_down \n");
+				WriteDebugFile("#                           [BC] = 0 - Wall, 1 - Period, 2 - Free, 3 - Pressure, 4 - Normal_Flow \n");
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.x_up", bc_x_up, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_x_up)) // up_x
 				{
 				case FDBC_Wall:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
 					d3q19_domain_boundary_x_up = bc_funcs::lbm_bc_d3q19::wall_no_slip_x_up;
 					break;
 				case FDBC_Period:
-					d3q19_domain_boundary_x_up = bc_funcs::lbm_bc_d3q19::period_x_up;
+					d3q19_domain_boundary_x_up = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
 					d3q19_domain_boundary_x_up = bc_funcs::lbm_bc_d3q19::free_x_up;
@@ -1547,53 +1524,55 @@ namespace pf {
 				case FDBC_Pressure:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
 					d3q19_domain_boundary_x_up = bc_funcs::lbm_bc_d3q19::pressure_x_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue], true);
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
 					d3q19_domain_boundary_x_up = bc_funcs::lbm_bc_d3q19::normal_micro_flow_x_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_X.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_up.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
 				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[2].int_value)) // down_y
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.x_down", bc_x_down, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_x_down)) // down_x
 				{
 				case FDBC_Wall:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::wall_no_slip_y_down;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::wall_no_slip_x_down;
 					break;
 				case FDBC_Period:
-					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::period_y_down;
+					d3q19_domain_boundary_x_down = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
-					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::free_y_down;
+					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::free_x_down;
 					break;
 				case FDBC_Pressure:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
-					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::pressure_y_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
+					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::pressure_x_down;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
-					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::normal_micro_flow_y_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Y.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
+					d3q19_domain_boundary_x_down = bc_funcs::lbm_bc_d3q19::normal_micro_flow_x_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.x_down.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_X][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
 				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[3].int_value)) // up_y
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.y_up", bc_y_up, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_y_up)) // up_y
 				{
 				case FDBC_Wall:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
 					d3q19_domain_boundary_y_up = bc_funcs::lbm_bc_d3q19::wall_no_slip_y_up;
 					break;
 				case FDBC_Period:
-					d3q19_domain_boundary_y_up = bc_funcs::lbm_bc_d3q19::period_y_up;
+					d3q19_domain_boundary_y_up = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
 					d3q19_domain_boundary_y_up = bc_funcs::lbm_bc_d3q19::free_y_up;
@@ -1601,53 +1580,55 @@ namespace pf {
 				case FDBC_Pressure:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
 					d3q19_domain_boundary_y_up = bc_funcs::lbm_bc_d3q19::pressure_y_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
 					d3q19_domain_boundary_y_up = bc_funcs::lbm_bc_d3q19::normal_micro_flow_y_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Y.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_up.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
 				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[4].int_value)) // down_z
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.y_down", bc_y_down, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_y_down)) // down_y
 				{
 				case FDBC_Wall:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Z.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_WallRoughness], true);
-					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::wall_no_slip_z_down;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::wall_no_slip_y_down;
 					break;
 				case FDBC_Period:
-					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::period_z_down;
+					d3q19_domain_boundary_y_down = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
-					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::free_z_down;
+					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::free_y_down;
 					break;
 				case FDBC_Pressure:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
-					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::pressure_z_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Z.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue], true);
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
+					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::pressure_y_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
-					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
-					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::normal_micro_flow_z_down;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Down_Z.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
+					d3q19_domain_boundary_y_down = bc_funcs::lbm_bc_d3q19::normal_micro_flow_y_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.y_down.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Y][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
 				}
-				switch (Fluid_Domain_Boundary_Condition(bc_value[5].int_value)) // up_z
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.z_up", bc_z_up, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_z_up)) // up_z
 				{
 				case FDBC_Wall:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Z.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.z_up.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_WallRoughness], true);
 					d3q19_domain_boundary_z_up = bc_funcs::lbm_bc_d3q19::wall_no_slip_z_up;
 					break;
 				case FDBC_Period:
-					d3q19_domain_boundary_z_up = bc_funcs::lbm_bc_d3q19::period_z_up;
+					d3q19_domain_boundary_z_up = bc_funcs::default_domain_boundary_condition;
 					break;
 				case FDBC_Free:
 					d3q19_domain_boundary_z_up = bc_funcs::lbm_bc_d3q19::free_z_up;
@@ -1655,13 +1636,41 @@ namespace pf {
 				case FDBC_Pressure:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
 					d3q19_domain_boundary_z_up = bc_funcs::lbm_bc_d3q19::pressure_z_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Z.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.z_up.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue], true);
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
 					break;
 				case FDBC_Normal_Flow:
 					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
 					d3q19_domain_boundary_z_up = bc_funcs::lbm_bc_d3q19::normal_micro_flow_z_up;
-					infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.BC_Up_Z.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.z_up.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_UP_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
+					break;
+				default:
+					break;
+				}
+				InputFileReader::get_instance()->read_int_value("Postprocess.FluidDynamics.BoundaryCondition.z_down", bc_z_down, true);
+				switch (Fluid_Domain_Boundary_Condition(bc_z_down)) // down_z
+				{
+				case FDBC_Wall:
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_WallRoughness] = 1.0;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.z_down.wall_roughness", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_WallRoughness], true);
+					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::wall_no_slip_z_down;
+					break;
+				case FDBC_Period:
+					d3q19_domain_boundary_z_down = bc_funcs::default_domain_boundary_condition;
+					break;
+				case FDBC_Free:
+					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::free_z_down;
+					break;
+				case FDBC_Pressure:
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue] = 1.0;
+					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::pressure_z_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.z_down.pressure", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue], true);
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue] = fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_DensityValue] / Cs2;
+					break;
+				case FDBC_Normal_Flow:
+					fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed] = 0.0;
+					d3q19_domain_boundary_z_down = bc_funcs::lbm_bc_d3q19::normal_micro_flow_z_down;
+					infile_reader::read_real_value("Postprocess.FluidDynamics.BoundaryCondition.z_down.normal_velocity", fluid_boundary_condition[Fluid_Boundary_Condition::FBC_DOWN_Z][Fluid_Boundary_Property::FBP_NormalFlowSpeed], true);
 					break;
 				default:
 					break;
@@ -1675,10 +1684,10 @@ namespace pf {
 			// viscosity = viscosity_two_phase;
 			// density = density_two_phase;
 			// WriteDebugFile("# tau_two_phase = Mobility / fluid_dt / Cs2 + 0.5 \n");
-			// infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.TwoPhaseFLow.Mobility", mobility_two_phase, true);
+			// infile_reader::read_real_value("Postprocess.FluidDynamics.TwoPhaseFLow.Mobility", mobility_two_phase, true);
 			// _tau_two_phase = mobility_two_phase / PCT_dt / Cs2 + 0.5;
-			// infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.TwoPhaseFLow.gas_viscosity", viscosity_gas, true);
-			// infile_reader::read_real_value("Postprocess.FluidDynamics.LatticeBoltzmann.TwoPhaseFLow.gas_density", density_gas, true);
+			// infile_reader::read_real_value("Postprocess.FluidDynamics.TwoPhaseFLow.gas_viscosity", viscosity_gas, true);
+			// infile_reader::read_real_value("Postprocess.FluidDynamics.TwoPhaseFLow.gas_density", density_gas, true);
 			// 
 			// if (field_lbm_two_phase_solver.lbm_lattice_model == LBM_LATTICE_MODEL::LBM_D2Q9) {
 			// 	field_lbm_two_phase_solver._boundary_condition = boundary_condition_d2q9;
@@ -1691,7 +1700,7 @@ namespace pf {
 		void lbm_properties_automatically_change() {
 			double cc = mesh_parameters::delt_r / time_parameters::delt_t;
 			Cs2 = cc * cc / 3.0;
-			Cs4 = cc * cc / 9.0;
+			Cs4 = cc * cc * cc * cc / 9.0;
 			_tau_const = viscosity_liquid / time_parameters::delt_t / Cs2 + 0.5;
 			_tau_two_phase = mobility_two_phase / time_parameters::delt_t / Cs2 + 0.5;
 		}

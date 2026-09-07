@@ -18,6 +18,7 @@ namespace pf {
 		bool is_phi_property(std::string _property_name);
 		std::string phi_property_name(size_t phi_property_index);
 		void init();
+		void init(std::vector<std::string> default_phi);
 		size_t operator[](size_t phi_index) {
 			return _phi_property[phi_index];
 		}

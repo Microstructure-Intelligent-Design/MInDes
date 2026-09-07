@@ -26,7 +26,7 @@ namespace pf {
 				fout << "<PointData Scalars= \"ScalarData\"  Vectors= \"VectorData\">" << std::endl;
 			}
 			void write_scalar_grains(std::ofstream& fout) {
-				fout << "<DataArray type = \"Float64\" Name = \"" << "grains" <<
+				fout << "<DataArray type = \"Float64\" Name = \"" << "phi2_summary" <<
 					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
@@ -70,7 +70,7 @@ namespace pf {
 			}
 			void write_scalar_grad_phi_all(std::ofstream& fout) {
 				for (size_t pindex = 0; pindex < main_field::phi_number; pindex++) {
-					std::string phi_name = "grad_phi_" + std::to_string(pindex);
+					std::string phi_name = "phi_grad_" + std::to_string(pindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << phi_name <<
 						"\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
@@ -102,7 +102,7 @@ namespace pf {
 			}
 			void write_scalar_grad_con_all(std::ofstream& fout) {
 				for (size_t cindex = 0; cindex < main_field::con_number; cindex++) {
-					std::string con_name = "grad_con_" + std::to_string(cindex);
+					std::string con_name = "con_grad_" + std::to_string(cindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << con_name <<
 						"\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
@@ -131,7 +131,7 @@ namespace pf {
 				fout << "</DataArray>" << std::endl;
 			}
 			void write_scalar_grad_temperature(std::ofstream& fout) {
-				fout << "<DataArray type = \"Float64\" Name = \"" << "grad_temp" <<
+				fout << "<DataArray type = \"Float64\" Name = \"" << "temp_grad" <<
 					"\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
@@ -144,6 +144,48 @@ namespace pf {
 								<< (main_field::temperature_field(i, j, k + 1) - main_field::temperature_field(i, j, k - 1)) / 2 / mesh_parameters::delt_r << std::endl;
 							else
 								fout << 0 << " " << 0 << " " << 0 << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
+			void write_velocity(std::ofstream& fout) {
+				fout << "<DataArray type = \"Float64\" Name = \"fluid_velocity\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							LBMPoint& point = external_physical_field::lbm_field(i, j, k);
+							fout << point.velocity[0] << " "
+								<< point.velocity[1] << " "
+								<< point.velocity[2] << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
+			void write_abs_velocity(std::ofstream& fout) {
+				fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_abs_velocity" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							fout << external_physical_field::lbm_field(i, j, k).velocity.abs() << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
+			void write_pressure(std::ofstream& fout) {
+				fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_pressure" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							fout << external_physical_field::lbm_field(i, j, k).pressure << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
+			void write_density(std::ofstream& fout) {
+				fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_density" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							fout << external_physical_field::lbm_field(i, j, k).mass << std::endl;
 						}
 				fout << "</DataArray>" << std::endl;
 			}
@@ -252,7 +294,7 @@ namespace pf {
 				if (buff)
 					load_vts_func(default_functions::write_scalar_phi_all);
 				buff = false;
-				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grad_phi_all", buff, true);
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.phi_grad_all", buff, true);
 				if (buff)
 					load_vts_func(default_functions::write_scalar_grad_phi_all);
 				buff = false;
@@ -260,7 +302,7 @@ namespace pf {
 				if (buff)
 					load_vts_func(default_functions::write_scalar_phi_index);
 				buff = false;
-				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grains", buff, true);
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.phi2_summary", buff, true);
 				if (buff)
 					load_vts_func(default_functions::write_scalar_grains);
 			}
@@ -270,7 +312,7 @@ namespace pf {
 				if (buff)
 					load_vts_func(default_functions::write_scalar_con_all);
 				buff = false;
-				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grad_con_all", buff, true);
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.con_grad_all", buff, true);
 				if (buff)
 					load_vts_func(default_functions::write_scalar_grad_con_all);
 			}
@@ -280,9 +322,27 @@ namespace pf {
 				if (buff)
 					load_vts_func(default_functions::write_scalar_temperature);
 				buff = false;
-				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.grad_temp", buff, true);
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.temp_grad", buff, true);
 				if (buff)
 					load_vts_func(default_functions::write_scalar_grad_temperature);
+			}
+			if (external_physical_field::is_fluid_field_on) {
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.fluid_velocity", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_velocity);
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.fluid_abs_velocity", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_abs_velocity);
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.fluid_pressure", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_pressure);
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.fluid_density", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_density);
 			}
 		}
 	}

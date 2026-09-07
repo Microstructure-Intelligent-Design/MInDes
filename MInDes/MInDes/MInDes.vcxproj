@@ -42,7 +42,7 @@
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.cpp" />
-    <ClCompile Include="src\modules\model_modules\dendritic_solidification\DS_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\dendrite_solidification\DS_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
     <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\PhiProperties.cpp" />
@@ -55,7 +55,6 @@
     <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\FluidDynamics\SourceF.cpp" />
-    <ClCompile Include="src\modules\postprocess_modules\FluidField.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\MachineLearning.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.cpp" />
     <ClCompile Include="src\modules\postprocess_modules\MachineLearning\field_predictor.cpp" />
@@ -108,9 +107,9 @@
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Params.h" />
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.h" />
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.h" />
-    <ClInclude Include="src\modules\model_modules\dendritic_solidification\DS_Functions.h" />
-    <ClInclude Include="src\modules\model_modules\dendritic_solidification\DS_Manager.h" />
-    <ClInclude Include="src\modules\model_modules\dendritic_solidification\DS_Params.h" />
+    <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Params.h" />
     <ClInclude Include="src\modules\model_modules\GrainsOrientations.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.h" />
     <ClInclude Include="src\modules\model_modules\grain_grows_spinodal\GGS_Manager.h" />
@@ -128,7 +127,6 @@
     <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\LatticeBoltzmann.h" />
     <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\MacroVar.h" />
     <ClInclude Include="src\modules\postprocess_modules\FluidDynamics\SourceF.h" />
-    <ClInclude Include="src\modules\postprocess_modules\FluidField.h" />
     <ClInclude Include="src\modules\postprocess_modules\MachineLearning.h" />
     <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_layout.h" />
     <ClInclude Include="src\modules\postprocess_modules\MachineLearning\FieldPredictor\shm_manager_win.h" />
@@ -275,12 +273,10 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ncrypt.lib;bcrypt.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ncrypt.lib;bcrypt.lib;libfftw3-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -298,12 +294,10 @@ xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)MInDes\lib\x64;$(SolutionDir)MInDes\lib\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ncrypt.lib;bcrypt.lib;libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ncrypt.lib;bcrypt.lib;libfftw3-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3f-3.dll" "$(SolutionDir)MInDes" /Y /D
-xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3l-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)MInDes\lib\x64\libfftw3-3.dll" "$(SolutionDir)MInDes" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

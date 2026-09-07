@@ -116,17 +116,29 @@ namespace pf {
 				main_field::init_temperature_field();
 		}
 		// - 
-		std::string external_physical_field_key = "Solver.Mesh.EPF", external_physical_field_string = "(false,false)";
-		WriteDebugFile("# Solver.Mesh.EPF = ( is_mechanical_field_on, is_fluid_field_on ) \n");
-		if (InputFileReader::get_instance()->read_string_value(external_physical_field_key, external_physical_field_string, true)) {
-			std::vector<input_value> external_physical_field_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(
-				InputValueType::IVType_BOOL, external_physical_field_key, external_physical_field_string, true);
-			external_physical_field::is_mech_field_on = external_physical_field_value[0].bool_value;
-			external_physical_field::is_fluid_field_on = external_physical_field_value[1].bool_value;
-			if (external_physical_field::is_mech_field_on)
-				external_physical_field::init_elastic_field();
-			if (external_physical_field::is_fluid_field_on)
-				external_physical_field::init_fluid_field();
+		if (main_field::is_phi_field_on || main_field::is_con_field_on || main_field::is_temp_field_on) {
+			std::string external_physical_field_key = "Solver.Mesh.EPF", external_physical_field_string = "(false,false)";
+			WriteDebugFile("# Solver.Mesh.EPF = ( is_mechanical_field_on, is_fluid_field_on ) \n");
+			if (InputFileReader::get_instance()->read_string_value(external_physical_field_key, external_physical_field_string, true)) {
+				std::vector<input_value> external_physical_field_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(
+					InputValueType::IVType_BOOL, external_physical_field_key, external_physical_field_string, true);
+				external_physical_field::is_mech_field_on = external_physical_field_value[0].bool_value;
+				external_physical_field::is_fluid_field_on = external_physical_field_value[1].bool_value;
+				if (external_physical_field::is_mech_field_on)
+					external_physical_field::init_elastic_field();
+				if (external_physical_field::is_fluid_field_on)
+					external_physical_field::init_fluid_field();
+				if (mesh_parameters::dimention == Dimension::One_Dimension) {
+					if (external_physical_field::is_mech_field_on) {
+						WriteDebugFile("# ERROR: Mechanical Module unavailable in 1D domains ! \n");
+						SYS_PROGRAM_STOP;
+					}
+					if (external_physical_field::is_fluid_field_on) {
+						WriteDebugFile("# ERROR: Fluid Module unavailable in 1D domains ! \n");
+						SYS_PROGRAM_STOP;
+					}
+				}
+			}
 		}
 	}
 }

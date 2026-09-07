@@ -1,6 +1,6 @@
 #include "DS_Functions.h"
 namespace pf {
-	namespace dendritic_solidification_model {
+	namespace dendrite_solidification_model {
 		void exec_pre_iii() {
 			// > generate points
 			std::random_device rd; // 高质量随机数种子生成器

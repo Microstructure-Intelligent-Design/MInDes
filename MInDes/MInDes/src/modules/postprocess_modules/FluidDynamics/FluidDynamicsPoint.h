@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../../base/VectorMatrix.h"
 namespace pf {
 	enum LBM_LATTICE_MODEL { LBM_D2Q9, LBM_D3Q19 };
@@ -131,7 +131,7 @@ namespace pf {
 			F_MACRO = 0;
 			pressure = 0;
 			mass = 0;
-			fluid_region = 0;
+			fluid_region = 1.0;
 		};
 		void init(LBM_LATTICE_MODEL model) {
 			if (model == LBM_LATTICE_MODEL::LBM_D2Q9) {
@@ -147,7 +147,91 @@ namespace pf {
 			pressure = 0;
 			mass = 0;
 			velocity = Vector3(0, 0, 0);
-			fluid_region = 0;
+			fluid_region = 1.0;
+		}
+		// 矩阵加法 (+)
+		LBMPoint operator+(const LBMPoint& other) const {
+			LBMPoint result = *this;
+			result += other;
+			return result;
+		}
+		// 矩阵减法 (-)
+		LBMPoint operator-(const LBMPoint& other) const {
+			LBMPoint result = *this;
+			result -= other;
+			return result;
+		}
+		// 矩阵除法 (*) - 逐元素相乘
+		LBMPoint operator*(const REAL& other) const {
+			LBMPoint result = *this;
+			result *= other;
+			return result;
+		}
+		// 矩阵除法 (/) - 逐元素相除
+		LBMPoint operator/(const REAL& other) const {
+			LBMPoint result = *this;
+			result /= other;
+			return result;
+		}
+		// 复合赋值运算符 (+=)，可以提升连续运算时的性能
+		LBMPoint& operator+=(const LBMPoint& other) {
+			size_t f_number = F.size();
+			for (size_t i = 0; i < f_number; ++i) {
+				F[i] += other.F[i];
+				M[i] += other.M[i];
+			}
+			F_MACRO += other.F_MACRO;
+			FV_MACRO += other.FV_MACRO;
+			pressure += other.pressure;
+			mass += other.mass;
+			velocity += other.velocity;
+			fluid_region += other.fluid_region;
+			return *this;
+		}
+		// 复合赋值运算符 (-=)，可以提升连续运算时的性能
+		LBMPoint& operator-=(const LBMPoint& other) {
+			size_t f_number = F.size();
+			for (size_t i = 0; i < f_number; ++i) {
+				F[i] -= other.F[i];
+				M[i] -= other.M[i];
+			}
+			F_MACRO -= other.F_MACRO;
+			FV_MACRO -= other.FV_MACRO;
+			pressure -= other.pressure;
+			mass -= other.mass;
+			velocity -= other.velocity;
+			fluid_region -= other.fluid_region;
+			return *this;
+		}
+		// 复合赋值运算符 (*=)，可以提升连续运算时的性能
+		LBMPoint& operator*=(const REAL& other) {
+			size_t f_number = F.size();
+			for (size_t i = 0; i < f_number; ++i) {
+				F[i] *= other;
+				M[i] *= other;
+			}
+			F_MACRO *= other;
+			FV_MACRO *= other;
+			pressure *= other;
+			mass *= other;
+			velocity *= other;
+			fluid_region *= other;
+			return *this;
+		}
+		// 复合赋值运算符 (/=)，可以提升连续运算时的性能
+		LBMPoint& operator/=(const REAL& other) {
+			size_t f_number = F.size();
+			for (size_t i = 0; i < f_number; ++i) {
+				F[i] /= other;
+				M[i] /= other;
+			}
+			F_MACRO /= other;
+			FV_MACRO /= other;
+			pressure /= other;
+			mass /= other;
+			velocity /= other;
+			fluid_region /= other;
+			return *this;
 		}
 	};
 }

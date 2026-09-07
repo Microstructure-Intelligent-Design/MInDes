@@ -9,8 +9,6 @@
 #include "postprocess_modules/ShowLoopInfo.h"
 #include "postprocess_modules/WriteVTS.h"
 #include "postprocess_modules/CpuMemoryUsage.h"
-#include "postprocess_modules/MechanicalField.h"
-#include "postprocess_modules/FluidField.h"
 namespace pf {
 	struct Solver_Module
 	{

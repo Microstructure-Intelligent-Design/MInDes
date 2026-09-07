@@ -28,6 +28,10 @@ namespace pf {
 			void write_scalar_grad_con_all(std::ofstream& fout);
 			void write_scalar_temperature(std::ofstream& fout);
 			void write_scalar_grad_temperature(std::ofstream& fout);
+			void write_velocity(std::ofstream& fout);
+			void write_abs_velocity(std::ofstream& fout);
+			void write_pressure(std::ofstream& fout);
+			void write_density(std::ofstream& fout);
 			void close_vts_file(std::ofstream& fout);
 		}
 		void write_vts_pre_iii();

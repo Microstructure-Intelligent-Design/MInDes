@@ -15,7 +15,7 @@ namespace pf {
 		void lbm_properties_automatically_change() {
 			double cc = mesh_parameters::delt_r / time_parameters::delt_t;
 			Cs2 = cc * cc / 3.0;
-			Cs4 = cc * cc / 9.0;
+			Cs4 = cc * cc * cc * cc / 9.0;
 		}
 
 		void init(LBM& fluid_lbm_solver) {
