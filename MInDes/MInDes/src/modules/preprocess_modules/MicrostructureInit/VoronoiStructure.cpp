@@ -219,6 +219,11 @@ namespace pf {
 					geo.con = voronoi_con;
 					geo.phi = 1;
 					geo.isNormalized = true;
+					geo.is_phi = true;
+					if (is_temp)
+						geo.is_temp = true;
+					if (is_con)
+						geo.is_con = true;
 					geometry_structure::nucleation_box.geometry_box.push_back(geo);
 				}
 			}
@@ -581,6 +586,11 @@ namespace pf {
 					set.phaseIndex = voronoi_phi_index_range[0] + grain;
 					set.temperature = voronoi_temperature;
 					set.con = voronoi_con;
+					set.is_phi = true;
+					if (is_temp)
+						set.is_temp = true;
+					if (is_con)
+						set.is_con = true;
 					set.is_normalized = false;
 					if (sum_sum_phi > 1e-6) {
 						geometry_structure::nucleation_box.point_set_box.push_back(set);

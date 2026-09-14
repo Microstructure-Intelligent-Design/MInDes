@@ -28,11 +28,7 @@ namespace pf {
 		void lbm_properties_automatically_change();
 		void init();
 		void exec_pre();
-		std::string exec_loop();
+		void exec_loop();
 		void deinit();
-		void write_velocity(std::ofstream& fout);
-		void write_abs_velocity(std::ofstream& fout);
-		void write_pressure(std::ofstream& fout);
-		void write_density(std::ofstream& fout);
 	}
 }

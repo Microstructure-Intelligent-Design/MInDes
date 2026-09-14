@@ -7,7 +7,7 @@ Solver.Mesh.PCT = (12,0,false)
 
 Preprocess.Microstructure.is_datafile_init = true
 # Preprocess.Microstructure.datafile_path : relative path from infile folder.
-Preprocess.Microstructure.datafile_path = 9_voronoi3d\MeshData_step0.dat
+Preprocess.Microstructure.datafile_path = 09_voronoi3d\MeshData_step0.dat
 
 Solver.Output.VTS.frequence = 1000
 Solver.Output.VTS.with_boundary = false

@@ -29,24 +29,6 @@ namespace pf {
 			WriteDebugFile("#             f(eta)        = 0.25 + \\sum_i {eta_i^4 / 4 - eta_i^2 / 2} + epsilon * \\sum_i \\sum_{j>i} {eta_i^2 * eta_j^2} \n");
 			WriteDebugFile("#             M(eta)        = Mb + Mg * (\\sum_i \\sum_{j>i} {eta_i^2 * eta_j^2})^0.5 \n");
 			// - 
-			parameters::phase_field = &main_field::phase_field;
-			parameters::concentration_field = &main_field::concentration_field;
-			parameters::MESH_NX = mesh_parameters::MESH_NX;
-			parameters::MESH_NY = mesh_parameters::MESH_NY;
-			parameters::MESH_NZ = mesh_parameters::MESH_NZ;
-			parameters::x_down = mesh_parameters::x_down;
-			parameters::y_down = mesh_parameters::y_down;
-			parameters::z_down = mesh_parameters::z_down;
-			parameters::x_up = mesh_parameters::x_up;
-			parameters::y_up = mesh_parameters::y_up;
-			parameters::z_up = mesh_parameters::z_up;
-			parameters::delt_r = mesh_parameters::delt_r;
-			parameters::delt_t = &time_parameters::delt_t;
-			parameters::phi_number = main_field::phi_number;
-			parameters::PHI_MAX_VARIATION = &main_field::PHI_MAX_VARIATION;
-			parameters::con_number = main_field::con_number;
-			parameters::CON_MAX_VARIATION = &main_field::CON_MAX_VARIATION;
-			// - 
 			infile_reader::read_real_value("SimulationModels.GrainGrowsSpinodal.L", parameters::L, true);
 			infile_reader::read_real_value("SimulationModels.GrainGrowsSpinodal.epsilon", parameters::epsilon, true);
 			infile_reader::read_real_value("SimulationModels.GrainGrowsSpinodal.kappa_eta", parameters::kappa_eta, true);

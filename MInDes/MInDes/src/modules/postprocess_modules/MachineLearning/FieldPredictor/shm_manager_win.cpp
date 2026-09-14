@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include "shm_manager_win.h"
 #include <iostream>
 
@@ -73,3 +74,4 @@ namespace pf {
         output_ = nullptr;
     }
 }
+#endif

@@ -8,8 +8,10 @@ Solver.Mesh.PCT = (2,0,false)
 # .matrix_phi = ( phi_index, phi_value ) 
 Preprocess.Microstructure.matrix_phi = (0, 1.0)
 
-# Preprocess.Microstructure.porous = (first_phi_index, second_phi_index, porosity, noise_level) 
-Preprocess.Microstructure.porous = (0,1,0.5,0.1)
+# Preprocess.Microstructure.porous = (porosity, noise_level) 
+Preprocess.Microstructure.porous = (0.5,0.1)
+# .phi = (first_phi_index, second_phi_index) 
+Preprocess.Microstructure.Porous.phi = (0,1)
 
 Solver.Output.VTS.frequence = 1000
 Solver.Output.VTS.with_boundary = false

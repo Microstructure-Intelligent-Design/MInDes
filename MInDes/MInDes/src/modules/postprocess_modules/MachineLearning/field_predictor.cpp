@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include "field_predictor.h"
 #include <windows.h>
 #include <chrono>
@@ -111,3 +112,4 @@ namespace pf {
         }
     }
 }
+#endif

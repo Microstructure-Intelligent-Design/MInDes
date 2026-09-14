@@ -2,8 +2,11 @@
 #include "../../base/Mesh_0.h"
 #include "../../base/VectorMatrix.h"
 #include "../../input_modules/ioFiles_Params.h"
-//x64
+#ifdef _WIN32
 #include "../../../../lib/x64/fftw3.h"
+#else
+#include <fftw3.h>
+#endif
 #include <complex>
 #include "MechanicalPoint.h"
 const std::complex<double> I(0.0, 1.0);

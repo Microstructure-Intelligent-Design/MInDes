@@ -9,7 +9,7 @@ namespace pf {
 
 	namespace write_vts {
 		inline size_t output_frequence = 0;
-		inline bool is_show_with_boundary = false;
+		inline bool is_show_with_boundary = true;
 		inline size_t x_begin = 0;
 		inline size_t y_begin = 0;
 		inline size_t z_begin = 0;
@@ -17,7 +17,7 @@ namespace pf {
 		inline size_t y_end = 0;
 		inline size_t z_end = 0;
 		inline std::vector<void(*)(std::ofstream& fout)> write_vts_list;
-		inline void load_vts_func(void(*buff)(std::ofstream& fout));
+		void load_vts_func(void(*buff)(std::ofstream& fout));
 		namespace default_functions {
 			void open_vts_file(std::ofstream& fout, std::string tail);
 			void write_scalar_grains(std::ofstream& fout);
@@ -28,6 +28,10 @@ namespace pf {
 			void write_scalar_grad_con_all(std::ofstream& fout);
 			void write_scalar_temperature(std::ofstream& fout);
 			void write_scalar_grad_temperature(std::ofstream& fout);
+			void write_velocity(std::ofstream& fout);
+			void write_abs_velocity(std::ofstream& fout);
+			void write_pressure(std::ofstream& fout);
+			void write_density(std::ofstream& fout);
 			void close_vts_file(std::ofstream& fout);
 		}
 		void write_vts_pre_iii();

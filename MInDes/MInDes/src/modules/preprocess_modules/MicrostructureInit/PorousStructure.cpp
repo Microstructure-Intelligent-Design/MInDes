@@ -518,7 +518,9 @@ namespace pf {
 				set_phi_1.temperature = porous_first_temperature;
 				set_phi_1.con = porous_first_con;
 				set_phi_1.is_normalized = is_porous_normalized;
-				
+				set_phi_1.is_phi = is_phi;
+				set_phi_1.is_con = is_con;
+				set_phi_1.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_1);
 
 				set_phi_2.generate_step = 0;
@@ -526,6 +528,9 @@ namespace pf {
 				set_phi_2.temperature = porous_second_temperature;
 				set_phi_2.con = porous_second_con;
 				set_phi_2.is_normalized = is_porous_normalized;
+				set_phi_2.is_phi = is_phi;
+				set_phi_2.is_con = is_con;
+				set_phi_2.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_2);
 			}
 			else if (MESH_NZ > 1) {
@@ -578,6 +583,9 @@ namespace pf {
 				set_phi_1.temperature = porous_first_temperature;
 				set_phi_1.con = porous_first_con;
 				set_phi_1.is_normalized = is_porous_normalized;
+				set_phi_1.is_phi = is_phi;
+				set_phi_1.is_con = is_con;
+				set_phi_1.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_1);
 
 				set_phi_2.generate_step = 0;
@@ -585,6 +593,9 @@ namespace pf {
 				set_phi_2.temperature = porous_second_temperature;
 				set_phi_2.con = porous_second_con;
 				set_phi_2.is_normalized = is_porous_normalized;
+				set_phi_2.is_phi = is_phi;
+				set_phi_2.is_con = is_con;
+				set_phi_2.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_2);
 			}
 			else {
@@ -664,6 +675,9 @@ namespace pf {
 				set_phi_1.temperature = porous_first_temperature;
 				set_phi_1.con = porous_first_con;
 				set_phi_1.is_normalized = is_porous_normalized;
+				set_phi_1.is_phi = is_phi;
+				set_phi_1.is_con = is_con;
+				set_phi_1.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_1);
 
 				set_phi_2.generate_step = 0;
@@ -671,6 +685,9 @@ namespace pf {
 				set_phi_2.temperature = porous_second_temperature;
 				set_phi_2.con = porous_second_con;
 				set_phi_2.is_normalized = is_porous_normalized;
+				set_phi_2.is_phi = is_phi;
+				set_phi_2.is_con = is_con;
+				set_phi_2.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_2);
 			}
 			else if (MESH_NZ > 1) {
@@ -725,6 +742,9 @@ namespace pf {
 				set_phi_1.temperature = porous_first_temperature;
 				set_phi_1.con = porous_first_con;
 				set_phi_1.is_normalized = is_porous_normalized;
+				set_phi_1.is_phi = is_phi;
+				set_phi_1.is_con = is_con;
+				set_phi_1.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_1);
 
 				set_phi_2.generate_step = 0;
@@ -732,6 +752,9 @@ namespace pf {
 				set_phi_2.temperature = porous_second_temperature;
 				set_phi_2.con = porous_second_con;
 				set_phi_2.is_normalized = is_porous_normalized;
+				set_phi_2.is_phi = is_phi;
+				set_phi_2.is_con = is_con;
+				set_phi_2.is_temp = is_temp;
 				geometry_structure::nucleation_box.point_set_box.push_back(set_phi_2);
 			}
 			else {

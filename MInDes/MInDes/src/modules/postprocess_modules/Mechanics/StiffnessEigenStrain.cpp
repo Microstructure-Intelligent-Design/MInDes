@@ -7,7 +7,7 @@ namespace pf {
 		}
 		namespace default_functions {
 			static void cal_eigenstrain_phi_dependent_norm(long long x, long long y, long long z, vStrain& eigenstrain) {
-				std::vector<REAL>& phi = main_field::phase_field(x, y, z);
+				Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
 				for (size_t index = 0; index < phi_number; index++) {
 					if (phi[index] < SYS_EPSILON)
 						continue;
@@ -15,7 +15,7 @@ namespace pf {
 				}
 			}
 			static void cal_stiffness_phi_dependent_norm(long long x, long long y, long long z, Matrix6x6& stiffness) {
-				std::vector<REAL>& phi = main_field::phase_field(x, y, z);
+				Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
 				for (size_t index = 0; index < phi_number; index++) {
 					if (phi[index] < SYS_EPSILON)
 						continue;

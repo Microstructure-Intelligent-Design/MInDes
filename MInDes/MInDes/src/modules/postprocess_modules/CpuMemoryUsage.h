@@ -6,7 +6,6 @@
 #else
 #include <unistd.h>
 #include <sys/types.h>
-#include <unistd.h>  // getpid(), fork(), etc.
 #endif
 #include <sstream>
 #include "../base/MACRO_DEF.h"
@@ -25,7 +24,7 @@ namespace pf {
 // the info line num in /proc/{pid}/status file
 #define VMRSS_LINE 22
 #define PROCESS_ITEM 14
-#ifdef WIN32
+#ifdef _WIN32
         uint64_t convert_time_format(const FILETIME* ftime);
 #else
         const char* get_items(const char* buffer, unsigned int item);

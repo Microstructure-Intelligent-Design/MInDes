@@ -123,7 +123,7 @@ namespace pf {
 		std::vector<T> data;
 	};
 
-	enum class BoundaryCondition { FIXED, PERIODIC, ZEROFLUX};
+	enum class BoundaryCondition { FIXED, PERIODIC, ZEROFLUX, OPENFLUX };
 
 	template <typename T>
 	class Mesh_Boundry : public Mesh<T> {
@@ -197,6 +197,27 @@ namespace pf {
 		long long COMP_X_END() { return static_cast<long long>(Mesh<T>::nx) - 2; };
 		long long COMP_Y_END() { return static_cast<long long>(Mesh<T>::ny) - 2; };
 		long long COMP_Z_END() { return static_cast<long long>(Mesh<T>::nz) - 2; };
+		bool IS_COMP_POINT(int x, int y, int z) {
+			if (x > 0 && x < int(Mesh<T>::nx) - 1 &&
+				y > 0 && y < int(Mesh<T>::ny) - 1 &&
+				z > 0 && z < int(Mesh<T>::nz) - 1)
+				return true;
+			return false;
+		}
+		bool IS_COMP_POINT(size_t x, size_t y, size_t z) {
+			if (x > 0 && x < Mesh<T>::nx - 1 &&
+				y > 0 && y < Mesh<T>::ny - 1 &&
+				z > 0 && z < Mesh<T>::nz - 1)
+				return true;
+			return false;
+		}
+		bool IS_COMP_POINT(long long x, long long y, long long z) {
+			if (x > 0 && x < static_cast<long long>(Mesh<T>::nx) - 1 &&
+				y > 0 && y < static_cast<long long>(Mesh<T>::ny) - 1 &&
+				z > 0 && z < static_cast<long long>(Mesh<T>::nz) - 1)
+				return true;
+			return false;
+		}
 
 		T& at_boundary_x_down(long long y, long long z) {
 			return Mesh<T>::data[MESH_INDEX(0LL, y, z, Mesh<T>::nx, Mesh<T>::ny)];
@@ -231,132 +252,132 @@ namespace pf {
 
 		// - find element with boundary condition
 		T& at2(size_t x, size_t y, size_t z) {
-			if (x >= 0 && x < Mesh<T>::nx && y >= 0 && y < Mesh<T>::ny && z >= 0 && z < Mesh<T>::nz) {
+			if (x >= 1 && x <= Mesh<T>::nx - 2 && y >= 1 && y <= Mesh<T>::ny - 2 && z >= 0 && z <= Mesh<T>::nz - 2) {
 				return Mesh<T>::data[MESH_INDEX(x, y, z, Mesh<T>::nx, Mesh<T>::ny)];
 			}
-			if (x < 0) {
+			if (x < 1) {
 				if (bc_x_down == BoundaryCondition::PERIODIC)
-					x = x + Mesh<T>::nx;
+					x = x + Mesh<T>::nx - 2;
 				else
-					x = 0;
+					x = 1;
 			}
-			if (x >= Mesh<T>::nx) {
+			if (x > Mesh<T>::nx - 2) {
 				if (bc_x_up == BoundaryCondition::PERIODIC)
-					x = x - Mesh<T>::nx;
+					x = x - Mesh<T>::nx + 2;
 				else
-					x = Mesh<T>::nx - 1;
+					x = Mesh<T>::nx - 2;
 			}
-			if (y < 0) {
+			if (y < 1) {
 				if (bc_y_down == BoundaryCondition::PERIODIC)
-					y = y + Mesh<T>::ny;
+					y = y + Mesh<T>::ny - 2;
 				else
-					y = 0;
+					y = 1;
 			}
-			if (y >= Mesh<T>::ny) {
+			if (y > Mesh<T>::ny - 2) {
 				if (bc_y_up == BoundaryCondition::PERIODIC)
-					y = y - Mesh<T>::ny;
+					y = y - Mesh<T>::ny + 2;
 				else
-					y = Mesh<T>::ny - 1;
+					y = Mesh<T>::ny - 2;
 			}
-			if (z < 0) {
+			if (z < 1) {
 				if (bc_z_down == BoundaryCondition::PERIODIC)
-					z = z + Mesh<T>::nz;
+					z = z + Mesh<T>::nz - 2;
 				else
-					z = 0;
+					z = 1;
 			}
-			if (z >= Mesh<T>::nz) {
+			if (z > Mesh<T>::nz - 2) {
 				if (bc_z_up == BoundaryCondition::PERIODIC)
-					z = z - Mesh<T>::nz;
+					z = z - Mesh<T>::nz + 2;
 				else
-					z = Mesh<T>::nz - 1;
+					z = Mesh<T>::nz - 2;
 			}
 			return (*this)(x, y, z);
 		}
 		// - find element with boundary condition
 		T& at2(long long x, long long y, long long z) {
 			size_t _x = size_t(x), _y = size_t(y), _z = size_t(z);
-			if (_x >= 0 && _x < Mesh<T>::nx && _y >= 0 && _y < Mesh<T>::ny && _z >= 0 && _z < Mesh<T>::nz) {
+			if (_x >= 1 && _x <= Mesh<T>::nx - 2 && _y >= 1 && _y <= Mesh<T>::ny - 2 && _z >= 0 && _z <= Mesh<T>::nz - 2) {
 				return Mesh<T>::data[MESH_INDEX(_x, _y, _z, Mesh<T>::nx, Mesh<T>::ny)];
 			}
-			if (_x < 0) {
+			if (_x < 1) {
 				if (bc_x_down == BoundaryCondition::PERIODIC)
-					_x = _x + Mesh<T>::nx;
+					_x = _x + Mesh<T>::nx - 2;
 				else
-					_x = 0;
+					_x = 1;
 			}
-			if (_x >= Mesh<T>::nx) {
+			if (_x > Mesh<T>::nx - 2) {
 				if (bc_x_up == BoundaryCondition::PERIODIC)
-					_x = _x - Mesh<T>::nx;
+					_x = _x - Mesh<T>::nx + 2;
 				else
-					_x = Mesh<T>::nx - 1;
+					_x = Mesh<T>::nx - 2;
 			}
-			if (_y < 0) {
+			if (_y < 1) {
 				if (bc_y_down == BoundaryCondition::PERIODIC)
-					_y = _y + Mesh<T>::ny;
+					_y = _y + Mesh<T>::ny - 2;
 				else
-					_y = 0;
+					_y = 1;
 			}
-			if (_y >= Mesh<T>::ny) {
+			if (_y > Mesh<T>::ny - 2) {
 				if (bc_y_up == BoundaryCondition::PERIODIC)
-					_y = _y - Mesh<T>::ny;
+					_y = _y - Mesh<T>::ny + 2;
 				else
-					_y = Mesh<T>::ny - 1;
+					_y = Mesh<T>::ny - 2;
 			}
-			if (_z < 0) {
+			if (_z < 1) {
 				if (bc_z_down == BoundaryCondition::PERIODIC)
-					_z = _z + Mesh<T>::nz;
+					_z = _z + Mesh<T>::nz - 2;
 				else
-					_z = 0;
+					_z = 1;
 			}
-			if (_z >= Mesh<T>::nz) {
+			if (_z > Mesh<T>::nz - 2) {
 				if (bc_z_up == BoundaryCondition::PERIODIC)
-					_z = _z - Mesh<T>::nz;
+					_z = _z - Mesh<T>::nz + 2;
 				else
-					_z = Mesh<T>::nz - 1;
+					_z = Mesh<T>::nz - 2;
 			}
 			return (*this)(_x, _y, _z);
 		}
 		// - find element with boundary condition
 		T& at2(int x, int y, int z) {
 			size_t _x = size_t(x), _y = size_t(y), _z = size_t(z);
-			if (_x >= 0 && _x < Mesh<T>::nx && _y >= 0 && _y < Mesh<T>::ny && _z >= 0 && _z < Mesh<T>::nz) {
+			if (_x >= 1 && _x <= Mesh<T>::nx - 2 && _y >= 1 && _y <= Mesh<T>::ny - 2 && _z >= 0 && _z <= Mesh<T>::nz - 2) {
 				return Mesh<T>::data[MESH_INDEX(_x, _y, _z, Mesh<T>::nx, Mesh<T>::ny)];
 			}
-			if (_x < 0) {
+			if (_x < 1) {
 				if (bc_x_down == BoundaryCondition::PERIODIC)
-					_x = _x + Mesh<T>::nx;
+					_x = _x + Mesh<T>::nx - 2;
 				else
-					_x = 0;
+					_x = 1;
 			}
-			if (_x >= Mesh<T>::nx) {
+			if (_x > Mesh<T>::nx - 2) {
 				if (bc_x_up == BoundaryCondition::PERIODIC)
-					_x = _x - Mesh<T>::nx;
+					_x = _x - Mesh<T>::nx + 2;
 				else
-					_x = Mesh<T>::nx - 1;
+					_x = Mesh<T>::nx - 2;
 			}
-			if (_y < 0) {
+			if (_y < 1) {
 				if (bc_y_down == BoundaryCondition::PERIODIC)
-					_y = _y + Mesh<T>::ny;
+					_y = _y + Mesh<T>::ny - 2;
 				else
-					_y = 0;
+					_y = 1;
 			}
-			if (_y >= Mesh<T>::ny) {
+			if (_y > Mesh<T>::ny - 2) {
 				if (bc_y_up == BoundaryCondition::PERIODIC)
-					_y = _y - Mesh<T>::ny;
+					_y = _y - Mesh<T>::ny + 2;
 				else
-					_y = Mesh<T>::ny - 1;
+					_y = Mesh<T>::ny - 2;
 			}
-			if (_z < 0) {
+			if (_z < 1) {
 				if (bc_z_down == BoundaryCondition::PERIODIC)
-					_z = _z + Mesh<T>::nz;
+					_z = _z + Mesh<T>::nz - 2;
 				else
-					_z = 0;
+					_z = 1;
 			}
-			if (_z >= Mesh<T>::nz) {
+			if (_z > Mesh<T>::nz - 2) {
 				if (bc_z_up == BoundaryCondition::PERIODIC)
-					_z = _z - Mesh<T>::nz;
+					_z = _z - Mesh<T>::nz + 2;
 				else
-					_z = Mesh<T>::nz - 1;
+					_z = Mesh<T>::nz - 2;
 			}
 			return (*this)(_x, _y, _z);
 		}
@@ -420,6 +441,13 @@ namespace pf {
 						at_boundary_x_down(y, z) = Mesh<T>::at(1, y, z);
 					}
 			}
+			else if (bc_x_down == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int y = 0; y < Mesh<T>::ny; y++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_x_down(y, z) = Mesh<T>::at(1, y, z) * 2 - Mesh<T>::at(2, y, z);
+					}
+			}
 			if (bc_y_down == BoundaryCondition::PERIODIC) {
 #pragma omp parallel for
 				for (int x = 0; x < Mesh<T>::nx; x++)
@@ -432,6 +460,13 @@ namespace pf {
 				for (int x = 0; x < Mesh<T>::nx; x++)
 					for (int z = 0; z < Mesh<T>::nz; z++) {
 						at_boundary_y_down(x, z) = Mesh<T>::at(x, 1, z);
+					}
+			}
+			else if (bc_y_down == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_y_down(x, z) = Mesh<T>::at(x, 1, z) * 2 - Mesh<T>::at(x, 2, z);
 					}
 			}
 			if (bc_z_down == BoundaryCondition::PERIODIC) {
@@ -448,6 +483,13 @@ namespace pf {
 						at_boundary_z_down(x, y) = Mesh<T>::at(x, y, 1);
 					}
 			}
+			else if (bc_z_down == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int y = 0; y < Mesh<T>::ny; y++) {
+						at_boundary_z_down(x, y) = Mesh<T>::at(x, y, 1) * 2 - Mesh<T>::at(x, y, 2);
+					}
+			}
 			if (bc_x_up == BoundaryCondition::PERIODIC) {
 #pragma omp parallel for
 				for (int y = 0; y < Mesh<T>::ny; y++)
@@ -460,6 +502,13 @@ namespace pf {
 				for (int y = 0; y < Mesh<T>::ny; y++)
 					for (int z = 0; z < Mesh<T>::nz; z++) {
 						at_boundary_x_up(y, z) = Mesh<T>::at(int(Mesh<T>::nx) - 2, y, z);
+					}
+			}
+			else if (bc_x_up == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int y = 0; y < Mesh<T>::ny; y++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_x_up(y, z) = Mesh<T>::at(int(Mesh<T>::nx) - 2, y, z) * 2 - Mesh<T>::at(int(Mesh<T>::nx) - 3, y, z);
 					}
 			}
 			if (bc_y_up == BoundaryCondition::PERIODIC) {
@@ -476,6 +525,13 @@ namespace pf {
 						at_boundary_y_up(x, z) = Mesh<T>::at(x, int(Mesh<T>::ny) - 2, z);
 					}
 			}
+			else if (bc_y_up == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int z = 0; z < Mesh<T>::nz; z++) {
+						at_boundary_y_up(x, z) = Mesh<T>::at(x, int(Mesh<T>::ny) - 2, z) * 2 - Mesh<T>::at(x, int(Mesh<T>::ny) - 3, z);
+					}
+			}
 			if (bc_z_up == BoundaryCondition::PERIODIC) {
 #pragma omp parallel for
 				for (int x = 0; x < Mesh<T>::nx; x++)
@@ -488,6 +544,13 @@ namespace pf {
 				for (int x = 0; x < Mesh<T>::nx; x++)
 					for (int y = 0; y < Mesh<T>::ny; y++) {
 						at_boundary_z_up(x, y) = Mesh<T>::at(x, y, int(Mesh<T>::nz) - 2);
+					}
+			}
+			else if (bc_z_up == BoundaryCondition::OPENFLUX) {
+#pragma omp parallel for
+				for (int x = 0; x < Mesh<T>::nx; x++)
+					for (int y = 0; y < Mesh<T>::ny; y++) {
+						at_boundary_z_up(x, y) = Mesh<T>::at(x, y, int(Mesh<T>::nz) - 2) * 2 - Mesh<T>::at(x, y, int(Mesh<T>::nz) - 3);
 					}
 			}
 		}

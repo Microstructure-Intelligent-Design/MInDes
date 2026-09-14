@@ -12,6 +12,7 @@
 #include <climits>
 #include "MainIterator_Params.h"
 #include "modules/Module.h"
+#include "modules/base/license.h"
 #include "modules/base/timer.h"
 #include "modules/input_modules/InputModulesManager.h"
 namespace pf {

@@ -50,10 +50,16 @@ namespace pf {
 					set.phaseIndex = bmp24_phi_index[layer_index];
 					set.is_normalized = bmp24_phi_normalized[layer_index];
 				}
+				if (is_phi[layer_index])
+					set.is_phi = true;
 				if (is_con_field_on)
 					set.con = bmp24_con[layer_index];
+				if (is_con[layer_index])
+					set.is_con = true;
 				if (is_temp_field_on)
 					set.temperature = bmp24_temperature[layer_index];
+				if (is_temp[layer_index])
+					set.is_temp = true;
 				geometry_structure::nucleation_box.point_set_box.push_back(set);
 			}
 			// free

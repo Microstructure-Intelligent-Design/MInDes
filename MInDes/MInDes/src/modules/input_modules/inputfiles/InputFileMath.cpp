@@ -309,7 +309,6 @@ namespace pf {
 		for (int in_var_index = 0; in_var_index < infile_vars.size(); in_var_index++)
 			if (key.compare(infile_vars[in_var_index].key) == 0) {
 				infile_vars[in_var_index].var = var;
-				cout << "> Wainning, custom variable: " << key << " has been defined multi-times !" << endl;
 				return in_var_index;
 			}
 		InFileVar new_var;
@@ -740,6 +739,7 @@ namespace pf {
 
 	// add string in <> in input value: Definition.Function = func_name<equation_str>
 	bool InfileMath::add_infile_funcs(string key, string func_str, bool debug) {
+		int replace_index = -1;
 		for (int in_func_index = 0; in_func_index < infile_funcs.size(); in_func_index++)
 			if (key.compare(infile_funcs[in_func_index].key) == 0) {
 				if (func_str.compare(infile_funcs[in_func_index].func_str) == 0) {
@@ -748,8 +748,8 @@ namespace pf {
 					return false;
 				}
 				else {
-					cout << "> Error, custom function: " << key << " has been defined multi-times with different equation !" << endl;
-					SYS_PROGRAM_STOP;
+					replace_index = in_func_index;
+					break;
 				}
 			}
 		InFileFunc new_func;
@@ -782,9 +782,8 @@ namespace pf {
 				new_func.terms_type.index_1.push_back(func_index);
 			}
 			else {
-				cout << "> Error, custom function: " << (*func_key) << " hasnt been defined ! or is not defined before function : "
-					<< key << endl;
-				SYS_PROGRAM_STOP;
+				if (debug) cout << "> Error, custom function: " << (*func_key) << " hasnt been defined ! or is not defined before function : " << key << endl;
+				return false;
 			}
 		}
 		new_func.operators.operators_1 = cal_operators1;
@@ -814,9 +813,8 @@ namespace pf {
 					new_func.terms_type.index_2[index1].push_back(func_index);
 				}
 				else {
-					cout << "> Error, custom function: " << (*func_key) << " hasnt been defined ! or is not defined before function : "
-						<< key << endl;
-					SYS_PROGRAM_STOP;
+					if (debug) cout << "> Error, custom function: " << (*func_key) << " hasnt been defined ! or is not defined before function : " << key << endl;
+					return false;
 				}
 			}
 			new_func.operators.operators_2[index1] = cal_operators2;
@@ -843,9 +841,8 @@ namespace pf {
 						new_func.terms_type.index_3[index1][index2].push_back(func_index);
 					}
 					else {
-						cout << "> Error, custom function: " << (*func_key) << " hasnt been defined ! or is not defined before function : "
-							<< key << endl;
-						SYS_PROGRAM_STOP;
+						if (debug) cout << "> Error, custom function: " << (*func_key) << " hasnt been defined ! or is not defined before function : " << key << endl;
+						return false;
 					}
 				}
 				new_func.operators.operators_3[index1][index2] = cal_operators3;
@@ -873,9 +870,8 @@ namespace pf {
 							new_func.func_structure[index1][index2][index3][_key_index].push_back(_var_index);
 						}
 						else {
-							cout << "> Error, custom Variables or default Field Variables: " << formulas4[_key_index] << ", function type : " << _key << " hasnt been defined ! or is not defined before function : "
-								<< key << endl;
-							SYS_PROGRAM_STOP;
+							if (debug) cout << "> Error, custom Variables or default Field Variables: " << formulas4[_key_index] << ", function type : " << _key << " hasnt been defined ! or is not defined before function : " << key << endl;
+							return false;
 						}
 					}
 					new_func.operators.operators_4[index1][index2][index3] = cal_operators4;
@@ -884,8 +880,12 @@ namespace pf {
 			}
 		}
 
+		if (replace_index >= 0) {
+			infile_funcs[replace_index] = new_func;
+			return true;
+		}
 		infile_funcs.push_back(new_func);
-		return int(infile_funcs.size()) - 1;
+		return true;
 	}
 
 }

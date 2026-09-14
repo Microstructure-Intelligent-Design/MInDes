@@ -8,7 +8,7 @@ namespace pf {
 			for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
 				for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
 					for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
-						std::vector<REAL>& phi = main_field::phase_field(x, y, z);
+						Matrix1D<REAL>& phi = main_field::phase_field(x, y, z);
 						for (size_t index = 0; index < main_field::phi_number; index++)
 							phi_info[index] += phi[index];
 					}
@@ -23,7 +23,7 @@ namespace pf {
 			for (long long x = main_field::concentration_field.COMP_X_BGN(); x <= main_field::concentration_field.COMP_X_END(); x++)
 				for (long long y = main_field::concentration_field.COMP_Y_BGN(); y <= main_field::concentration_field.COMP_Y_END(); y++)
 					for (long long z = main_field::concentration_field.COMP_Z_BGN(); z <= main_field::concentration_field.COMP_Z_END(); z++) {
-						std::vector<REAL>& con = main_field::concentration_field(x, y, z);
+						Matrix1D<REAL>& con = main_field::concentration_field(x, y, z);
 						for (size_t index = 0; index < main_field::con_number; index++)
 							con_info[index] += con[index];
 					}
@@ -44,7 +44,6 @@ namespace pf {
 		}
 
 		void exec_pre_iii() {
-			std::vector<REAL> phi_info, con_info; REAL temp_info = 0;
 			if (main_field::is_phi_field_on)
 				phi_info = statistical_phi();
 			if (main_field::is_con_field_on)
@@ -65,6 +64,13 @@ namespace pf {
 				log << ">  Temp " << " = "
 				<< setprecision(5) << temp_info << endl;
 			WriteLog(log.str());
+			// - begin statistic info
+			stringstream statistics;
+			for (const auto& item : data_statistics_functions::statistics_data) {
+				statistics << item.first << data_statistics_functions::statistics_separator;
+			}
+			std::filesystem::path statistic_path = std::filesystem::path(input_output_files_parameters::WorkingFolder_Path) / statistic_file_name;
+			write_string_to_file(statistics.str(), statistic_path.string());
 		}
 
 		void exec_pos_i() {
@@ -72,7 +78,6 @@ namespace pf {
 			if (screen_output_step == 0)
 				return;
 			if (main_iterator::Current_ITE_step % screen_output_step == 0) {
-				std::vector<REAL> phi_info, con_info; REAL temp_info = 0;
 				if (main_field::is_phi_field_on)
 					phi_info = statistical_phi();
 				if (main_field::is_con_field_on)
@@ -106,6 +111,14 @@ namespace pf {
 				data_statistics_functions::update_statistics("sim_step", REAL(main_iterator::Current_ITE_step));
 				data_statistics_functions::update_statistics("real_time", time_parameters::Real_Time);
 				data_statistics_functions::update_statistics("dtime", time_parameters::delt_t);
+				if (is_phi_statistic)
+					for (size_t index = 0; index < main_field::phi_number; index++)
+						data_statistics_functions::update_statistics(phi_info_key + std::to_string(index), phi_info[index]);
+				if (is_con_statistic)
+					for (size_t index = 0; index < main_field::con_number; index++)
+						data_statistics_functions::update_statistics(con_info_key + std::to_string(index), con_info[index]);
+				if (is_temp_statistic)
+					data_statistics_functions::update_statistics(temp_info_key, temp_info);
 			}
 		}
 
@@ -162,11 +175,16 @@ namespace pf {
 		}
 
 		void init_show_loop_information() {
-			infile_reader::read_int_value("Solver.Output.LOG.loop_info_step", screen_loop_step, true);
-			infile_reader::read_int_value("Solver.Output.LOG.screen_output_step", screen_output_step, true);
+			infile_reader::read_int_value("Solver.Output.LOG.pct_loop_step", screen_loop_step, true);
+			infile_reader::read_int_value("Solver.Output.LOG.pct_statistic_step", screen_output_step, true);
+			infile_reader::read_bool_value("Solver.Output.Statistic.phi", is_phi_statistic, true);
+			infile_reader::read_bool_value("Solver.Output.Statistic.con", is_con_statistic, true);
+			infile_reader::read_bool_value("Solver.Output.Statistic.temp", is_temp_statistic, true);
 			load_a_new_module(nullptr, nullptr, exec_pre_iii,
 				nullptr, nullptr, nullptr,
 				exec_pos_i, exec_pos_ii, exec_pos_iii, nullptr);
+			phi_info.resize(main_field::phi_number, 0);
+			con_info.resize(main_field::con_number, 0);
 			// statistic
 			data_statistics_functions::statistics_data.push_back({ "progress", REAL(0) });
 			data_statistics_functions::statistics_data.push_back({ "sim_step", REAL(0) });
@@ -175,12 +193,14 @@ namespace pf {
 			data_statistics_functions::statistics_data.push_back({ "dphidt", REAL(0) });
 			data_statistics_functions::statistics_data.push_back({ "dcondt", REAL(0) });
 			data_statistics_functions::statistics_data.push_back({ "dtempdt", REAL(0) });
-			stringstream statistics;
-			for (const auto& item : data_statistics_functions::statistics_data) {
-				statistics << item.first << data_statistics_functions::statistics_separator;
-			}
-			std::filesystem::path statistic_path = std::filesystem::path(input_output_files_parameters::WorkingFolder_Path) / statistic_file_name;
-			write_string_to_file(statistics.str(), statistic_path.string());
+			if (is_phi_statistic)
+				for (size_t index = 0; index < main_field::phi_number; index++)
+					data_statistics_functions::statistics_data.push_back({ phi_info_key + std::to_string(index), REAL(0)});
+			if (is_con_statistic)
+				for (size_t index = 0; index < main_field::con_number; index++)
+					data_statistics_functions::statistics_data.push_back({ con_info_key + std::to_string(index), REAL(0) });
+			if (is_temp_statistic)
+				data_statistics_functions::statistics_data.push_back({ temp_info_key, REAL(0) });
 		}
 	}
 }

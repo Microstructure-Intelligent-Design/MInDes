@@ -2,6 +2,7 @@
 #include "../../base/MACRO_DEF.h"
 #include <filesystem>
 #include <algorithm>
+#include <vector>
 namespace pf {
 
 	void infile_line_process(std::string& str);

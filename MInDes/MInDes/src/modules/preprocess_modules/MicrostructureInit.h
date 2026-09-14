@@ -24,7 +24,7 @@ namespace pf {
 		void check_con_size(size_t con_size);
 		// -
 		void init_microstructure_pre_i();
-		// - 
+		// -   
 		void write_data_pre_iii();
 		void write_data_pos_iii();
 		void dinit();
