@@ -42,6 +42,11 @@
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_BulkEnergy.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Con_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Phi_Functions.cpp" />
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Temp_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\dendrite_solidification\DS_Functions.cpp" />
     <ClCompile Include="src\modules\model_modules\GrainsOrientations.cpp" />
     <ClCompile Include="src\modules\model_modules\grain_grows_spinodal\GGS_Functions.cpp" />
@@ -107,6 +112,13 @@
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Params.h" />
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Phi_Functions.h" />
     <ClInclude Include="src\modules\model_modules\ddc_calphad_ai\DDCCPAI_Temp_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_BulkEnergy.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Con_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Manager.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Params.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Phi_Functions.h" />
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Temp_Functions.h" />
     <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Functions.h" />
     <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Manager.h" />
     <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Params.h" />

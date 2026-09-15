@@ -1,7 +1,7 @@
-#include "DDCCPAI_Phi_Functions.h"
+﻿#include "DDCDS_Phi_Functions.h"
 #include <cmath>
 namespace pf {
-	namespace ddc_calphad_ai_model {
+	namespace ddc_dendrite_solidification {
 		namespace phase_field_functions {
 			void interphase_gradient_lapace_calculation_7P(size_t x, size_t y, size_t z, size_t phi_index) {
 				if (!main_field::phase_field.IS_COMP_POINT(x, y, z))
@@ -341,32 +341,6 @@ namespace pf {
 					(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
 				return Lij;
 			};
-			REAL Lij_hex_sun(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
-				// to be defined
-				REAL Lij = parameters::Lij(alpha_index, beta_index);
-				// - anisotropic
-				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
-				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
-					- parameters::intMobAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0)
-						- 30.0 * norm[2] * norm[2] + 3.0)
-					- parameters::intMobAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0)
-						- 315.0 * std::pow(norm[2], 4.0) + 105.0 * norm[2] * norm[2] - 5.0)
-					- parameters::intMobAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
-						- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1]
-						+ 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0)
-						- std::pow(norm[1], 6.0)));
-				return Lij;
-			};
-			REAL Lij_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
-				// to be defined
-				REAL Lij = parameters::Lij(alpha_index, beta_index);
-				// - anisotropic
-				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
-				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * std::pow((3 * norm[2] * norm[2] - 1.0), 2.0)
-					- parameters::intMobAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
-					* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intMobAniso_param3), 2.0));
-				return Lij;
-			};
 			REAL Lij_temp(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
 				return parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
 			};
@@ -387,32 +361,6 @@ namespace pf {
 				Lij = Lij * REAL(1.0 + parameters::intMobAniso_param1 * (std::pow(norm[0], 6.0) - std::pow(norm[1], 6.0) -
 					15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * std::pow(norm[1], 4.0) * norm[0] * norm[0] +
 					(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
-				return Lij;
-			};
-			REAL Lij_temp_hex_sun(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
-				// to be defined
-				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
-				// - anisotropic
-				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
-				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
-					- parameters::intMobAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0)
-						- 30.0 * norm[2] * norm[2] + 3.0)
-					- parameters::intMobAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0)
-						- 315.0 * std::pow(norm[2], 4.0) + 105.0 * norm[2] * norm[2] - 5.0)
-					- parameters::intMobAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
-						- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1]
-						+ 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0)
-						- std::pow(norm[1], 6.0)));
-				return Lij;
-			};
-			REAL Lij_temp_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad, REAL temperature) {
-				// to be defined
-				REAL Lij = parameters::Lij(alpha_index, beta_index) * std::exp(-parameters::Qij(alpha_index, beta_index) / parameters::R / temperature);
-				// - anisotropic
-				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
-				Lij = Lij * REAL(1.0 - parameters::intMobAniso_param1 * std::pow((3 * norm[2] * norm[2] - 1.0), 2.0)
-					- parameters::intMobAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
-					* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intMobAniso_param3), 2.0));
 				return Lij;
 			};
 			// - interface energy
@@ -439,32 +387,167 @@ namespace pf {
 					(5.0 * std::pow(norm[2], 4.0) - 5.0 * std::pow(norm[2], 2.0) + std::pow(norm[2], 6.0))));
 				return loc_xi_ab;
 			};
-			REAL xi_ab_hex_sun(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
-				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
-				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
-				// - 
-				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
-				loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * sqrt(5.0 / 16.0 / PI) * (3.0 * norm[2] * norm[2] - 1.0)
-					+ parameters::intEnAniso_param2 * 3.0 / 16.0 / sqrt(PI) * (35.0 * std::pow(norm[2], 4.0) - 30.0 * norm[2] * norm[2] + 3.0)
-					+ parameters::intEnAniso_param3 * sqrt(13.0 / PI) / 32.0 * (231.0 * std::pow(norm[2], 6.0) - 315.0 * std::pow(norm[2], 4.0)
-						+ 105.0 * norm[2] * norm[2] - 5.0)
-					+ parameters::intEnAniso_param4 * sqrt(6006.0 / PI) / 64.0 * (std::pow(norm[0], 6.0)
-						- 15.0 * std::pow(norm[0], 4.0) * norm[1] * norm[1] + 15.0 * norm[0] * norm[0] * std::pow(norm[1], 4.0) - std::pow(norm[1], 6.0)));
-				return loc_xi_ab;
-			};
-			REAL xi_ab_hex_yang(size_t alpha_index, size_t beta_index, REAL alpha_phi, REAL beta_phi, Vector3& alpha_grad, Vector3& beta_grad) {
-				size_t phi_alpha_property = PhiProperties::instance()[alpha_index], phi_beta_property = PhiProperties::instance()[beta_index];
-				REAL loc_xi_ab = parameters::xi_ab(phi_alpha_property, phi_beta_property);
-				// - 
-				Vector3 norm = parameters::grain_rotation_matrix[beta_index] * normals(alpha_phi, beta_phi, alpha_grad, beta_grad);
-				loc_xi_ab = loc_xi_ab * REAL(1.0 + parameters::intEnAniso_param1 * std::pow((3.0 * norm[2] * norm[2] - 1.0), 2.0)
-					+ parameters::intEnAniso_param2 * std::pow((norm[0] * norm[0] * norm[0] - 3.0 * norm[0] * norm[1] * norm[1]), 2.0)
-					* std::pow((9.0 * norm[2] * norm[2] - 1.0 + parameters::intEnAniso_param3), 2.0));
-				return loc_xi_ab;
-			};
 			REAL xi_abc(size_t alpha_index, size_t beta_index, size_t gamma_index) {
 				return parameters::xi_abc(PhiProperties::instance()[alpha_index], PhiProperties::instance()[beta_index], PhiProperties::instance()[gamma_index]);
 			};
+
+			namespace {
+				void accumulate_cubic_interface_pair(FIELD_PhiTemp& point, size_t alpha_index, size_t beta_index) {
+					const REAL phi_alpha = point.old_phi[alpha_index];
+					const REAL phi_beta = point.old_phi[beta_index];
+					const Vector3& grad_alpha = point.grad_phi[alpha_index];
+					const Vector3& grad_beta = point.grad_phi[beta_index];
+					const size_t alpha_property = PhiProperties::instance()[alpha_index];
+					const size_t beta_property = PhiProperties::instance()[beta_index];
+					const REAL xi_0 = parameters::xi_ab(alpha_property, beta_property);
+					Vector3 p = grad_alpha * phi_beta - grad_beta * phi_alpha;
+					const REAL p_length = std::sqrt(p * p);
+					REAL xi = xi_0;
+					Vector3 h(0, 0, 0);
+					if (p_length >= SYS_EPSILON) {
+						const Vector3 normal = p / p_length;
+						const Vector3 crystal_normal = parameters::grain_rotation_matrix[beta_index] * normal;
+						const REAL fourth_sum = std::pow(crystal_normal[0], 4.0)
+							+ std::pow(crystal_normal[1], 4.0) + std::pow(crystal_normal[2], 4.0);
+						xi *= REAL(1.0) + parameters::intEnAniso_param1 * (REAL(1.5) - REAL(2.5) * fourth_sum);
+						const Vector3 dxi_dcrystal(
+							-REAL(10.0) * xi_0 * parameters::intEnAniso_param1 * std::pow(crystal_normal[0], 3.0),
+							-REAL(10.0) * xi_0 * parameters::intEnAniso_param1 * std::pow(crystal_normal[1], 3.0),
+							-REAL(10.0) * xi_0 * parameters::intEnAniso_param1 * std::pow(crystal_normal[2], 3.0));
+						const Vector3 dxi_dnormal = parameters::grain_rotation_matrix[beta_index].get_transposed() * dxi_dcrystal;
+						h = (dxi_dnormal - normal * (normal * dxi_dnormal)) / p_length;
+					}
+
+					const REAL eta = parameters::interface_width;
+					const REAL obstacle_factor = REAL(16.0) / PI2;
+					const REAL grad_product = grad_alpha * grad_beta;
+					const REAL h_dot_alpha = h * grad_alpha;
+					const REAL h_dot_beta = h * grad_beta;
+
+					point.mu_phi[alpha_index] += eta * (xi_0 * point.lap_phi[beta_index] + grad_product * h_dot_beta)
+						+ obstacle_factor / eta * (xi * phi_beta - phi_alpha * phi_beta * h_dot_beta);
+					point.interface_flux[alpha_index] += (grad_beta * (xi - xi_0) + h * (grad_product * phi_beta)) * eta
+						- h * (obstacle_factor / eta * phi_alpha * phi_beta * phi_beta);
+
+					point.mu_phi[beta_index] += eta * (xi_0 * point.lap_phi[alpha_index] - grad_product * h_dot_alpha)
+						+ obstacle_factor / eta * (xi * phi_alpha + phi_alpha * phi_beta * h_dot_alpha);
+					point.interface_flux[beta_index] += (grad_alpha * (xi - xi_0) - h * (grad_product * phi_alpha)) * eta
+						+ h * (obstacle_factor / eta * phi_alpha * phi_alpha * phi_beta);
+				}
+
+				REAL cubic_interface_flux_divergence(size_t x, size_t y, size_t z, size_t phi_index) {
+					const REAL inv_2dr = REAL(1.0) / (REAL(2.0) * mesh_parameters::delt_r);
+					return (parameters::PhiTemp_field(x + 1, y, z).interface_flux[phi_index][0]
+						- parameters::PhiTemp_field(x - 1, y, z).interface_flux[phi_index][0]) * inv_2dr
+						+ (parameters::PhiTemp_field(x, y + 1, z).interface_flux[phi_index][1]
+							- parameters::PhiTemp_field(x, y - 1, z).interface_flux[phi_index][1]) * inv_2dr
+						+ (parameters::PhiTemp_field(x, y, z + 1).interface_flux[phi_index][2]
+							- parameters::PhiTemp_field(x, y, z - 1).interface_flux[phi_index][2]) * inv_2dr;
+				}
+
+				void synchronize_cubic_interface_flux_boundary() {
+					auto& field = parameters::PhiTemp_field;
+					const long long nx = field.Nx();
+					const long long ny = field.Ny();
+					const long long nz = field.Nz();
+					auto apply = [](Vector3& ghost, const Vector3& adjacent, const Vector3& next,
+						const Vector3& periodic, BoundaryCondition boundary) {
+						if (boundary == BoundaryCondition::PERIODIC)
+							ghost = periodic;
+						else if (boundary == BoundaryCondition::OPENFLUX)
+							ghost = adjacent * REAL(2.0) - next;
+						else
+							ghost = adjacent;
+					};
+					for (size_t phi_index = 0; phi_index < main_field::phi_number; phi_index++) {
+						for (long long y = 0; y < ny; y++)
+							for (long long z = 0; z < nz; z++) {
+								apply(field.at_boundary_x_down(y, z).interface_flux[phi_index],
+									field(1LL, y, z).interface_flux[phi_index], field(2LL, y, z).interface_flux[phi_index],
+									field(nx - 2, y, z).interface_flux[phi_index], field.BC_X_DOWN());
+								apply(field.at_boundary_x_up(y, z).interface_flux[phi_index],
+									field(nx - 2, y, z).interface_flux[phi_index], field(nx - 3, y, z).interface_flux[phi_index],
+									field(1LL, y, z).interface_flux[phi_index], field.BC_X_UP());
+							}
+						for (long long x = 0; x < nx; x++)
+							for (long long z = 0; z < nz; z++) {
+								apply(field.at_boundary_y_down(x, z).interface_flux[phi_index],
+									field(x, 1LL, z).interface_flux[phi_index], field(x, 2LL, z).interface_flux[phi_index],
+									field(x, ny - 2, z).interface_flux[phi_index], field.BC_Y_DOWN());
+								apply(field.at_boundary_y_up(x, z).interface_flux[phi_index],
+									field(x, ny - 2, z).interface_flux[phi_index], field(x, ny - 3, z).interface_flux[phi_index],
+									field(x, 1LL, z).interface_flux[phi_index], field.BC_Y_UP());
+							}
+						for (long long x = 0; x < nx; x++)
+							for (long long y = 0; y < ny; y++) {
+								apply(field.at_boundary_z_down(x, y).interface_flux[phi_index],
+									field(x, y, 1LL).interface_flux[phi_index], field(x, y, 2LL).interface_flux[phi_index],
+									field(x, y, nz - 2).interface_flux[phi_index], field.BC_Z_DOWN());
+								apply(field.at_boundary_z_up(x, y).interface_flux[phi_index],
+									field(x, y, nz - 2).interface_flux[phi_index], field(x, y, nz - 3).interface_flux[phi_index],
+									field(x, y, 1LL).interface_flux[phi_index], field.BC_Z_UP());
+							}
+					}
+				}
+
+				void prepare_cubic_interface_variation() {
+#pragma omp parallel for
+					for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
+						for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
+							for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
+								FIELD_PhiTemp& point = parameters::PhiTemp_field(x, y, z);
+								for (size_t a_slot = 0; a_slot < parameters::PHI_ACC_NUMBER
+									&& point.active_index[a_slot] != parameters::PAIRWISE_ACC_STOP; a_slot++) {
+									const size_t alpha_index = point.active_index[a_slot];
+									if (!point.intflag[alpha_index])
+										continue;
+									for (size_t b_slot = a_slot + 1; b_slot < parameters::PHI_ACC_NUMBER
+										&& point.active_index[b_slot] != parameters::PAIRWISE_ACC_STOP; b_slot++) {
+										const size_t beta_index = point.active_index[b_slot];
+										if (point.intflag[beta_index])
+											accumulate_cubic_interface_pair(point, alpha_index, beta_index);
+									}
+								}
+
+								const REAL inv_eta = REAL(1.0) / parameters::interface_width;
+								for (size_t a_slot = 0; a_slot < parameters::PHI_ACC_NUMBER
+									&& point.active_index[a_slot] != parameters::PAIRWISE_ACC_STOP; a_slot++) {
+									const size_t alpha_index = point.active_index[a_slot];
+									if (!point.intflag[alpha_index])
+										continue;
+									REAL triple_term = 0;
+									for (size_t b_slot = 0; b_slot < parameters::PHI_ACC_NUMBER
+										&& point.active_index[b_slot] != parameters::PAIRWISE_ACC_STOP; b_slot++) {
+										const size_t beta_index = point.active_index[b_slot];
+										if (beta_index == alpha_index || !point.intflag[beta_index])
+											continue;
+										for (size_t g_slot = b_slot + 1; g_slot < parameters::PHI_ACC_NUMBER
+											&& point.active_index[g_slot] != parameters::PAIRWISE_ACC_STOP; g_slot++) {
+											const size_t gamma_index = point.active_index[g_slot];
+											if (gamma_index != alpha_index && point.intflag[gamma_index])
+												triple_term += _xi_abc(alpha_index, beta_index, gamma_index)
+													* point.old_phi[beta_index] * point.old_phi[gamma_index];
+										}
+									}
+									point.mu_phi[alpha_index] += triple_term * inv_eta;
+								}
+							}
+
+					synchronize_cubic_interface_flux_boundary();
+#pragma omp parallel for
+					for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
+						for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
+							for (long long z = main_field::phase_field.COMP_Z_BGN(); z <= main_field::phase_field.COMP_Z_END(); z++) {
+								FIELD_PhiTemp& point = parameters::PhiTemp_field(x, y, z);
+								for (size_t slot = 0; slot < parameters::PHI_ACC_NUMBER
+									&& point.active_index[slot] != parameters::PAIRWISE_ACC_STOP; slot++) {
+									const size_t phi_index = point.active_index[slot];
+									if (point.intflag[phi_index])
+										point.mu_phi[phi_index] += cubic_interface_flux_divergence(x, y, z, phi_index);
+								}
+							}
+				}
+			}
 			// - source
 			REAL noise_pairwise_acc(size_t x, size_t y, size_t z, size_t alpha_index, size_t beta_index) {
 				REAL noise = 0.0;
@@ -478,20 +561,6 @@ namespace pf {
 				return noise;
 			}
 			// - interface energy model
-			REAL dfint_dphi_grad_S1996_acc(FIELD_PhiTemp& point, size_t phi_index) {
-				REAL grad = 0.0;
-				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER && point.active_index[index] != parameters::PAIRWISE_ACC_STOP; index++) {
-					size_t phi_bIndex = point.active_index[index];
-					if (point.intflag[phi_bIndex] && phi_bIndex != phi_index) {
-						grad += _xi_ab(phi_index, phi_bIndex, point.old_phi[phi_index], point.old_phi[phi_bIndex], point.grad_phi[phi_index], point.grad_phi[phi_bIndex])
-							* (point.grad_phi[phi_bIndex] * point.grad_phi[phi_bIndex] * point.old_phi[phi_index] * 2
-								+ point.old_phi[phi_index] * point.old_phi[phi_bIndex] * point.lap_phi[phi_bIndex]
-								- point.grad_phi[phi_index] * point.grad_phi[phi_bIndex] * point.old_phi[phi_bIndex] * 2
-								- point.old_phi[phi_bIndex] * point.old_phi[phi_bIndex] * point.lap_phi[phi_index]);
-					}
-				}
-				return 2 * parameters::interface_width * grad;
-			};
 			REAL dfint_dphi_grad_S1999_acc(FIELD_PhiTemp& point, size_t phi_index) {
 				REAL grad = 0.0;
 				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER && point.active_index[index] != parameters::PAIRWISE_ACC_STOP; index++) {
@@ -517,50 +586,22 @@ namespace pf {
 				}
 				return pot / parameters::interface_width;
 			};
-			REAL dfint_dphi_pot_Nwell_acc(FIELD_PhiTemp& point, size_t phi_index) {
-				REAL pot = 0.0;
-				for (size_t index = 0; index < parameters::PHI_ACC_NUMBER && point.active_index[index] != parameters::PAIRWISE_ACC_STOP; index++) {
-					size_t phi_bIndex = point.active_index[index];
-					if (point.intflag[phi_bIndex] && phi_bIndex != phi_index) {
-						pot += 18 * _xi_ab(phi_index, phi_bIndex, point.old_phi[phi_index],point.old_phi[phi_bIndex], point.grad_phi[phi_index], point.grad_phi[phi_bIndex]) 
-							* point.old_phi[phi_bIndex] * point.old_phi[phi_bIndex];
-						for (size_t index2 = index + 1; index2 < parameters::PHI_ACC_NUMBER && point.active_index[index2] != parameters::PAIRWISE_ACC_STOP; index2++) {
-							size_t phi_gIndex = point.active_index[index2];
-							if (point.intflag[phi_gIndex] && phi_gIndex != phi_index)
-								pot += 6 * _xi_abc(phi_index, phi_bIndex, phi_gIndex)
-								* point.old_phi[phi_bIndex] * point.old_phi[phi_gIndex] * point.old_phi[phi_bIndex] * point.old_phi[phi_gIndex];
-						}
-					}
-				}
-				return point.old_phi[phi_index] / parameters::interface_width * pot;
-			};
 			// - 
-			REAL dfint_dphi_pairwise_S2009(FIELD_PhiTemp& point, size_t alpha_index, size_t beta_index) {
-				return _xi_ab(alpha_index, beta_index, point.old_phi[alpha_index], point.old_phi[beta_index], point.grad_phi[alpha_index], point.grad_phi[beta_index])
-					* (PI * PI / 2 / parameters::interface_width * (point.old_phi[alpha_index] - point.old_phi[beta_index])
-						+ parameters::interface_width * (point.old_phi[beta_index] * point.lap_phi[alpha_index] - point.old_phi[alpha_index] * point.lap_phi[beta_index]));
-			};
-			REAL dfint_dphi_pairwise_S1996_NO(FIELD_PhiTemp& point, size_t alpha_index, size_t beta_index) {
-				return dfint_dphi_grad_S1996_acc(point, beta_index) + dfint_dphi_pot_Nobstacle_acc(point, beta_index) -
-					dfint_dphi_grad_S1996_acc(point, alpha_index) - dfint_dphi_pot_Nobstacle_acc(point, alpha_index);
-			};
-			REAL dfint_dphi_pairwise_S1996_NW(FIELD_PhiTemp& point, size_t alpha_index, size_t beta_index) {
-				return dfint_dphi_grad_S1996_acc(point, beta_index) + dfint_dphi_pot_Nwell_acc(point, beta_index) -
-					dfint_dphi_grad_S1996_acc(point, alpha_index) - dfint_dphi_pot_Nwell_acc(point, alpha_index);
-			};
 			REAL dfint_dphi_pairwise_S1999_NO(FIELD_PhiTemp& point, size_t alpha_index, size_t beta_index) {
 				return dfint_dphi_grad_S1999_acc(point, beta_index) + dfint_dphi_pot_Nobstacle_acc(point, beta_index) -
 					dfint_dphi_grad_S1999_acc(point, alpha_index) - dfint_dphi_pot_Nobstacle_acc(point, alpha_index);
-			};
-			REAL dfint_dphi_pairwise_S1999_NW(FIELD_PhiTemp& point, size_t alpha_index, size_t beta_index) {
-				return dfint_dphi_grad_S1999_acc(point, beta_index) + dfint_dphi_pot_Nwell_acc(point, beta_index) -
-					dfint_dphi_grad_S1999_acc(point, alpha_index) - dfint_dphi_pot_Nwell_acc(point, alpha_index);
 			};
 			REAL dfbulk_dphi_pairwise_acc(long long x, long long y, long long z, size_t phi_index) {
 				REAL dfbulk_sum = 0.0;
 				for (auto dfbulk : parameters::delt_Fbulk_delt_phi)
 					dfbulk_sum += dfbulk(x, y, z, PhiProperties::instance()[phi_index]);
 				return dfbulk_sum;
+			}
+			REAL interface_variation_simple(FIELD_PhiTemp& field_var, size_t alpha_index, size_t beta_index) {
+				return dfint_dphi_pairwise_acc(field_var, alpha_index, beta_index);
+			}
+			REAL interface_variation_complex(FIELD_PhiTemp& field_var, size_t alpha_index, size_t beta_index) {
+				return field_var.mu_phi[beta_index] - field_var.mu_phi[alpha_index];
 			}
 			REAL source_pairwise_acc(long long x, long long y, long long z, size_t alpha_index, size_t beta_index) {
 				REAL source_sum = 0.0;
@@ -645,6 +686,8 @@ namespace pf {
 							for (size_t index = 0; index < main_field::phi_number; index++) {
 								field_var.old_phi[index] = phi[index]; // save old phi for other physical field
 								field_var.new_phi[index] = 0; // increment during calculation
+								field_var.mu_phi[index] = 0;
+								field_var.interface_flux[index] = Vector3(0, 0, 0);
 								if ((field_var.intflag[index] || phi[index] > parameters::PhiCon_Cut_Off) && field_var.active_number < parameters::PHI_ACC_NUMBER) {
 									field_var.active_index[field_var.active_number] = index; // save the active phi index 
 									field_var.active_number++;
@@ -662,6 +705,8 @@ namespace pf {
 							if (field_var.active_number > parameters::MAX_ACTIVE_PHI_NUMBER)
 								parameters::MAX_ACTIVE_PHI_NUMBER = field_var.active_number;
 						}
+				if (parameters::intEnAniso_model == parameters::Int_Energy_Anisotropic::IEA_CUBIC_DENDRITE)
+					prepare_cubic_interface_variation();
 #pragma omp parallel for
 				for (long long x = main_field::phase_field.COMP_X_BGN(); x <= main_field::phase_field.COMP_X_END(); x++)
 					for (long long y = main_field::phase_field.COMP_Y_BGN(); y <= main_field::phase_field.COMP_Y_END(); y++)
@@ -682,7 +727,7 @@ namespace pf {
 										continue;
 									REAL int_incre_b_a = _Lij(alpha_index, beta_index, phi[alpha_index], phi[beta_index],
 										field_var.grad_phi[alpha_index], field_var.grad_phi[beta_index], field_var.new_temp) / parameters::interface_width
-										* dfint_dphi_pairwise_acc(field_var, alpha_index, beta_index);
+										* parameters::interface_variation(field_var, alpha_index, beta_index);
 									if (parameters::is_phi_normalized) {
 										if ((int_incre_b_a > SYS_EPSILON && (phi[alpha_index] > SYS_EPSILON_R || phi[beta_index] < SYS_EPSILON))
 											|| (int_incre_b_a < -SYS_EPSILON && (phi[alpha_index] < SYS_EPSILON || phi[beta_index] > SYS_EPSILON_R)))

@@ -1,0 +1,19 @@
+\contentsline {section}{\numberline {1}模型范围与实现位置}{2}{section.1}%
+\contentsline {section}{\numberline {2}状态变量与缓存}{2}{section.2}%
+\contentsline {section}{\numberline {3}界面能密度}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}自由能定义}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}界面法向与晶体坐标}{4}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}立方各向异性}{4}{subsection.3.3}%
+\contentsline {section}{\numberline {4}严格 Euler--Lagrange 变分}{4}{section.4}%
+\contentsline {section}{\numberline {5}代码中的局部项--通量拆分}{5}{section.5}%
+\contentsline {section}{\numberline {6}空间离散}{5}{section.6}%
+\contentsline {section}{\numberline {7}相场演化}{6}{section.7}%
+\contentsline {section}{\numberline {8}线性化固液驱动力}{6}{section.8}%
+\contentsline {section}{\numberline {9}浓度演化}{7}{section.9}%
+\contentsline {section}{\numberline {10}温度演化}{7}{section.10}%
+\contentsline {section}{\numberline {11}同步显式时间推进}{7}{section.11}%
+\contentsline {section}{\numberline {12}扩展回调}{8}{section.12}%
+\contentsline {section}{\numberline {13}Ghost layer 与固定内存管理}{8}{section.13}%
+\contentsline {section}{\numberline {14}输入参数}{9}{section.14}%
+\contentsline {section}{\numberline {15}退化情形与数值不变量}{10}{section.15}%
+\contentsline {section}{\numberline {16}实现约定}{11}{section.16}%

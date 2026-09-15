@@ -35,7 +35,49 @@ namespace pf {
 		add_string_to_file(out.str(), input_output_files_parameters::DebugFile_Path);
 		// parallel
 		infile_reader::read_int_value("Solver.Loop.OpenMP_Thread", main_iterator::OpenMP_Thread_Counts, true);
-		WriteLog("> Simulation OpenMP Thread is " + std::to_string(main_iterator::OpenMP_Thread_Counts) + " \n");
+
+		const int requested_openmp_threads =
+			main_iterator::OpenMP_Thread_Counts;
+
+#ifdef _OPENMP
+
+		int available_openmp_threads = omp_get_num_procs();
+
+		if (available_openmp_threads < 1)
+			available_openmp_threads = 1;
+
+		if (main_iterator::OpenMP_Thread_Counts < 1)
+			main_iterator::OpenMP_Thread_Counts = 1;
+		else if (main_iterator::OpenMP_Thread_Counts > available_openmp_threads)
+			main_iterator::OpenMP_Thread_Counts = available_openmp_threads;
+
+		omp_set_dynamic(0);
+
+		omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
+
+		WriteLog(
+			"> OpenMP requested threads = "
+			+ std::to_string(requested_openmp_threads)
+			+ ", effective threads = "
+			+ std::to_string(main_iterator::OpenMP_Thread_Counts)
+			+ ", available processors = "
+			+ std::to_string(available_openmp_threads)
+			+ ", max threads = "
+			+ std::to_string(omp_get_max_threads())
+			+ " \n"
+		);
+
+#else
+
+		main_iterator::OpenMP_Thread_Counts = 1;
+
+		WriteLog(
+			"> OpenMP is disabled in this build; requested threads = "
+			+ std::to_string(requested_openmp_threads)
+			+ ", effective threads = 1\n"
+		);
+
+#endif
 		// - mesh and time parameters
 		infile_reader::read_int_value("Solver.Loop.begin_step", main_iterator::ITE_Begin_Step, true);
 		infile_reader::read_int_value("Solver.Loop.end_step", main_iterator::ITE_End_Step, true);

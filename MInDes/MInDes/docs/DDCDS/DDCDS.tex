@@ -1,0 +1,840 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{geometry}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\geometry{left=2.2cm,right=2.2cm,top=2.4cm,bottom=2.4cm}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\grad}{\bm{\nabla}}
+\newcommand{\diver}{\bm{\nabla}\!\cdot}
+\newcommand{\vct}[1]{\bm{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{DDCDS：数据驱动复杂枝晶凝固模块\\模型、函数、参数与缓存网格}
+\author{MInDes}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{文档范围与模型入口}
+
+本文档整理当前
+\code{src/modules/model\_modules/ddc\_dendrite\_solidification}
+模块的实际实现。模块简称 DDCDS，负责相场、总浓度和温度三个主场的耦合显式推进，
+并可选地在每个网格点进行相内浓度重分配和多项式化学自由能计算。
+模型入口为 \code{DDCDS\_Manager.h::init\_model\_modules()}，要求命令行主场配置满足
+\begin{equation}
+  \mathrm{PCT}=(N_\phi,K,\mathrm{true}),\qquad N_\phi>0,
+\end{equation}
+即相场数必须非零且温度场必须开启；浓度场可由 $K$ 是否为零决定是否启用。
+
+DDCDS 使用三层索引：相场索引 $\alpha$ 标识具体晶粒或相场分量，
+相属性 $p(\alpha)$ 将多个同类晶粒映射到同一热力学相，
+区域 $r(\alpha)$ 则由 \code{ConRegions} 将相场映射到一组共享总浓度的区域。
+组分索引 $i$ 归属于唯一浓度区域 $r(i)$。晶粒取向由
+\code{GrainsOrientations} 给出旋转矩阵 $R_\alpha$。
+
+本文档中的公式按源代码运算顺序书写。源码保留两种 cubic 界面能路径：
+\code{CUBIC}（选择值 1）只把 $\xi_{\alpha\beta}(\vct n)$ 作为当前点的
+方向相关系数代入原有算子，不对其法向依赖求导；
+\code{CUBIC\_DENDRITE}（选择值 3）则把该法向依赖纳入完整
+Euler--Lagrange 变分。各向同性和六方 Boettger 路径同样沿用点值系数计算。
+
+\section{状态变量、区域量与时间推进}
+
+主场为
+\begin{equation}
+  \{\phi_\alpha(\vct x,t)\}_{\alpha=0}^{N_\phi-1},\qquad
+  \{c_i(\vct x,t)\}_{i=0}^{K-1},\qquad T(\vct x,t).
+\end{equation}
+对每个浓度区域 $r$，代码从新相场计算区域体积分数
+\begin{equation}
+  h_r=\sum_{\alpha:r(\alpha)=r}\phi_\alpha .
+  \label{eq:region-fraction}
+\end{equation}
+若启用热力学最小化，还保存相属性聚合量
+\begin{equation}
+  \Phi_p=\sum_{\alpha:p(\alpha)=p}\phi_\alpha,
+\end{equation}
+以及各相属性内的 $c_{p,i}$ 和 $\mu_{p,i}$。
+
+一个迭代步由 \code{exec\_i()} 按固定顺序执行：
+\begin{enumerate}
+  \item \code{pre\_calculation\_phi\_pair\_wise()} 计算相场右端，
+        \code{solve\_phi\_pair\_wise()} 立即提交 $\phi^{n+1}$；
+  \item 若浓度场开启，基于已经提交的 $\phi^{n+1}$ 更新区域、化学势和迁移率，
+        再提交 $c^{n+1}$；
+  \item 基于新的相场及相场实际增量计算温度右端，再提交 $T^{n+1}$。
+\end{enumerate}
+因此这是按 $\phi\rightarrow c\rightarrow T$ 排序的显式分裂推进，
+并非三个主场从同一个完整步首快照同步提交。
+
+\section{空间离散与界面判据}
+
+令网格间距为 $\Delta x$。7 点格式的中心梯度与拉普拉斯为
+\begin{align}
+ (\partial_x u)_{i,j,k}
+ &=\frac{u_{i+1,j,k}-u_{i-1,j,k}}{2\Delta x},\\
+ (\nabla^2_7u)_{i,j,k}
+ &=\frac{\sum_{\vct e\in\mathcal A_6}u_{\vct i+\vct e}-6u_{\vct i}}
+         {\Delta x^2},
+\end{align}
+其中 $\mathcal A_6$ 是六个轴向近邻。19 点格式仍使用同一轴向中心梯度，
+但拉普拉斯为
+\begin{equation}
+ (\nabla^2_{19}u)_{\vct i}
+ =\frac{4\sum_{\mathcal A_6}u_{\vct i+\vct e}
+ +\sum_{\mathcal E_{12}}u_{\vct i+\vct e}-36u_{\vct i}}
+ {6\Delta x^2},
+ \label{eq:lap19}
+\end{equation}
+其中 $\mathcal E_{12}$ 是十二个面对角近邻。浓度区域外的近邻在计算
+$\grad h_r$、$\grad\mu_i$、$\nabla^2\mu_i$ 和 $\nabla^2c_i$ 时被当前点替代，
+等价于在活动区域边缘采用零法向差分。
+
+相场界面标志采用
+\begin{equation}
+ \phi_{\mathrm{cut}}=0.001,\qquad
+ \phi_{\mathrm{cut}}^R=0.999.
+\end{equation}
+当 $\phi_\alpha\in[\phi_{\mathrm{cut}},\phi_{\mathrm{cut}}^R]$ 时标记为
+\code{IF\_INTERFACE}；纯相点若在所选 7 点或 19 点邻域内接触界面则标记为
+\code{IF\_NEAR\_INTERFACE}，其余为 \code{IF\_BULK}。
+每步只把有界面标志或 $\phi_\alpha>\phi_c=0.1$ 的相加入固定容量活动表。
+
+\section{相场模型}
+
+\subsection{界面自由能与变分量}
+
+令 $\varepsilon$ 为 \code{interface\_width}。代码对应的 S1999 交叉梯度能为
+\begin{equation}
+ f_{\mathrm{grad}}^{\mathrm{S99}}
+ =-\varepsilon\sum_\alpha\sum_{\beta>\alpha}
+ \xi^{\alpha\beta}\grad\phi^\alpha\!\cdot\!\grad\phi^\beta .
+ \label{eq:s99}
+\end{equation}
+Nestler 多障碍势和三相结点项为
+\begin{equation}
+ f_{\mathrm{pot}}^{\mathrm{NO}}
+ =\frac{16}{\varepsilon\pi^2}
+ \sum_\alpha\sum_{\beta>\alpha}\xi^{\alpha\beta}\phi^\alpha\phi^\beta
+ +\frac{1}{\varepsilon}
+ \sum_\alpha\sum_{\beta>\alpha}\sum_{\gamma>\beta}
+ \xi^{\alpha\beta\gamma}\phi^\alpha\phi^\beta\phi^\gamma .
+ \label{eq:no}
+\end{equation}
+对各向同性、\code{CUBIC}（选择值 1）和六方 Boettger 路径，
+代码按当前点值 $\xi$ 计算
+\begin{align}
+ \mathcal I_\alpha^{\mathrm{grad}}
+ &=\varepsilon\sum_{\beta\ne\alpha}^{\mathrm{active}}
+   \xi_{\alpha\beta}\nabla^2\phi_\beta,\\
+ \mathcal I_\alpha^{\mathrm{pot}}
+ &=\frac{1}{\varepsilon}\left[
+   \frac{16}{\pi^2}\sum_{\beta\ne\alpha}^{\mathrm{active}}
+   \xi_{\alpha\beta}\phi_\beta
+   +\sum_{\substack{\beta<\gamma\\\beta,\gamma\ne\alpha}}^{\mathrm{active}}
+   \xi_{\alpha\beta\gamma}\phi_\beta\phi_\gamma\right].
+\end{align}
+其成对界面驱动力定义为
+\begin{equation}
+ \Delta\mathcal I_{\beta\alpha}
+ =\mathcal I_\beta^{\mathrm{grad}}+\mathcal I_\beta^{\mathrm{pot}}
+ -\mathcal I_\alpha^{\mathrm{grad}}-\mathcal I_\alpha^{\mathrm{pot}}.
+\end{equation}
+
+\subsection{法向、各向异性与温度依赖迁移率}
+
+对代码遍历到的相对 $\alpha<\beta$，法向为
+\begin{equation}
+ \vct n_{\alpha\beta}
+ =\frac{\phi_\beta\grad\phi_\alpha-
+             \phi_\alpha\grad\phi_\beta}
+ {\left\lVert\phi_\beta\grad\phi_\alpha-
+             \phi_\alpha\grad\phi_\beta\right\rVert}.
+ \label{eq:normal}
+\end{equation}
+分母小于 \code{SYS\_EPSILON} 时返回零向量。各向异性函数使用
+$\vct n^c=R_\beta\vct n_{\alpha\beta}$，即始终采用遍历中第二个相场的晶体取向。
+
+立方函数
+\begin{equation}
+ A_{\mathrm{cub}}(\vct n^c)
+ =\frac32-\frac52\left[(n_x^c)^4+(n_y^c)^4+(n_z^c)^4\right]
+\end{equation}
+给出
+\begin{equation}
+ L_{\alpha\beta}=L^0_{\alpha\beta}(1-\delta_LA_{\mathrm{cub}}),
+ \qquad
+ \xi_{\alpha\beta}=\xi^0_{p(\alpha)p(\beta)}(1+\delta_\xi A_{\mathrm{cub}}).
+\end{equation}
+界面能选择值 1 和 3 使用相同的 cubic $\xi_{\alpha\beta}(\vct n)$；
+二者区别只在变分策略：值 1 使用上述点值系数近似，值 3 使用下一节的严格变分。
+六方 Boettger 函数记为
+\begin{align}
+ H(\vct n^c)={}&(n_x^c)^6-(n_y^c)^6
+ -15(n_x^c)^4(n_y^c)^2+15(n_y^c)^4(n_x^c)^2\nonumber\\
+ &+5(n_z^c)^4-5(n_z^c)^2+(n_z^c)^6,
+\end{align}
+相应地
+\begin{equation}
+ L_{\alpha\beta}=L^0_{\alpha\beta}(1+\delta_LH),
+ \qquad
+ \xi_{\alpha\beta}=\xi^0_{p(\alpha)p(\beta)}(1-\delta_\xi H).
+\end{equation}
+只要提供任一 $Q_{\alpha\beta}$ 输入，界面迁移率函数切换为
+\begin{equation}
+ L_{\alpha\beta}(T)=L^0_{\alpha\beta}
+ \exp\!\left(-\frac{Q_{\alpha\beta}}{RT}\right)A_L(\vct n^c),
+ \qquad R=8.314,
+\end{equation}
+其中各向同性时 $A_L=1$。
+
+\subsection{CUBIC\_DENDRITE 的法向偏导与严格变分}
+
+本节只对应
+\code{Model.DDCDS.Phi.InterfaceEnergy.Anisotropic.property=3}，即
+\code{CUBIC\_DENDRITE}。选择值 1 的 \code{CUBIC} 仍使用相同的
+$\xi(\vct n)$，但不会计算本节中的 $\partial\xi/\partial\vct n$、
+$\vct h$ 及附加通量项。
+为简化记号，对规范相对 $\alpha<\beta$ 定义
+\begin{equation}
+ \vct p=\phi_\beta\grad\phi_\alpha-\phi_\alpha\grad\phi_\beta,
+ \qquad r=\lVert\vct p\rVert,
+ \qquad \vct n={\vct p\over r},
+ \qquad \vct n^c=R_\beta\vct n .
+ \label{eq:cubic-p}
+\end{equation}
+基准界面能记为 $\xi_0=\xi^0_{p(\alpha)p(\beta)}$，则
+\begin{equation}
+ \xi(\vct n)=\xi_0\left[1+\delta_\xi\left(
+ {3\over2}-{5\over2}\sum_{i=1}^3(n_i^c)^4\right)\right].
+ \label{eq:cubic-xi}
+\end{equation}
+其晶体坐标偏导为
+\begin{equation}
+ {\partial\xi\over\partial\vct n^c}
+ =-10\xi_0\delta_\xi
+ \begin{bmatrix}(n_x^c)^3&(n_y^c)^3&(n_z^c)^3\end{bmatrix}^{\mathsf T}.
+ \label{eq:dxi-dnc}
+\end{equation}
+由归一化映射 $\vct n=\vct p/r$ 的导数
+\begin{equation}
+ {\partial\vct n\over\partial\vct p}
+ ={1\over r}\left(I-\vct n\vct n^{\mathsf T}\right)
+\end{equation}
+得到代码缓存的方向导数向量
+\begin{equation}
+ \vct h:={\partial\xi\over\partial\vct p}
+ ={1\over r}\left(I-\vct n\vct n^{\mathsf T}\right)
+ R_\beta^{\mathsf T}{\partial\xi\over\partial\vct n^c}.
+ \label{eq:cubic-h}
+\end{equation}
+其中切平面投影保证 $\vct h\cdot\vct n=0$，而 $R_\beta^{\mathsf T}$
+将晶体坐标导数旋回实验室坐标。当 $r<\code{SYS\_EPSILON}$ 时法向未定义，
+实现取 $\xi=\xi_0$、$\vct h=\vct0$。
+
+式 \eqref{eq:cubic-p} 对相场及其梯度的偏导为
+\begin{equation}
+ {\partial\vct p\over\partial\phi_\alpha}=-\grad\phi_\beta,
+ \quad {\partial\vct p\over\partial\phi_\beta}=\grad\phi_\alpha,
+ \quad {\partial\vct p\over\partial(\grad\phi_\alpha)}=\phi_\beta I,
+ \quad {\partial\vct p\over\partial(\grad\phi_\beta)}=-\phi_\alpha I.
+ \label{eq:dp-dphi}
+\end{equation}
+令 $s=\grad\phi_\alpha\cdot\grad\phi_\beta$，并使用
+\begin{equation}
+ \mathcal I_\kappa={\partial f_{\mathrm{int}}\over\partial\phi_\kappa}
+ -\diver{\partial f_{\mathrm{int}}\over\partial(\grad\phi_\kappa)},
+\end{equation}
+单个相对的 S1999 梯度能贡献为
+\begin{align}
+ \mathcal I_{\alpha,\mathrm{grad}}^{\alpha\beta}
+ &=\varepsilon\left[s\vct h\cdot\grad\phi_\beta
+ +\diver\left(\xi\grad\phi_\beta+s\phi_\beta\vct h\right)\right],\\
+ \mathcal I_{\beta,\mathrm{grad}}^{\alpha\beta}
+ &=\varepsilon\left[-s\vct h\cdot\grad\phi_\alpha
+ +\diver\left(\xi\grad\phi_\alpha-s\phi_\alpha\vct h\right)\right].
+ \label{eq:cubic-grad-var}
+\end{align}
+双相障碍势贡献为
+\begin{align}
+ \mathcal I_{\alpha,\mathrm{pot}}^{\alpha\beta}
+ &={16\over\varepsilon\pi^2}\left[
+ \xi\phi_\beta-\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\beta
+ -\diver(\phi_\alpha\phi_\beta^2\vct h)\right],\\
+ \mathcal I_{\beta,\mathrm{pot}}^{\alpha\beta}
+ &={16\over\varepsilon\pi^2}\left[
+ \xi\phi_\alpha+\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\alpha
+ +\diver(\phi_\alpha^2\phi_\beta\vct h)\right].
+ \label{eq:cubic-pot-var}
+\end{align}
+
+\subsubsection{代码中的局部项--通量拆分}
+
+为了使 $\delta_\xi=0$ 时严格退化为原生 7 点或 19 点拉普拉斯，
+实现把 $\xi_0\nabla^2\phi$ 留在局部项，只对各向异性修正取通量散度：
+\begin{align}
+ \ell_\alpha^{\alpha\beta}
+ &=\varepsilon\left(\xi_0\nabla^2\phi_\beta+s\vct h\cdot\grad\phi_\beta\right)
+ +{16\over\varepsilon\pi^2}\left(
+ \xi\phi_\beta-\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\beta\right),\\
+ \vct q_\alpha^{\alpha\beta}
+ &=\varepsilon\left[(\xi-\xi_0)\grad\phi_\beta+s\phi_\beta\vct h\right]
+ -{16\over\varepsilon\pi^2}\phi_\alpha\phi_\beta^2\vct h,\\
+ \ell_\beta^{\alpha\beta}
+ &=\varepsilon\left(\xi_0\nabla^2\phi_\alpha-s\vct h\cdot\grad\phi_\alpha\right)
+ +{16\over\varepsilon\pi^2}\left(
+ \xi\phi_\alpha+\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\alpha\right),\\
+ \vct q_\beta^{\alpha\beta}
+ &=\varepsilon\left[(\xi-\xi_0)\grad\phi_\alpha-s\phi_\alpha\vct h\right]
+ +{16\over\varepsilon\pi^2}\phi_\alpha^2\phi_\beta\vct h.
+ \label{eq:cubic-local-flux}
+\end{align}
+对所有活动相对累加后，完整变分量为
+\begin{equation}
+ \mathcal I_\alpha=\sum_{\beta\ne\alpha}\ell_\alpha^{\alpha\beta}
+ +{1\over\varepsilon}
+ \sum_{\substack{\beta<\gamma\\\beta,\gamma\ne\alpha}}
+ \xi_{\alpha\beta\gamma}\phi_\beta\phi_\gamma
+ +\diver\sum_{\beta\ne\alpha}\vct q_\alpha^{\alpha\beta}.
+ \label{eq:cubic-full-var}
+\end{equation}
+局部项存入 \code{mu\_phi}，通量存入 \code{interface\_flux}；
+通量 ghost layer 完成边界同步后，散度使用轴向中心差分。
+7 点和 19 点选择只改变式 \eqref{eq:cubic-local-flux} 中的基准拉普拉斯，
+因为两种模式原本就使用相同的轴向中心梯度。
+
+最终 \code{CUBIC\_DENDRITE} 成对界面驱动力为
+\begin{equation}
+ \Delta\mathcal I_{\beta\alpha}=\mathcal I_\beta-\mathcal I_\alpha,
+ \label{eq:cubic-pair-var}
+\end{equation}
+并进入下述反对称演化方程。
+
+\subsection{成对演化、体驱动力与噪声}
+
+对活动界面相对 $\alpha<\beta$，界面贡献为
+\begin{equation}
+ J_{\alpha\beta}^{\mathrm{int}}
+ =\frac{L_{\alpha\beta}}{\varepsilon}\Delta\mathcal I_{\beta\alpha}.
+\end{equation}
+当两相均满足 $\phi>\phi_c$ 时才计算体驱动力和用户源：
+\begin{equation}
+ J_{\alpha\beta}^{\mathrm{bulk}}
+ =\frac{L_{\alpha\beta}}{\varepsilon}
+ \left(\frac{\delta F_{\mathrm{bulk}}}{\delta\phi_\beta}
+      -\frac{\delta F_{\mathrm{bulk}}}{\delta\phi_\alpha}\right)
+ +S_{\alpha\beta}.
+\end{equation}
+所有成对贡献均以反对称方式累加，
+\begin{equation}
+ \dot\phi_\alpha\mathrel{+}=J_{\alpha\beta},\qquad
+ \dot\phi_\beta\mathrel{-}=J_{\alpha\beta},
+ \label{eq:pairwise}
+\end{equation}
+故未截断时局部相场增量之和为零。常数体能输入实际注册
+$\delta F/\delta\phi_\alpha=f^0_{p(\alpha)}$。
+
+随机源只在指定步区间且步号可被 \code{frequency} 整除时生效；
+只有相对两端都列在 \code{Phi.noise} 中才产生
+\begin{equation}
+ S_{\alpha\beta}^{\mathrm{noise}}=A_\eta U[-1,1].
+\end{equation}
+未给种子时使用 \code{random\_device}，给出种子时采用可复现的 Mersenne Twister。
+
+若 \code{Phi.is\_normalize=true}，代码先阻止继续越过 0 或 1 的成对通量，
+再用一个统一缩放因子缩小全部活动相增量，使显式候选值留在区间内，
+最后调用 \code{normalize\_new\_phi} 归一化提交值。
+
+\section{浓度模型}
+
+\subsection{化学势与迁移率}
+
+对区域 $r$ 中的组分 $i$，缓存化学势为所有已注册贡献之和
+\begin{equation}
+ \mu_i=\sum_q\left(\frac{\delta F}{\delta c_i}\right)_q.
+\end{equation}
+可选 \code{DiffusionPotential.con} 直接加入 $c_i$；
+若给出 $K_i$，还加入 Cahn--Hilliard 型梯度项
+\begin{equation}
+ \mu_i^{\mathrm{grad}}=-K_i\nabla^2c_i.
+\end{equation}
+若启用热力学最小化且未选择直接 $c_i$ 势，则加入相化学势的活动相平均值。
+
+总迁移率是已注册项的和。体扩散为
+\begin{align}
+ M_{i,r}^{\mathrm{bulk}}
+ &=\sum_{\alpha:r(\alpha)=r}\phi_\alpha
+ M^0_{p(\alpha),i},\\
+ M_{i,r}^{\mathrm{bulk}}(T)
+ &=\sum_{\alpha:r(\alpha)=r}\phi_\alpha M^0_{p(\alpha),i}
+ \exp\!\left[-\frac{Q_{p(\alpha),i}}{RT}\right].
+\end{align}
+提供逐相 $Q$ 后选择温度依赖形式。区域表面与同区域相界面附加项为
+\begin{align}
+ M_{i,r}^{\mathrm{surf}}&=h_r(1-h_r)M^{\mathrm{surf}}_{r,i},\\
+ M_{i,r}^{\mathrm{int}}&=
+ \sum_{\substack{\alpha<\beta\\r(\alpha)=r(\beta)=r}}
+ \phi_\alpha\phi_\beta M^{\mathrm{int}}_{p(\alpha),p(\beta),i}.
+\end{align}
+
+\subsection{区域守恒方程与移动区域}
+
+在 $h_r>\phi_c$ 的区域内，代码计算
+\begin{align}
+ \dot c_i={1\over h_r^{n+1}}\bigg[&
+ \grad M_i\cdot\grad\mu_i+M_i\nabla^2\mu_i
+ +|\grad h_r|S^{\mathrm{surf}}_{r,i}
+ +h_r^{n+1}S^{\mathrm{bulk}}_{r,i}\nonumber\\
+ &-c_i^n\frac{h_r^{n+1}-h_r^n}{\Delta t}\bigg].
+ \label{eq:concentration}
+\end{align}
+最后一项补偿区域体积分数变化，使方程对应 $h_rc_i$ 的守恒更新。
+显式提交为 $c_i^{n+1}=c_i^n+\Delta t\dot c_i$。
+
+当区域从 $h_r\le\phi_c$ 进入活动状态时，默认初始化函数取 $3\times3\times3$
+邻域中前后两步均活动的点，并按其新区域分数加权平均浓度；若没有足够邻点，
+将区域内每个组分设为 $\phi_c^R/N_r=0.9/N_r$。区域消失时对应总浓度置零。
+若启用浓度归一化，每个活动组分被限制到
+\code{SYS\_EPSILON} 与 \code{SYS\_EPSILON\_R} 之间；若区域组分和过大，
+再统一缩放到 \code{SYS\_EPSILON\_R}。
+
+\section{温度模型}
+
+局部热迁移率由相分数插值得到
+\begin{equation}
+ M_T=\sum_{\alpha\in\mathrm{active}}
+ \phi_\alpha^{n+1}M_{T,p(\alpha)}.
+\end{equation}
+若配置相变热源，使用已经提交的相场增量
+\begin{equation}
+ S_T^\phi=\sum_{\alpha\in\mathrm{active}}
+ K_{T,p(\alpha)}\frac{\phi_\alpha^{n+1}-\phi_\alpha^n}{\Delta t}.
+\end{equation}
+温度方程及显式更新为
+\begin{align}
+ \dot T&=\grad M_T\cdot\grad T+M_T\nabla^2T+\sum_qS_{T,q},\\
+ T^{n+1}&=T^n+\Delta t\dot T.
+ \label{eq:temperature}
+\end{align}
+\code{Temp.is\_normalize} 会被读入参数，但当前温度求解函数没有使用该开关进行截断。
+
+\section{多项式化学自由能与局部重分配}
+
+对相属性 $p$，输入的每一项由组分幂次、温度幂次和对应系数组成，代码计算
+\begin{equation}
+ f_p(\vct c,T)=\sum_m
+ \left(\sum_q A_{pmq}T^{b_{pmq}}\right)
+ \prod_{i\in r(p)}c_i^{a_{pmi}}.
+ \label{eq:fchem}
+\end{equation}
+化学势由式 \eqref{eq:fchem} 对指定 $c_i$ 解析求导。
+相场体自由能贡献使用 grand-potential 形式
+\begin{equation}
+ \frac{\delta F_{\mathrm{chem}}}{\delta\phi_\alpha}
+ =f_{p(\alpha)}-\sum_{i\in r(\alpha)}c_{p(\alpha),i}\mu_{p(\alpha),i}.
+\end{equation}
+
+在启用的区域中，相属性分数超过 $\phi_c=0.1$ 的相参加局部重分配。
+若只有一个活动相，其相浓度直接等于区域总浓度；若有多个活动相，代码先按
+$\sum_p\Phi_pc_{p,i}=h_rc_i$ 重标定相浓度，再迭代
+\begin{align}
+ \bar\mu_i&={1\over N_{\mathrm{act}}}\sum_{p\in\mathrm{act}}\mu_{p,i},\\
+ \Delta c_{p,i}&=-{L_c\over\Phi_p}\,h_r(\mu_{p,i}-\bar\mu_i),\\
+ c_{p,i}&\leftarrow c_{p,i}+\Delta c_{p,i}.
+ \label{eq:minimization}
+\end{align}
+当本轮最大 $|\Delta c_{p,i}|$ 小于 \code{phasecon\_epsilon} 或达到
+\code{max\_phasecon\_variation\_step} 时停止。
+
+\section{缓存网格与数据生命周期}
+
+三个缓存均使用与主网格相同尺寸、间距和边界范围的
+\code{Mesh\_Boundry<T>}。每个点内部的向量在初始化时按相场数、组分数、
+区域数或相属性数分配。
+
+\begin{longtable}{>{\ttfamily}p{0.19\textwidth}p{0.25\textwidth}p{0.48\textwidth}}
+\toprule
+\normalfont 缓存/成员 & 尺寸或类型 & 含义与生命周期\\
+\midrule
+\endhead
+PhiTemp\_field & Mesh\_Boundry<FIELD\_PhiTemp> & 相场和温度共用缓存；\code{exec\_pre\_iii} 创建，\code{deinit} 清理。\\
+active\_index & PHI\_ACC\_NUMBER & 活动相索引；未用槽填 \code{PAIRWISE\_ACC\_STOP}。\\
+active\_number & size\_t & 当前点实际活动相数。\\
+intflag & $N_\phi$ 个 int & 每相的 bulk/near-interface/interface 标志。\\
+old\_phi,new\_phi & 各 $N_\phi$ 个 REAL & 步首相场与相场右端/已提交新值的复用缓存。\\
+lap\_phi,grad\_phi & $N_\phi$ 个标量/向量 & 仅对带界面标志的相计算的拉普拉斯与梯度。\\
+mu\_phi & $N_\phi$ 个 REAL & 仅在 \code{CUBIC\_DENDRITE}（选择值 3）下累积式 \eqref{eq:cubic-full-var} 的局部项，通量散度计算后保存完整界面变分势。\\
+interface\_flux & $N_\phi$ 个 Vector3 & 仅在 \code{CUBIC\_DENDRITE} 下累积式 \eqref{eq:cubic-local-flux} 的各向异性通量；求散度前随 \code{PhiTemp\_field} 同步 ghost layer。\\
+old\_temp,new\_temp & REAL & 步首温度与温度右端/已提交新值的复用缓存。\\
+mob\_temp & REAL & 当前步由相分数插值得到的热迁移率。\\
+\midrule
+Con\_field & Mesh\_Boundry<FIELD\_Con> & 浓度开启时创建；\code{deinit} 清理。\\
+old\_region,new\_region & 各 $N_r$ 个 REAL & 前一步和新相场对应的区域体积分数。\\
+old\_con,new\_con & 各 $K$ 个 REAL & 步首浓度与浓度右端/新值复用缓存。\\
+miu\_con,mob\_con & 各 $K$ 个 REAL & 当前步化学势与总迁移率；求空间导数前同步边界。\\
+\midrule
+PhaseCon\_field & Mesh\_Boundry<FIELD\_PhaseCon> & 浓度初始化时由热力学模块创建；源码 \code{deinit} 未显式调用其 \code{clear()}。\\
+phase\_old\_phi,phase\_phi & 各 $N_p$ 个 REAL & 相属性聚合分数的前值和当前值。\\
+phase\_con,phase\_miu & $N_p\times K$ & 每个相属性的组分浓度和化学势。\\
+\bottomrule
+\end{longtable}
+
+\code{FIELD\_PhiTemp}、\code{FIELD\_Con} 和 \code{FIELD\_PhaseCon}
+还实现了逐点加、减、乘、除运算，供边界插值机制使用。相场缓存的算术运算处理
+新旧相场、\code{mu\_phi}、\code{interface\_flux}、新旧温度和温度迁移率，
+不处理活动表、标志、梯度或拉普拉斯；
+浓度缓存运算处理全部新旧区域、新旧浓度、化学势与迁移率；
+相浓度缓存运算处理全部相属性分数、相浓度和相化学势。
+
+初始化阶段依次创建 \code{PhiTemp\_field}、可选 \code{Con\_field}、
+可选温度缓存内容以及 \code{PhaseCon\_field}。每个子求解器在空间导数计算前调用
+缓存或主场的边界同步；提交后相应主场再次执行边界条件。
+
+\section{参数总表}
+
+\subsection{基础参数、矩阵和回调}
+
+\begin{longtable}{>{\ttfamily}p{0.27\textwidth}p{0.18\textwidth}p{0.47\textwidth}}
+\toprule
+\normalfont 参数 & 默认值/索引 & 作用\\
+\midrule
+\endhead
+Phi\_Cut\_Off, Phi\_Cut\_Off\_R & 0.001, 0.999 & 相场界面判据。\\
+PhiCon\_Cut\_Off, PhiCon\_Cut\_Off\_R & 0.1, 0.9 & 活动区域、热力学活动相和缺省初始化判据。\\
+diff\_method & SEVEN\_POINT & 选择相场、浓度和温度的 7 点或 19 点函数。\\
+is\_phi/con/temp\_normalized & false & 相场与浓度开关被求解器使用；温度开关当前只保存。\\
+PHI\_ACC\_NUMBER & 初始化为 $N_\phi$ & 每点活动相容器容量，可由输入覆盖。\\
+PAIRWISE\_ACC\_STOP & $N_\phi$ & 活动相表哨兵；不是输入量。\\
+MAX\_ACTIVE\_PHI\_NUMBER & 0 & 每步记录观测到的最大活动相数。\\
+grain\_rotation\_matrix & 按相场索引 & 来自 \code{GrainsOrientations}。\\
+Lij,Qij & $(\alpha,\beta)$ & 对称界面迁移率基值和激活能矩阵。\\
+R & 8.314 & Arrhenius 气体常数。\\
+interface\_width & 4.0 & 式 \eqref{eq:s99}--\eqref{eq:pairwise} 中的 $\varepsilon$。\\
+xi\_ab & $(p_\alpha,p_\beta)$ & 对称两相界面能矩阵。\\
+xi\_abc & $(p_\alpha,p_\beta,p_\gamma)$ & 三相结点系数；矩阵输入只写指定排列。\\
+intMobAniso\_param1 & 输入设置 & 界面迁移率各向异性强度 $\delta_L$。\\
+intEnAniso\_param1 & 输入设置 & 界面能各向异性强度 $\delta_\xi$。\\
+f\_bulk\_0 & 按相属性 & 常数体自由能导数，缺省为零。\\
+is\_phi\_noise & 按相场索引 & 标记允许产生噪声的相。\\
+phi\_noise\_* & 0,0,100,0 & 起止步、频率、振幅及可选种子。\\
+Mii,Qii & $(p,i)$ & 体扩散迁移率基值和激活能。\\
+Mii\_surf & $(r,i)$ & 区域表面扩散参数。\\
+Mii\_grain & $(p_\alpha,p_\beta,i)$ & 同区域相界面扩散参数。\\
+Ki & 按组分，0 & 浓度梯度能系数。\\
+Mtemp,Ktemp & 按相属性，0 & 热迁移率与相变温度源系数。\\
+max\_phasecon\_variation\_step & 100 & 局部浓度重分配最大迭代数。\\
+L\_phasecon & 1.0 & 式 \eqref{eq:minimization} 的迭代系数。\\
+phasecon\_epsilon & $10^{-4}$ & 局部浓度重分配停止阈值。\\
+ThermoCalcScanRange & (0,0,1) & CSV 扫描的起点、终点和步长。\\
+delt\_Fbulk\_delt\_phi & 回调列表 & 相场体自由能导数贡献求和。\\
+source\_alpha\_beta & 回调列表 & 成对相场源求和。\\
+delt\_Fbulk\_delt\_con & 回调列表 & 浓度化学势贡献求和。\\
+mobility & 回调列表 & 浓度迁移率贡献求和。\\
+bulk/surface\_reaction & 回调列表 & 体反应和表面反应源求和；管理器当前未从 DDCDS 键注册内置反应。\\
+mobility\_temp,source\_temp & 回调列表 & 温度迁移率与源项求和。\\
+\bottomrule
+\end{longtable}
+
+\subsection{派生状态、热力学存储与输出选择}
+
+\begin{longtable}{>{\ttfamily}p{0.34\textwidth}p{0.18\textwidth}p{0.40\textwidth}}
+\toprule
+\normalfont 参数成员 & 初值/维度 & 用途\\
+\midrule
+\endhead
+is\_phasecon\_on & false & 保留的相浓度开关；当前 DDCDS 源码未读取或修改。\\
+is\_phase/region\_volume\_statistic & false & 控制相属性、区域体积分数统计。\\
+is\_average/total\_con\_statistic & false & 控制区域平均浓度和全域总浓度统计。\\
+statistic\_phase/region\_volume & 键值对 & 保存 \code{vol\_phase}、\code{vol\_region} 及说明文字。\\
+statistic\_average/total\_con & 键值对 & 保存 \code{ave\_con}、\code{tot\_con} 及说明文字。\\
+is\_energy\_minimization & 按区域 bool & 标记需要局部相浓度重分配的区域。\\
+con\_orders & $[p](m,i)$ & 式 \eqref{eq:fchem} 的组分幂次 $a_{pmi}$。\\
+temp\_orders, params & $[p](m,q)$ & 温度幂次 $b_{pmq}$ 与系数 $A_{pmq}$。\\
+terms\_number & 按相属性 & 每个相属性的多项式项数。\\
+temp\_terms\_number & $[p][m]$ & 每个多项式项的温度子项数。\\
+MAX\_MINIMIZATION\_RESULTS & (0,0) & 每步全域最大相浓度变化及最大迭代步数。\\
+is\_write\_phase\_con/miu & $(p,i)$ 列表 & VTS 相浓度与相化学势选择。\\
+is\_write\_con/miu & 组分索引列表 & VTS 总浓度与总化学势选择。\\
+is\_write\_fchem & 相属性列表 & VTS 化学自由能选择。\\
+thermo\_calc\_energy\_phases & 相属性列表 & 化学自由能 CSV 扫描相。\\
+thermo\_calc\_energy\_con\_ranges & 按组分范围 & 化学自由能扫描的组分轴。\\
+thermo\_calc\_energy\_temp\_range & 单个范围 & 化学自由能扫描的温度轴。\\
+thermo\_calc\_energy\_csv\_name & thermo\_calc\_energy\_data.csv & 化学自由能 CSV 文件名。\\
+is\_write\_thermo\_calc\_csv & false & 是否执行局部平衡 CSV 扫描。\\
+thermo\_calc\_region & 0 & 局部平衡扫描区域索引。\\
+thermo\_calc\_phi\_property & 按相属性 bool & 标记扫描区域所含相属性。\\
+thermo\_calc\_fix\_con & 按组分 $(bool,value)$ & 标记起止值相等的固定组分。\\
+thermo\_calc\_phases & 相属性列表 & 局部平衡扫描包含的相。\\
+thermo\_calc\_con/phi\_ranges & 按组分/相属性 & 局部平衡扫描的浓度与前 $N-1$ 相分数轴。\\
+thermo\_calc\_temp\_range & 单个范围 & 局部平衡扫描温度轴。\\
+thermo\_calc\_equi\_csv\_name & thermo\_calc\_equi\_data.csv & 局部平衡 CSV 文件名。\\
+\bottomrule
+\end{longtable}
+
+上述合并行对应的精确成员名包括
+\code{is\_phi\_normalized}、\code{is\_con\_normalized}、
+\code{is\_temp\_normalized}、\code{intMobAniso\_model}、
+\code{intEnAniso\_model}、\code{is\_phi\_noise\_rand}、
+\code{phi\_noise\_begin}、\code{phi\_noise\_end}、
+\code{phi\_noise\_frequency}、\code{phi\_noise\_amplitude} 和
+\code{phi\_noise\_seed}。统计成员为
+\code{is\_phase\_volume\_statistic}、\code{is\_region\_volume\_statistic}、
+\code{is\_average\_con\_statistic}、\code{is\_total\_con\_statistic}，
+以及对应的 \code{statistic\_phase\_volume}、\code{statistic\_region\_volume}、
+\code{statistic\_average\_con}、\code{statistic\_total\_con}。
+VTS 选择成员包括 \code{is\_write\_phase\_miu} 和 \code{is\_write\_miu}；
+局部平衡扫描范围的精确名称包括 \code{thermo\_calc\_con\_ranges} 和
+\code{thermo\_calc\_phi\_ranges}。结构初始化参数 \code{con\_number}
+表示组分维数，不是独立模型输入。
+
+统计开关对应键值 \code{vol\_phase}、\code{vol\_region}、
+\code{ave\_con} 和 \code{tot\_con}。输出选择分别保存需要写出的相浓度、总浓度、
+相化学势、总化学势、化学自由能，以及两类热力学 CSV 扫描的相、组分和温度范围。
+
+\section{DDCDS 输入参数}
+
+除特别说明外，\code{read\_*\_value(...,true)} 允许键缺省，缺省时保留参数初值。
+动态键中的 \code{PhaseName}、\code{RegionName} 和 \code{ConName}
+必须使用前置输入模块已经注册的名称。
+
+\subsection{离散、归一化、统计和相场}
+
+\begin{longtable}{>{\ttfamily}p{0.39\textwidth}p{0.24\textwidth}p{0.29\textwidth}}
+\toprule
+\normalfont 输入键 & 格式/默认 & 效果与约束\\
+\midrule
+\endhead
+Model.DDCDS.difference\_method & int，0 & 0：7 点；1：19 点。其他值不会绑定离散函数。\\
+Model.DDCDS.Phi.is\_normalize & bool，false & 启用相场增量缩放及提交归一化。\\
+Model.DDCDS.Con.is\_normalize & bool，false & 启用浓度范围与区域组分和限制。\\
+Model.DDCDS.Temp.is\_normalize & bool，false & 当前实现只读取并保存。\\
+Model.DDCDS.PhiConTemp.statistic & (STA\_KEY,...)，空 & 可选 \code{vol\_phase}、\code{vol\_region}、\code{ave\_con}、\code{tot\_con}。\\
+Model.DDCDS.Phi.PairWiseAcc.container\_size & int，$N_\phi$ & 活动相数组容量；过小会截断活动相集合。\\
+Model.DDCDS.Phi.IntMobility.const & real，0 & 设置全部或所选相对的 $L^0$。\\
+Model.DDCDS.Phi.IntMobility.const.block & [(index,...),...] & 若存在，对每组内部相对应用常数；优先于 \code{const.cross\_block}。\\
+Model.DDCDS.Phi.IntMobility.const.cross\_block & \{[(a,...),(b,...)],...\} & 对每组两侧的笛卡尔积相对应用常数。\\
+Model.DDCDS.Phi.IntMobility.matrix & [(i,j,L),...] & 逐相对覆盖并对称写入。\\
+Model.DDCDS.Phi.IntMobility.block & [(begin,end,L),...] & 对闭区间内部全部相对覆盖。\\
+Model.DDCDS.Phi.IntMobilityQ.const & real，0 & 设置 $Q_{\alpha\beta}$；出现时启用温度依赖迁移率。\\
+Model.DDCDS.Phi.IntMobilityQ.const.block & [(index,...),...] & $Q$ 常数的组内相对范围。\\
+Model.DDCDS.Phi.IntMobilityQ.const.cross\_block & \{[(a,...),(b,...)],...\} & $Q$ 常数的跨组相对范围。\\
+Model.DDCDS.Phi.IntMobilityQ.matrix & [(i,j,Q),...] & 逐相对对称覆盖 $Q$。\\
+Model.DDCDS.Phi.IntMobilityQ.block & [(begin,end,Q),...] & 对闭区间内部相对覆盖 $Q$。\\
+Model.DDCDS.Phi.IntMobility.Anisotropic.property & int，0 & 0：ISO；1：CUBIC；2：HEX\_BOETTGER。\\
+Model.DDCDS.Phi.IntMobility.Anisotropic.parameter\_1 & real & 选择 1 或 2 时的 $\delta_L$。\\
+Model.DDCDS.Phi.InterfaceEnergy.int\_width & real，4.0 & 界面宽度 $\varepsilon$。\\
+Model.DDCDS.Phi.InterfaceEnergy.const & real，0 & 初始化全部相属性对的 $\xi^0$。\\
+Model.DDCDS.Phi.InterfaceEnergy.matrix & [(PhaseA,PhaseB,$\xi$),...] & 逐相属性对覆盖并对称写入。\\
+Model.DDCDS.Phi.InterfaceEnergy.Anisotropic.property & int，0 & 0：ISO；1：CUBIC（点值系数近似）；2：HEX\_BOETTGER；3：CUBIC\_DENDRITE（含法向偏导的严格变分）。\\
+Model.DDCDS.Phi.InterfaceEnergy.Anisotropic.parameter\_1 & real & 选择 1、2 或 3 时的 $\delta_\xi$；值 1 和 3 使用相同 cubic 界面能函数。\\
+Model.DDCDS.Phi.TripleJunctionEnergy.const & real，0 & 初始化全部三相属性组合。\\
+Model.DDCDS.Phi.TripleJunctionEnergy.matrix & [(A,B,C,$\xi_{abc}$),...] & 覆盖指定索引排列，不自动写入全部排列。\\
+Model.DDCDS.Phi.BulkEnergy.const & [(PhaseName,$f^0$),...] & 设置常数体能并注册体驱动力回调。\\
+Model.DDCDS.Phi.noise & (phi\_index,...)，空 & 标记噪声相；至少一个有效索引时注册噪声源。\\
+Model.DDCDS.Phi.noise.begin\_step & int，0 & 噪声起始步，包含端点。\\
+Model.DDCDS.Phi.noise.end\_step & int，0 & 噪声结束步，包含端点。\\
+Model.DDCDS.Phi.noise.frequency & int，100 & 以当前步取模；必须由用户保证非零。\\
+Model.DDCDS.Phi.noise.amplitude & real，0 & 均匀噪声振幅。\\
+Model.DDCDS.Phi.noise.seed & int，可缺省 & 给出后固定随机种子；缺省使用系统随机源。\\
+\bottomrule
+\end{longtable}
+
+\subsection{浓度、温度与热力学}
+
+\begin{longtable}{>{\ttfamily}p{0.41\textwidth}p{0.23\textwidth}p{0.28\textwidth}}
+\toprule
+\normalfont 输入键 & 格式/默认 & 效果与约束\\
+\midrule
+\endhead
+Model.DDCDS.Con.BulkMobility.const & real，0 & 初始化全部 $(p,i)$ 的 $M^0$。\\
+Model.DDCDS.Con.BulkMobility.PhaseName.matrix & ($M_1,\ldots$) & 按该相所在区域的组分顺序覆盖；长度必须等于区域组分数。\\
+Model.DDCDS.Con.BulkMobilityQ.const & real，0 & 初始化全部 $(p,i)$ 的 $Q$；单独给常数不会切换温度函数。\\
+Model.DDCDS.Con.BulkMobilityQ.PhaseName.matrix & ($Q_1,\ldots$) & 按区域组分顺序覆盖；任一此动态键出现时启用 Arrhenius 体迁移率。\\
+Model.DDCDS.Con.SurfaceMobility.const & real，0 & 初始化全部 $(r,i)$ 的表面迁移率参数。\\
+Model.DDCDS.Con.SurfaceMobility.RegionName.matrix & ($M_1,\ldots$) & 按区域组分顺序覆盖；至少一个动态键出现才注册表面迁移率项。\\
+Model.DDCDS.Con.IntMobility.const & real，0 & 初始化全部 $(p_a,p_b,i)$ 的相界面迁移率。\\
+Model.DDCDS.Con.IntMobility.PhaseA\textbar PhaseB.matrix & ($M_1,\ldots$) & 仅为同一区域相属性对生成动态键；出现时对称写入并注册界面迁移率项。\\
+Model.DDCDS.Con.DiffusionPotential.con & bool，false & 将 $c_i$ 本身作为化学势贡献。\\
+Model.DDCDS.Con.DiffusionPotential.Ki & ($K_1,\ldots,K_K$) & 长度必须等于总组分数，注册 $-K_i\nabla^2c_i$。\\
+Model.DDCDS.Temp.Mobility.const & real，0 & 初始化全部相属性热迁移率。\\
+Model.DDCDS.Temp.Mobility.PhaseName.matrix & real & 覆盖指定相属性的热迁移率。\\
+Model.DDCDS.Temp.Source.dphidtemp & [(PhaseName,$K_T$),...] & 设置相变热源系数并注册相场温度源。\\
+Model.DDCDS.ThermoCalc.regions & (RegionName,...)，空 & 启用所列有效区域的局部相浓度最小化。\\
+Model.DDCDS.ThermoCalc.ChemEnergy.PhaseName & $\{[(\vct a),(\vct b),(\vct A)],...\}$ & 每项依次为全部组分幂次、温度幂次、温度系数；后两者非空且等长。\\
+Model.DDCDS.ThermoCalc.max\_variation\_step & int，100 & 局部最小化最大步数。\\
+Model.DDCDS.ThermoCalc.L & real，1.0 & 局部最小化迭代系数。\\
+Model.DDCDS.ThermoCalc.epsilon & real，$10^{-4}$ & 局部最小化收敛阈值。\\
+\bottomrule
+\end{longtable}
+
+\subsection{CSV 与 VTS 输出}
+
+\begin{longtable}{>{\ttfamily}p{0.43\textwidth}p{0.22\textwidth}p{0.27\textwidth}}
+\toprule
+\normalfont 输入键 & 格式/默认 & 效果与约束\\
+\midrule
+\endhead
+Model.DDCDS.Output.CSV.EnergyMinimization.active & bool，false & 开启独立局部平衡扫描；要求浓度场开启。\\
+Model.DDCDS.Output.CSV.EnergyMinimization.file\_name & string，thermo\_calc\_equi\_data.csv & 文件名不得为空。\\
+Model.DDCDS.Output.CSV.EnergyMinimization.region & RegionName，必需 & 必须是已定义且已在 \code{ThermoCalc.regions} 启用的非空区域。\\
+Model.DDCDS.Output.CSV.EnergyMinimization.concentration & (start,end,step)，必需 & 区域全部组分共用；$0\le start\le end<1$，$step>0$。\\
+Model.DDCDS.Output.CSV.EnergyMinimization.phase\_fraction & (start,end,step)，必需 & 前 $N-1$ 相扫描，末相补足 1；$0<start\le end<1$，$step>0$。\\
+Model.DDCDS.Output.CSV.EnergyMinimization.temperature & (start,end,step)，必需 & $start\le end$ 且 $step>0$。\\
+Model.DDCDS.Output.CSV.ChemEnergy & (PhaseName,...)，空 & 选择化学能扫描相；相必须属于启用热力学区域，不可重复。\\
+Model.DDCDS.Output.CSV.ChemEnergy.file\_name & string，thermo\_calc\_energy\_data.csv & 至少选择一相时读取；不得为空。\\
+Model.DDCDS.Output.CSV.ChemEnergy.concentration & [(ConName,start,end,step),...] & 必须完整且仅定义所选相用到的组分；$0\le start\le end\le1$，$step>0$。\\
+Model.DDCDS.Output.CSV.ChemEnergy.temperature & (start,end,step) & 选择相后必需；$start\le end$ 且 $step>0$。\\
+Model.DDCDS.Output.VTS.active\_phis & bool，false & 输出每点活动相数。\\
+Model.DDCDS.Output.VTS.con\_all & bool，false & 输出区域加权的全部总浓度。\\
+Model.DDCDS.Output.VTS.phase\_con & [(PhaseName,ConName),...] & 输出指定相浓度；要求相所在区域启用热力学且包含该组分。\\
+Model.DDCDS.Output.VTS.con & (ConName,...) & 输出指定总浓度。\\
+Model.DDCDS.Output.VTS.phase\_miu & [(PhaseName,ConName),...] & 输出指定相化学势；验证规则同相浓度。\\
+Model.DDCDS.Output.VTS.miu & (ConName,...) & 输出指定总化学势。\\
+Model.DDCDS.Output.VTS.f\_chemical & (PhaseName,...) & 输出指定相化学能；相所在区域必须启用热力学。\\
+\bottomrule
+\end{longtable}
+
+两类 CSV 在 \code{exec\_pre\_iii()} 初始化字段后立即调用写出函数，
+属于启动阶段的独立参数扫描，不随主时间步循环重复执行。
+
+\section{函数索引}
+
+\subsection{模块生命周期函数}
+
+\begin{longtable}{>{\ttfamily}p{0.22\textwidth}p{0.22\textwidth}p{0.48\textwidth}}
+\toprule
+\normalfont 函数 & 阶段/缓存 & 职责与返回值\\
+\midrule
+\endhead
+init\_model\_modules & 模块注册 & 校验主场，初始化映射，读取全部输入，绑定函数指针并注册生命周期回调。\\
+exec\_pre\_ii & 预处理 II & 为选中的统计量注册输出槽。\\
+exec\_pre\_iii & 预处理 III & 分配三个缓存，初始化主场缓存，执行初始热力学平衡和 CSV 扫描。\\
+exec\_i & 每步执行 I & 依次推进相场、浓度和温度，写入三个最大变化量。\\
+exec\_pos\_i & 后处理 I & 按屏幕输出频率统计相/区域体积分数和平均/总浓度。\\
+exec\_pos\_iii & 后处理 III & 输出局部化学能最小化的最大变化和迭代数。\\
+deinit & 卸载 & 清理三个主场、PhiTemp 和 Con 缓存。\\
+\bottomrule
+\end{longtable}
+
+\subsection{相场函数}
+
+\begin{longtable}{>{\ttfamily}p{0.32\textwidth}p{0.18\textwidth}p{0.42\textwidth}}
+\toprule
+\normalfont 函数组 & 输入/输出 & 职责与依赖\\
+\midrule
+\endhead
+interphase\_gradient\_lapace\_calculation\_7P/19P & 坐标、相索引 & 从主相场写入 \code{grad\_phi/lap\_phi}。\\
+currentFlag\_7P/19P, upgradeFlag\_7P/19P & 坐标、相索引/标志 & 建立并传播界面标志。\\
+normals & 两相值和梯度/向量 & 计算式 \eqref{eq:normal}。\\
+Lij, Lij\_cubic, Lij\_hex\_boettger & 相对、局部状态/REAL & 常温下三种界面迁移率。\\
+Lij\_temp, Lij\_temp\_cubic, Lij\_temp\_hex\_boettger & 相对、状态、温度/REAL & Arrhenius 三种界面迁移率。\\
+xi\_ab, xi\_ab\_cubic, xi\_ab\_hex\_boettger & 相对与局部状态/REAL & 三种两相界面能函数；选择值 1 和 3 共用 \code{xi\_ab\_cubic}。\\
+xi\_abc & 三相索引/REAL & 按相属性返回三相结点系数。\\
+accumulate\_cubic\_interface\_pair & 点缓存、相对 & 选择值 3 的内部函数；按式 \eqref{eq:cubic-local-flux} 累积两侧局部项和通量。\\
+cubic\_interface\_flux\_divergence & 坐标、相索引/REAL & 选择值 3 的内部函数；对同步后的相通量求中心散度。\\
+synchronize\_cubic\_interface\_flux\_boundary & 全网格 & 选择值 3 的内部函数；仅按主网格边界类型同步通量 ghost layer，避免改写其他缓存。\\
+prepare\_cubic\_interface\_variation & 全网格 & 选择值 3 的内部函数；累积相对与三相项、同步边界并形成完整 \code{mu\_phi}。\\
+dfint\_dphi\_grad\_S1999\_acc & 点缓存、相索引/REAL & 计算 S1999 梯度变分。\\
+dfint\_dphi\_pot\_Nobstacle\_acc & 点缓存、相索引/REAL & 计算多障碍势和三相项变分。\\
+dfint\_dphi\_pairwise\_S1999\_NO & 点缓存、相对/REAL & 返回 $\mathcal I_\beta-\mathcal I_\alpha$。\\
+interface\_variation\_simple & 点缓存、相对/REAL & ISO、CUBIC（值 1）和 HEX 路径；调用原有点值系数变分。\\
+interface\_variation\_complex & 点缓存、相对/REAL & CUBIC\_DENDRITE（值 3）路径；返回完整缓存势之差。\\
+dfbulk\_dphi\_pairwise\_acc & 坐标、相索引/REAL & 累加所有相场体能回调。\\
+source\_pairwise\_acc, noise\_pairwise\_acc & 坐标、相对/REAL & 累加源并提供默认噪声源。\\
+pairwise\_normalize\_acc & 活动表、旧值、增量 & 统一缩放增量以避免越界。\\
+init/pre\_calculation/solve\_phi\_pair\_wise & 全网格/最大变化 & 初始化、组装相场右端、显式提交及更新标志。\\
+write\_scalar\_active\_phi\_number & VTS 流 & 写出每点活动相数量。\\
+\bottomrule
+\end{longtable}
+
+\subsection{浓度、温度和化学能函数}
+
+\begin{longtable}{>{\ttfamily}p{0.33\textwidth}p{0.18\textwidth}p{0.41\textwidth}}
+\toprule
+\normalfont 函数组 & 输入/输出 & 职责与依赖\\
+\midrule
+\endhead
+init/deinit\_con\_in\_moving\_region\_default & 坐标、区域 & 初始化新生区域或清空消失区域浓度。\\
+cal\_mob\_miu\_grad\_lap\_7P/19P & 坐标、区域/导数量 & 计算区域、化学势和迁移率的空间导数。\\
+dfdcon\_con, dfdcon\_lap\_con\_7P/19P & 坐标、区域、组分/REAL & 返回 $c_i$ 或 $-K_i\nabla^2c_i$。\\
+bulk/surface\_reaction\_flux & 坐标、区域、组分/REAL & 累加已注册反应回调。\\
+bulk\_diffusion\_mobility & 坐标、区域、组分/REAL & 相分数插值体迁移率。\\
+bulk\_diffusion\_mobility\_with\_temperature & 同上/REAL & 相分数插值 Arrhenius 体迁移率。\\
+surface/interphase\_diffusion\_mobility & 坐标、区域、组分/REAL & 区域表面和相界面附加迁移率。\\
+init/pre\_calculation/solve\_total\_concentration & 全网格/最大变化 & 初始化缓存、组装式 \eqref{eq:concentration}、显式提交。\\
+cal\_mob\_temp\_grad\_lap\_7P/19P & 坐标/导数量 & 计算温度、热迁移率梯度和温度拉普拉斯。\\
+temperature\_mobility\_0 & 坐标/REAL & 相分数插值 $M_T$。\\
+temperature\_source\_phi & 坐标/REAL & 从已接受相场增量计算潜热源。\\
+init/pre\_calculation/solve\_temperature & 全网格/最大变化 & 初始化温度缓存、组装式 \eqref{eq:temperature}、显式提交。\\
+fchem\_polynomial, miu\_polynomial & 浓度、温度、相属性 & 计算式 \eqref{eq:fchem} 及其组分导数。\\
+delt\_Fchem\_delt\_phi/con & 坐标与索引/REAL & 提供相场 grand-potential 驱动力和区域化学势。\\
+init\_phase\_concentration & 全网格 & 创建并初始化 \code{PhaseCon\_field}。\\
+energy\_minimazation & 点内数组/变化与步数 & 执行式 \eqref{eq:minimization}。\\
+local\_concentration\_redistribution & 坐标/变化与步数 & 维护活动相、守恒重标定并调用局部最小化。\\
+calculation\_energy\_minimazation\_pre & 全网格 & 生成初始相浓度、相化学势和平衡日志。\\
+write\_scalar\_* & VTS 流 & 写出相/总浓度、相/总化学势和相化学能。\\
+write\_csv\_energy\_results & 扫描参数/CSV & 写出选定相的多项式化学自由能扫描。\\
+write\_csv\_energy\_minimization\_results & 扫描参数/CSV & 写出选定区域的局部浓度平衡扫描。\\
+\bottomrule
+\end{longtable}
+
+为避免组合写法掩盖声明名，上述表中的斜线组合分别对应源码中的完整函数：
+\code{interpolation\_func} 与 \code{dinterpolation\_func} 给出
+$h(\phi)=\phi^2(3-2\phi)$ 和 $h'(\phi)=6\phi(1-\phi)$；
+缓存结构初始化函数为 \code{init\_phi} 和 \code{init\_con}；
+相场求解阶段函数为 \code{init\_phi\_pair\_wise}、
+\code{pre\_calculation\_phi\_pair\_wise} 和 \code{solve\_phi\_pair\_wise}；
+相场离散/标志函数完整名为
+\code{interphase\_gradient\_lapace\_calculation\_7P}、
+\code{interphase\_gradient\_lapace\_calculation\_19P}、
+\code{currentFlag\_7P}、\code{currentFlag\_19P}、
+\code{upgradeFlag\_7P} 和 \code{upgradeFlag\_19P}。
+常数体能函数为 \code{dfbulk\_dphi\_0}。
+
+浓度求解完整阶段名为 \code{init\_total\_concentration}、
+\code{pre\_calculation\_total\_concentration}、\code{solve\_total\_concentration}；
+其两套导数函数为 \code{cal\_mob\_miu\_grad\_lap\_7P}、
+\code{cal\_mob\_miu\_grad\_lap\_19P}、\code{dfdcon\_lap\_con\_7P} 和
+\code{dfdcon\_lap\_con\_19P}。反应与附加迁移率入口包括
+\code{bulk\_reaction\_flux}、\code{surface\_reaction\_flux}、
+\code{surface\_diffusion\_mobility} 和 \code{interphase\_diffusion\_mobility}。
+
+温度阶段完整名为 \code{init\_temperature\_field}、
+\code{pre\_calculation\_temperature}、\code{solve\_temperature}，
+离散函数为 \code{cal\_mob\_temp\_grad\_lap\_7P} 和
+\code{cal\_mob\_temp\_grad\_lap\_19P}。化学能输出函数完整名为
+\code{write\_scalar\_phasecon}、\code{write\_scalar\_con}、
+\code{write\_scalar\_phasemiu}、\code{write\_scalar\_miu}、
+\code{write\_scalar\_fchem}；浓度总览函数为 \code{write\_scalar\_con\_all}。
+相场和浓度化学驱动力入口分别为 \code{delt\_Fchem\_delt\_phi} 与
+\code{delt\_Fchem\_delt\_con}。
+
+\section{实现约束与使用注意}
+
+\begin{itemize}
+  \item \code{PHI\_ACC\_NUMBER} 必须足以容纳一个点可能同时活动的相；源码不会在超容时扩容。
+  \item 噪声 \code{frequency} 直接作为取模除数，启用噪声时必须设为正数。
+  \item 各向异性参数、温度和界面宽度没有统一的输入范围检查；用户应保证
+        $\varepsilon>0$、$T\ne0$，并使迁移率保持物理允许值。
+  \item \code{TripleJunctionEnergy.matrix} 不执行对称排列展开；需要对不同排列取值一致时，
+        应使用常数输入或显式提供源码访问到的排列。
+  \item 当前管理器在写入 \code{Qij} 后才调用其 \code{resize()}，而
+        \code{Matrix2D::resize()} 会用零重新填充矩阵；因此界面迁移率激活能输入在当前源码中
+        存在越界写入或随后被清零的风险。本文档记录此实现现状，但不在本次文档任务中修改它。
+  \item \code{DDCDS\_Phi\_Functions.h} 中 \code{pairwise\_normalize\_acc}
+        声明使用 \code{vector<REAL>/vector<bool>}，而实现使用
+        \code{vector<size\_t>/vector<int>}；当前调用命中实现文件内先定义的版本，
+        但头文件声明与定义并不一致。本次同样只记录、不修改。
+  \item 常数 \code{BulkMobilityQ.const} 自身不把浓度迁移率切换到温度依赖函数；
+        当前管理器只有读取到至少一个逐相 \code{BulkMobilityQ.PhaseName.matrix} 时才切换。
+  \item 相场提交先于浓度和温度，温度潜热使用实际接受的相场增量；理解耦合时应遵循本文件给出的执行次序。
+\end{itemize}
+
+\end{document}

@@ -1335,8 +1335,10 @@ namespace pf {
 				is_solid_phases.resize(main_field::phi_number, false);
 				for (int index = 0; index < fluid_phase_value.size(); index++) {
 					size_t phi_index = size_t(fluid_phase_value[index].int_value);
-					if (phi_index < main_field::phi_number)
+					if (phi_index < main_field::phi_number) {
 						is_solid_phases[index] = true;
+						is_solid_phase_in_simulation = true;
+					}
 				}
 			}
 			WriteDebugFile("# tau = viscosity / fluid_dt / Cs2 + 0.5 \n");

@@ -1,0 +1,699 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{geometry}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\geometry{left=2.4cm,right=2.4cm,top=2.5cm,bottom=2.5cm}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\grad}{\bm{\nabla}}
+\newcommand{\diver}{\bm{\nabla}\!\cdot}
+\newcommand{\vct}[1]{\bm{#1}}
+
+\title{Dendrite Solidification 模块的\\各向异性反对称相场模型}
+\author{MInDes}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{模型范围与实现位置}
+
+本文档整理当前 \texttt{dendrite\_solidification} 模块中已经实现的
+\(\phi+c+T\) 多成分模型及其 \(\phi+T\) 无成分退化模式。两种模式均采用
+立方各向异性界面能、反对称成对相场演化、七点中心差分以及同步显式时间推进。
+体自由能、成对相场源、浓度化学势和外部源均通过可叠加回调提供；当这些回调未注册时，
+对应项为零。
+
+本次固定内存实现只修改以下四个模块文件及本文档：
+\begin{itemize}
+  \item \texttt{DS\_Params.h}：参数、连续工作区、ghost 缓存及只读访问器；
+  \item \texttt{DS\_Manager.h}：输入读取、检查及执行器注册；
+  \item \texttt{DS\_Functions.h/.cpp}：空间离散、界面变分、右端计算和时间推进；
+  \item \texttt{docs/DS/DS\_coupled\_model.tex}：模型、数据职责及内存管理说明。
+\end{itemize}
+
+该模块根据浓度字段数自动选择模式，合法主场配置为
+\[
+  \mathrm{PCT}=(N_\phi,0,\mathrm{true})
+  \quad\text{或}\quad
+  \mathrm{PCT}=(N_\phi,2K,\mathrm{true}),
+  \qquad N_\phi\geq2,\quad K\geq1.
+\]
+其中 \(\phi_0\) 固定表示液相，\(\phi_{\gamma>0}\) 表示同一固相的不同取向晶粒。
+在多成分模式中，每一相态保存 \(K=n-1\) 个独立成分：浓度字段前半段为液相成分，
+后半段为名称一一对应的固相成分；在无成分模式中不存在浓度物理量和浓度方程。
+
+\section{状态变量与缓存}
+
+多成分模式的连续状态变量记为
+\[
+  \{\phi_\alpha(\vct{x},t)\}_{\alpha=0}^{N_\phi-1},
+  \qquad \{c_l^i,c_s^i\}_{i=0}^{K-1},\qquad T(\vct{x},t),
+\]
+无成分模式则退化为
+\[
+  \{\phi_\alpha(\vct{x},t)\}_{\alpha=0}^{N_\phi-1},\qquad T(\vct{x},t).
+\]
+并要求相场满足单纯形约束
+\[
+  0\leq \phi_\alpha\leq 1,\qquad
+  \sum_\alpha\phi_\alpha=1.
+\]
+
+多成分模式中的三个主场是唯一持久保存的物理状态：
+\begin{equation}
+ \texttt{phase\_field},\qquad
+ \texttt{concentration\_field},\qquad
+ \texttt{temperature\_field}.
+\end{equation}
+无成分模式只使用其中的 \texttt{phase\_field} 和 \texttt{temperature\_field}，
+不访问未初始化的 \texttt{concentration\_field}。同一步的全部右端完成前不修改所用主场，
+故主场自身就是同步步首快照，
+无需再复制 \texttt{old\_*}。候选新值只在提交阶段逐点产生，
+无需保存整场 \texttt{new\_*}。
+
+DS 使用 \texttt{DendriteWorkspace} 保存固定容量中间量。
+主要分量及其含义如下：
+
+\begin{longtable}{>{\ttfamily}p{0.31\textwidth}p{0.61\textwidth}}
+\toprule
+\normalfont 分量 & 含义\\
+\midrule
+\endhead
+active\_indices, active\_flags, active\_count
+  & 每点固定容量的活跃相索引、对应界面标志及实际数量；不再保存完整 \texttt{intflag[$N_\phi$]}。\\
+grad\_phi, lap\_phi\_or\_rhs
+  & 相场梯度；复用标量缓冲先保存七点拉普拉斯，界面变分完成后改存最终相场变化率。\\
+mu\_phi
+  & 完整相场变分势；界面局部项直接累计于此，不再另设 \texttt{interface\_local}。\\
+interface\_flux
+  & 各向异性界面通量；计算散度前需要同步 ghost layer。\\
+grad\_con, lap\_con\_or\_rhs
+  & 多成分模式下全部 \(2K\) 个浓度字段的梯度；复用标量缓冲先保存拉普拉斯，化学势完成后改存浓度右端。无成分模式容量为零。\\
+mu\_con, mob\_con
+  & 多成分模式下全部浓度字段的化学势和对角迁移率，均需邻点访问和 ghost layer；无成分模式不分配数据。\\
+delta\_g
+  & 多成分模式由步首液相浓度和温度计算，无成分模式只由步首温度计算。\\
+grad\_temp, lap\_temp, mob\_temp
+  & 温度梯度、拉普拉斯和热扩散率；其中迁移率需要 ghost layer。\\
+temp\_rhs
+  & 包含热扩散、潜热和外部源的温度变化率。\\
+\bottomrule
+\end{longtable}
+
+工作区按分量使用整场连续数组，不在每个网格点内嵌 \texttt{std::vector}。
+界面变分仍只为每个相保存一个累计势和一个累计通量，因此存储复杂度为
+\(O(N_\phi)\)，而不是 \(O(N_\phi^2)\)。
+
+\section{界面能密度}
+
+\subsection{自由能定义}
+
+令 \(\eta>0\) 为界面宽度，\(C_{\mathrm{ob}}=16/\pi^2\)。
+当前模块对应的界面自由能为
+\begin{align}
+ F_{\mathrm{int}}
+ &=\int_\Omega f_{\mathrm{int}}\,\dd V,\\
+ f_{\mathrm{int}}
+ &=\sum_{\alpha<\beta}
+ \left[
+ -\eta\,\sigma_{\alpha\beta}(\vct n_{\alpha\beta})
+       \grad\phi_\alpha\!\cdot\!\grad\phi_\beta
+ +\frac{C_{\mathrm{ob}}}{\eta}
+       \sigma_{\alpha\beta}(\vct n_{\alpha\beta})
+       \phi_\alpha\phi_\beta
+ \right]\nonumber\\
+ &\quad
+ +\frac{\xi_{abc}}{\eta}
+ \sum_{\alpha<\beta<\gamma}
+ \phi_\alpha\phi_\beta\phi_\gamma .
+\label{eq:fint}
+\end{align}
+第一项为 S1999 型交叉梯度能，第二项为 Nestler 型多障碍势，
+最后一项为统一系数 \(\xi_{abc}\) 的三相交汇惩罚。
+
+\subsection{界面法向与晶体坐标}
+
+每个无序相对固定取 \(\alpha<\beta\)，并始终以较大索引 \(\beta\) 的晶粒取向
+计算本相对的界面能。定义
+\begin{align}
+ \vct p_{\alpha\beta}
+ &=\phi_\beta\grad\phi_\alpha-\phi_\alpha\grad\phi_\beta,\\
+ r_{\alpha\beta}&=\lVert\vct p_{\alpha\beta}\rVert,\qquad
+ \vct n_{\alpha\beta}=\frac{\vct p_{\alpha\beta}}{r_{\alpha\beta}},\\
+ \vct n_{\alpha\beta}^{\,c}
+ &=R_\beta\vct n_{\alpha\beta},
+\end{align}
+其中 \(R_\beta\) 将实验室坐标中的法向旋转到相 \(\beta\) 的晶体坐标。
+当 \(r_{\alpha\beta}<\varepsilon\) 时，代码令各向异性法向导数为零并采用基准界面能，
+从而避免除零和无定义法向。
+
+\subsection{立方各向异性}
+
+界面能采用
+\begin{equation}
+ \sigma_{\alpha\beta}
+ =\widetilde\sigma_{\alpha\beta}
+ \left[
+ 1+\delta\left(
+ \frac{3}{2}
+ -\frac{5}{2}\sum_{i=1}^{3}
+ (n_{\alpha\beta,i}^{c})^4
+ \right)
+ \right],
+\label{eq:sigma}
+\end{equation}
+其中 \(\widetilde\sigma_{\alpha\beta}\) 为输入的基准界面能，
+\(\delta\) 为统一各向异性强度。晶体坐标中的导数为
+\begin{equation}
+ \frac{\partial\sigma_{\alpha\beta}}
+      {\partial\vct n_{\alpha\beta}^{\,c}}
+ =-10\widetilde\sigma_{\alpha\beta}\delta
+ \begin{bmatrix}
+ (n_x^c)^3&(n_y^c)^3&(n_z^c)^3
+ \end{bmatrix}^{\mathsf T}.
+\end{equation}
+由单位向量归一化的链式法则，
+\begin{equation}
+ \vct h_{\alpha\beta}
+ :=\frac{\partial\sigma_{\alpha\beta}}{\partial\vct p_{\alpha\beta}}
+ =\frac{1}{r_{\alpha\beta}}
+ \left(I-\vct n_{\alpha\beta}\vct n_{\alpha\beta}^{\mathsf T}\right)
+ R_\beta^{\mathsf T}
+ \frac{\partial\sigma_{\alpha\beta}}
+      {\partial\vct n_{\alpha\beta}^{\,c}} .
+\label{eq:h}
+\end{equation}
+式 \eqref{eq:h} 同时包含切平面投影和从晶体坐标返回实验室坐标的
+\(R_\beta^{\mathsf T}\)，二者均不可省略。
+
+\section{严格 Euler--Lagrange 变分}
+
+以下记
+\[
+ s_{\alpha\beta}:=\grad\phi_\alpha\cdot\grad\phi_\beta,\qquad
+ \sigma:=\sigma_{\alpha\beta},\qquad
+ \vct h:=\vct h_{\alpha\beta}.
+\]
+由
+\[
+ \frac{\partial\vct p}{\partial\phi_\alpha}=-\grad\phi_\beta,\quad
+ \frac{\partial\vct p}{\partial\phi_\beta}=\grad\phi_\alpha,\quad
+ \frac{\partial\vct p}{\partial(\grad\phi_\alpha)}=\phi_\beta I,\quad
+ \frac{\partial\vct p}{\partial(\grad\phi_\beta)}=-\phi_\alpha I
+\]
+以及
+\[
+ \mathcal M_\alpha^{\mathrm{int}}
+ =\frac{\partial f_{\mathrm{int}}}{\partial\phi_\alpha}
+ -\diver\frac{\partial f_{\mathrm{int}}}
+                 {\partial(\grad\phi_\alpha)},
+\]
+单个相对 \((\alpha,\beta)\) 对两侧的梯度能贡献为
+\begin{align}
+ \mathcal M_{\alpha,\mathrm{grad}}^{\alpha\beta}
+ &=\eta\left[
+ s_{\alpha\beta}\vct h\cdot\grad\phi_\beta
+ +\diver\left(
+ \sigma\grad\phi_\beta+s_{\alpha\beta}\phi_\beta\vct h
+ \right)\right],\\
+ \mathcal M_{\beta,\mathrm{grad}}^{\alpha\beta}
+ &=\eta\left[
+ -s_{\alpha\beta}\vct h\cdot\grad\phi_\alpha
+ +\diver\left(
+ \sigma\grad\phi_\alpha-s_{\alpha\beta}\phi_\alpha\vct h
+ \right)\right].
+\end{align}
+障碍势贡献为
+\begin{align}
+ \mathcal M_{\alpha,\mathrm{pot}}^{\alpha\beta}
+ &=\frac{C_{\mathrm{ob}}}{\eta}\left[
+ \sigma\phi_\beta
+ -\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\beta
+ -\diver(\phi_\alpha\phi_\beta^2\vct h)
+ \right],\\
+ \mathcal M_{\beta,\mathrm{pot}}^{\alpha\beta}
+ &=\frac{C_{\mathrm{ob}}}{\eta}\left[
+ \sigma\phi_\alpha
+ +\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\alpha
+ +\diver(\phi_\alpha^2\phi_\beta\vct h)
+ \right].
+\end{align}
+三相项对相 \(\alpha\) 的贡献为
+\begin{equation}
+ \mathcal M_{\alpha,\mathrm{triple}}
+ =\frac{\xi_{abc}}{\eta}
+ \sum_{\substack{\beta<\gamma\\\beta,\gamma\ne\alpha}}
+ \phi_\beta\phi_\gamma .
+\end{equation}
+
+\section{代码中的局部项--通量拆分}
+
+数学上仍可写成
+\begin{equation}
+ \mathcal M_\alpha^{\mathrm{int}}
+ =\ell_\alpha+\diver\vct q_\alpha.
+\end{equation}
+为使 \(\delta=0\) 时精确退化为代码原生七点拉普拉斯，而不是
+“中心梯度再取中心散度”形成的跨两格模板，基准各向同性部分
+\(\widetilde\sigma_{\alpha\beta}\nabla^2\phi\) 被直接放入局部项，
+通量只保存各向异性修正。对单个相对，实际累计为
+\begin{align}
+ \ell_\alpha^{\alpha\beta}
+ &=\eta\left[
+ \widetilde\sigma_{\alpha\beta}\nabla^2\phi_\beta
+ +s_{\alpha\beta}\vct h\cdot\grad\phi_\beta
+ \right]
+ +\frac{C_{\mathrm{ob}}}{\eta}\left[
+ \sigma\phi_\beta
+ -\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\beta
+ \right],\\
+ \vct q_\alpha^{\alpha\beta}
+ &=\eta\left[
+ (\sigma-\widetilde\sigma_{\alpha\beta})\grad\phi_\beta
+ +s_{\alpha\beta}\phi_\beta\vct h
+ \right]
+ -\frac{C_{\mathrm{ob}}}{\eta}
+ \phi_\alpha\phi_\beta^2\vct h,\\
+ \ell_\beta^{\alpha\beta}
+ &=\eta\left[
+ \widetilde\sigma_{\alpha\beta}\nabla^2\phi_\alpha
+ -s_{\alpha\beta}\vct h\cdot\grad\phi_\alpha
+ \right]
+ +\frac{C_{\mathrm{ob}}}{\eta}\left[
+ \sigma\phi_\alpha
+ +\phi_\alpha\phi_\beta\vct h\cdot\grad\phi_\alpha
+ \right],\\
+ \vct q_\beta^{\alpha\beta}
+ &=\eta\left[
+ (\sigma-\widetilde\sigma_{\alpha\beta})\grad\phi_\alpha
+ -s_{\alpha\beta}\phi_\alpha\vct h
+ \right]
+ +\frac{C_{\mathrm{ob}}}{\eta}
+ \phi_\alpha^2\phi_\beta\vct h.
+\end{align}
+各相对贡献和三相局部贡献累加后，代码将局部量 \(\ell_\alpha\)
+直接累计到 \texttt{mu\_phi}，仅将 \(\vct q_\alpha\) 保存于
+\texttt{interface\_flux}。同步通量 ghost layer 并求散度后，
+\[
+ \texttt{mu\_phi}_\alpha
+ =\sum_{\beta\ne\alpha}\ell_\alpha^{\alpha\beta}
+ +\mathcal M_{\alpha,\mathrm{triple}}
+ +\diver\sum_{\beta\ne\alpha}\vct q_\alpha^{\alpha\beta}.
+\]
+
+\section{空间离散}
+
+网格间距为 \(\Delta x\)。对标量 \(u\)，七点中心差分为
+\begin{align}
+ (\partial_x u)_{i,j,k}
+ &=\frac{u_{i+1,j,k}-u_{i-1,j,k}}{2\Delta x},\\
+ (\nabla^2u)_{i,j,k}
+ &=\frac{
+ u_{i+1,j,k}+u_{i-1,j,k}
+ +u_{i,j+1,k}+u_{i,j-1,k}
+ +u_{i,j,k+1}+u_{i,j,k-1}
+ -6u_{i,j,k}}{\Delta x^2}.
+\end{align}
+二维或一维情况下，退化方向由网格边界系统处理。对向量通量
+\(\vct q=(q_x,q_y,q_z)\)，散度采用
+\begin{equation}
+ (\diver\vct q)_{i,j,k}
+ =\frac{q_{x,i+1,j,k}-q_{x,i-1,j,k}}{2\Delta x}
+ +\frac{q_{y,i,j+1,k}-q_{y,i,j-1,k}}{2\Delta x}
+ +\frac{q_{z,i,j,k+1}-q_{z,i,j,k-1}}{2\Delta x}.
+\end{equation}
+计算散度前只同步 \texttt{interface\_flux} 的边界数据。
+
+\section{立方各向异性界面迁移率}
+
+输入矩阵 \(L^0_{\alpha\beta}\) 给出基础界面迁移率。默认
+\texttt{interface\_mobility\_const} 回调采用与界面能相同的规范相对
+\(\alpha<\beta\)、法向 \(\vct p_{\alpha\beta}\) 以及 \(R_\beta\) 晶体坐标约定，计算
+\begin{equation}
+ L_{\alpha\beta}(\vct n)
+ =L^0_{\alpha\beta}
+ \left[1-\delta_L\left(
+ \frac32-\frac52\sum_{i=x,y,z}(n_i^c)^4
+ \right)\right],
+ \qquad
+ \vct n^c=R_\beta\frac{\vct p_{\alpha\beta}}
+ {\lVert\vct p_{\alpha\beta}\rVert}.
+ \label{eq:cubic-mobility}
+\end{equation}
+这里 \(\delta_L\) 独立于界面能各向异性参数 \(\delta\)。当
+\(\lVert\vct p_{\alpha\beta}\rVert<\varepsilon\) 时界面方向未定义，代码直接返回
+\(L^0_{\alpha\beta}\)，不将零向量代入式 \eqref{eq:cubic-mobility}。
+
+对典型晶向，式 \eqref{eq:cubic-mobility} 给出
+\begin{equation}
+ L_{\langle100\rangle}=L^0(1+\delta_L),\qquad
+ L_{\langle111\rangle}=L^0\left(1-\frac23\delta_L\right).
+\end{equation}
+输入范围 \(-1<\delta_L<1.5\) 保证所有单位法向上的倍率严格为正；
+\(\delta_L=0\) 时逐点严格退化为原基础矩阵。该计算只使用已有相值、相场梯度和旋转矩阵，
+不增加逐点缓存或 ghost layer。
+
+\section{相场演化}
+
+完整相场驱动力为
+\begin{equation}
+ \mathcal M_\alpha
+ =\mathcal M_\alpha^{\mathrm{int}}
+ +\sum_k \mathcal M_{\alpha,k}^{\mathrm{bulk}},
+\end{equation}
+其中体项来自已注册的 \texttt{phi\_bulk\_terms} 回调。
+对每个活跃无序相对 \(\alpha<\beta\)，定义成对通量
+\begin{equation}
+ J_{\alpha\beta}
+ =\frac{L_{\alpha\beta}}{\eta}
+ \left(\mathcal M_\beta-\mathcal M_\alpha\right)
+ +J_{\alpha\beta}^{\Delta G}
+ +\sum_k S_{\alpha\beta,k}.
+\end{equation}
+右端以严格正负形式加入：
+\begin{equation}
+ \dot\phi_\alpha\mathrel{+}=J_{\alpha\beta},\qquad
+ \dot\phi_\beta\mathrel{-}=J_{\alpha\beta}.
+\label{eq:antisymmetric}
+\end{equation}
+因此在归一化前，成对演化逐点满足
+\[
+ \sum_\alpha\dot\phi_\alpha=0.
+\]
+
+只有满足 cutoff 判据的相参与局部成对计算，以减少多相模型的计算量。
+若开启归一化，显式候选值首先被限制到 \([0,1]\)，再采用 DDCCPAI 式处理：
+\begin{equation}
+ \widehat\phi_\alpha
+ =\min\!\left(1,\max\!\left(0,\phi_\alpha^n
+ +\Delta t\,\dot\phi_\alpha^{\,*}\right)\right),\qquad
+ \phi_\alpha^{n+1}
+ =\frac{\widehat\phi_\alpha}{\sum_\gamma\widehat\phi_\gamma}.
+\end{equation}
+代码随后用已接受的新相场反算有效变化率
+\begin{equation}
+ \dot\phi_\alpha
+ =\frac{\phi_\alpha^{n+1}-\phi_\alpha^n}{\Delta t}.
+\label{eq:accepted-rate}
+\end{equation}
+温度方程中的潜热源使用式 \eqref{eq:accepted-rate}，因此与实际提交的相场增量一致。
+
+\section{线性化固液驱动力}
+
+所有固相晶粒共享一套热力学线性化参数。多成分模式用前半段液相浓度字段和同步步首温度计算
+\begin{equation}
+ \Delta G_{\gamma l}
+ =
+ \sum_{i=0}^{K-1}
+ \left.\frac{\partial\Delta G_{\gamma l}}{\partial c_l^i}\right|_{\mathrm{eq}}
+ (c_l^i-c_l^{i,\mathrm{eq}})
+ +
+ \left.\frac{\partial\Delta G_{\gamma l}}{\partial T}\right|_{\mathrm{eq}}
+ (T-T^{\mathrm{eq}}).
+\label{eq:delta-g}
+\end{equation}
+后半段固相浓度字段不进入式 \eqref{eq:delta-g}。当
+\(\mathrm{PCT}=(N_\phi,0,\mathrm{true})\) 时，求和为空，统一入口严格退化为
+\begin{equation}
+ \Delta G_{\gamma l}^{(T)}
+ =
+ \left.\frac{\partial\Delta G_{\gamma l}}{\partial T}\right|_{\mathrm{eq}}
+ (T-T^{\mathrm{eq}}).
+ \label{eq:delta-g-thermal}
+\end{equation}
+该模式不读取浓度主场或任何浓度参数。正的 \(\Delta G_{\gamma l}\)
+约定为促进凝固，并在每个液相--固相晶粒界面加入
+\begin{equation}
+ \left.\dot\phi_\gamma\right|_{\Delta G}
+ =M_{0\gamma}\frac{\pi}{\eta}
+ \sqrt{\max(0,\phi_0\phi_\gamma)}\,\Delta G_{\gamma l},
+ \qquad \gamma>0 .
+\end{equation}
+这里的 \(M_{0\gamma}\) 复用当前点的 \texttt{interface\_mobility}。
+代码采用规范相对 \(a=0,b=\gamma\)，且更新方式是
+\(\dot\phi_a\mathrel{+}=J,\dot\phi_b\mathrel{-}=J\)，因此实际加入成对 rate 的量为
+\begin{equation}
+ J_{0\gamma}^{\Delta G}
+ =-M_{0\gamma}\frac{\pi}{\eta}
+ \sqrt{\max(0,\phi_0\phi_\gamma)}\,\Delta G_{\gamma l}.
+\end{equation}
+固相--固相相对没有此内置驱动力；用户注册的成对源仍在其后继续叠加。
+
+\section{浓度演化}
+
+本节只适用于 \(K\geq1\) 的多成分模式。令扁平字段索引 \(j=0,\ldots,2K-1\)。其映射为
+\[
+ j=i\Longleftrightarrow c_j=c_l^i,\qquad
+ j=K+i\Longleftrightarrow c_j=c_s^i.
+\]
+每个字段的化学势和对角迁移率分别由带 \texttt{con\_index} 的回调给出：
+\begin{equation}
+ \mu_j=\sum_k\mu_{j,k},\qquad
+ M_j=M_j(\phi^n,\vct c^n,T^n).
+\end{equation}
+守恒演化方程为
+\begin{equation}
+ \dot c_j
+ =\diver(M_j\grad\mu_j)+\sum_k S_{j,k}
+ =\grad M_j\cdot\grad\mu_j
+ +M_j\nabla^2\mu_j+\sum_kS_{j,k}.
+\end{equation}
+空间变迁移率和化学势均在步首缓存并完成边界同步后再计算右端。
+默认化学势回调为空，因此若用户不注册 \(\mu_j\) 或浓度源，对应字段保持不变；
+常数迁移率本身不会产生扩散驱动力。
+在无成分模式中，\texttt{grad\_con}、\texttt{lap\_con\_or\_rhs}、
+\texttt{mu\_con} 和 \texttt{mob\_con} 的数据容量均为零；模型不调用浓度回调，
+不执行浓度边界同步、浓度 RHS 或浓度提交。
+
+\section{温度演化}
+
+温度方程为
+\begin{equation}
+ \dot T
+ =\diver(M_T\grad T)
+ +\sum_\alpha K_\alpha\dot\phi_\alpha
+ +\sum_k S_{T,k},
+\end{equation}
+离散计算采用
+\begin{equation}
+ \dot T
+ =\grad M_T\cdot\grad T+M_T\nabla^2T
+ +\sum_\alpha K_\alpha\dot\phi_\alpha
+ +\sum_k S_{T,k}.
+\end{equation}
+若提供逐相热扩散率 \(M_{T,\alpha}\)，局部扩散率按步首相分数混合：
+\begin{equation}
+ M_T=\sum_\alpha\phi_\alpha^n M_{T,\alpha};
+\end{equation}
+否则使用统一常数。\(K_\alpha\) 是相 \(\alpha\) 的潜热耦合系数。
+
+\section{同步显式时间推进}
+
+多成分模式的一个时间步严格按以下顺序执行：
+\begin{enumerate}
+  \item 更新三个主场边界；此后三个主场保持只读并代表
+        \(\phi^n,\vct c^n,T^n\)；
+  \item 在固定缓存中重建活跃相，并为相场、浓度和温度统一预计算一次梯度与拉普拉斯；
+  \item 每点按式 \eqref{eq:delta-g} 计算一次 \(\Delta G\)，累积界面局部势和通量；
+  \item 只同步 \texttt{interface\_flux} 的 ghost layer，计算散度并完成 \(\mathcal M_\alpha\)；
+  \item 计算并同步 \texttt{mu\_con}、\texttt{mob\_con} 和 \texttt{mob\_temp}；
+  \item 基于同一步首主场计算全部 \(\phi,c,T\) 右端，并将失效的 Laplace 缓冲切换为 RHS 缓冲；
+  \item 使用每个 OpenMP 线程预分配的数组完成相场截断和归一化，
+        再统一提交三个主场并更新边界。
+\end{enumerate}
+无成分模式跳过上述所有浓度动作，执行顺序退化为：同步相场和温度边界；
+计算活跃相、相场及温度空间导数和式 \eqref{eq:delta-g-thermal}；完成界面势、
+相场 RHS、温度扩散、潜热与温度源；最后统一提交相场和温度并更新两者边界。
+整个 RHS 阶段同样只读取步首 \(\phi^n,T^n\)。
+浓度和温度的显式更新分别为
+\[
+ c_j^{n+1}=c_j^n+\Delta t\,\dot c_j,\qquad
+ T^{n+1}=T^n+\Delta t\,\dot T.
+\]
+这种顺序避免了同一时间步内先更新的场污染后更新场的右端。
+
+\section{扩展回调}
+
+\begin{longtable}{>{\ttfamily}p{0.34\textwidth}p{0.58\textwidth}}
+\toprule
+\normalfont 回调 & 数学含义与默认行为\\
+\midrule
+\endhead
+phi\_bulk\_terms(x,y,z,phi\_index)
+  & 可叠加的 \(\mathcal M_\alpha^{\mathrm{bulk}}\)；未注册时为零。\\
+phi\_pair\_sources(x,y,z,alpha,beta)
+  & 可叠加的 \(S_{\alpha\beta}\)；对规范相对以正负形式加入。\\
+con\_mu\_terms(x,y,z,con\_index)
+  & 多成分模式中可叠加的逐字段浓度化学势；未注册时 \(\mu_j=0\)，无成分模式不调用。\\
+con\_sources(x,y,z,con\_index)
+  & 多成分模式中可叠加的非守恒浓度源；未注册时为零，无成分模式不调用。\\
+temp\_sources(x,y,z)
+  & 可叠加的外部温度源；未注册时为零。\\
+interface\_mobility(...)
+  & 单一界面迁移率函数；默认读取 \(L^0_{\alpha\beta}\) 并应用式 \eqref{eq:cubic-mobility}。自定义回调完全覆盖默认实现，不自动叠加 cubic 因子。\\
+con\_mobility(x,y,z,con\_index)
+  & 多成分模式中的逐字段浓度迁移率函数；默认读取共享常数及液/固成分覆盖值，无成分模式不调用。\\
+temp\_mobility(x,y,z)
+  & 单一热扩散率函数；默认使用常数或逐相混合值。\\
+\bottomrule
+\end{longtable}
+
+所有回调均通过 DS 的只读访问器读取主场步首状态和当前阶段有效的预计算缓存。
+管理器只在函数指针尚未设置时安装安全默认实现，因此上层模块可在初始化阶段替换迁移率函数。
+回调表在 \texttt{exec\_pre\_iii} 分配工作区时冻结；进入时间步后若回调数量或底层地址发生变化，
+程序将报告错误并停止，从而避免循环中的隐式扩容。
+
+\section{Ghost layer 与固定内存管理}
+
+Ghost layer 是包围内部计算区域的一层虚拟网格点。对内部尺寸
+\(N_x\times N_y\times N_z\)，带边界缓存的尺寸为
+\begin{equation}
+ (N_x+2)(N_y+2)(N_z+2).
+\end{equation}
+周期边界复制对侧内部值，零通量边界复制相邻内部值，开放边界采用线性外推；
+对于这些没有独立物理边界输入的派生缓存，固定主场边界按相邻内部缓存值填充。
+Ghost 数据使边界内部点也能直接使用统一中心差分。
+
+只有确实需要邻点访问的 \texttt{interface\_flux}、\texttt{mu\_con}、
+\texttt{mob\_con} 和 \texttt{mob\_temp} 使用 halo 容器；其中浓度两项仅在多成分模式
+分配非零数据，无成分模式的组件数为零、实际字节数为零。
+活跃相、梯度、Laplace/RHS、\texttt{mu\_phi}、\(\Delta G\) 和
+\texttt{temp\_rhs} 只覆盖内部网格。
+
+所有空间在初始化阶段固定：管理器首先确定 \(N_x,N_y,N_z,N_\phi,N_c\)
+及活跃相容量，\texttt{exec\_pre\_iii} 随后一次性分配连续工作区和
+\(N_{\mathrm{thread}}N_\phi\) 个归一化临时数。时间步中禁止
+\texttt{resize}、\texttt{reserve}、\texttt{push\_back} 或重新初始化网格，
+只覆写已有元素。每步入口校验全部数组的地址和容量签名；只有
+\texttt{deinit} 负责释放空间。
+若任一点的实际活跃相数超过固定容量，程序输出该点坐标、所需容量和已配置容量后停止，
+不允许通过静默截断改变相场演化。
+
+旧的逐点结构包含 17 个 \texttt{std::vector} 对象，按 MSVC x64 估算为
+\begin{equation}
+ M_{\mathrm{old}}\approx488+8A+100N_\phi+72N_c
+ \quad\text{bytes/含边界点},
+\end{equation}
+且尚未计入每点多次堆分配的管理与碎片开销。固定连续工作区的内部点主项约为
+\begin{equation}
+ M_{\mathrm{new}}\approx64N_\phi+48N_c+9A+O(1)
+ \quad\text{bytes/内部点}.
+\end{equation}
+实际总量还包括上述四类缓存的 ghost 数据和每线程归一化数组。
+在无成分模式 \(N_c=0\) 下，内部点主项进一步退化为
+\begin{equation}
+ M_{\mathrm{thermal}}\approx64N_\phi+9A+O(1)
+ \quad\text{bytes/内部点},
+\end{equation}
+外加 \texttt{interface\_flux}、\texttt{mob\_temp} 的 ghost 数据和每线程相场归一化空间；
+不存在浓度缓存的存储项。
+程序在预处理阶段输出工作区实际分配字节数，便于核对具体网格配置。
+
+\section{输入参数}
+
+模型通过
+\[
+ \texttt{SimulationModels.model = 2}
+\]
+启用。当前输入键均位于 \texttt{Model.DS.*} 命名空间。
+\texttt{Solver.Mesh.PCT} 的浓度数为零时自动选择无成分模式；为正偶数时自动选择
+多成分模式；正奇数、\(N_\phi<2\) 或关闭温度均会被拒绝。
+
+\begin{longtable}{p{0.48\textwidth}p{0.18\textwidth}p{0.25\textwidth}}
+\toprule
+输入键 & 默认值 & 含义\\
+\midrule
+\endhead
+\texttt{Model.DS.Phi.PairWiseAcc.container\_size}
+  & \(N_\phi\) & 活跃相容器容量，必须为正。\\
+\texttt{Model.DS.Phi.cutoff}
+  & \(10^{-3}\) & 活跃相 cutoff。\\
+\texttt{Model.DS.Phi.con\_cutoff}
+  & \(10^{-1}\) & 相邻区域参与判据使用的 cutoff。\\
+\texttt{Model.DS.Phi.is\_normalize}
+  & \texttt{true} & 是否执行 DDCCPAI 式相场归一化。\\
+\texttt{Model.DS.Phi.InterfaceEnergy.int\_width}
+  & \(4\) & 界面宽度 \(\eta>0\)。\\
+\texttt{Model.DS.Phi.InterfaceEnergy.Anisotropic.delta}
+  & \(0\) & 立方各向异性强度，要求 \(-1.5<\delta<1\)。\\
+\texttt{Model.DS.Phi.TripleJunctionEnergy.const}
+  & \(0\) & 统一三相系数 \(\xi_{abc}\)。\\
+\texttt{Model.DS.Phi.InterfaceEnergy.const}
+  & \(0\) & 默认 \(\widetilde\sigma_{\alpha\beta}\)。\\
+\texttt{Model.DS.Phi.InterfaceEnergy.matrix}
+  & 空 & 行格式为 \((\alpha,\beta,\sigma_{\alpha\beta})\)。\\
+\texttt{Model.DS.Phi.IntMobility.const}
+  & \(0\) & 默认 \(L_{\alpha\beta}\)。\\
+\texttt{Model.DS.Phi.IntMobility.matrix}
+  & 空 & 行格式为 \((\alpha,\beta,L_{\alpha\beta})\)。\\
+\texttt{Model.DS.Phi.IntMobility.Anisotropic.delta}
+  & (0\) & cubic 迁移率强度 \(\delta_L\)，要求有限且 \(-1<\delta_L<1.5\)。\\
+\texttt{Model.DS.Con.ComponentNames}
+  & 多成分必填 & \(K\) 个唯一逻辑成分名，顺序同时定义液相和固相字段；无成分模式不读取。\\
+\texttt{Model.DS.Phi.DrivingForce.Teq}
+  & 必填 & 线性展开的平衡温度 \(T^{\mathrm{eq}}\)。\\
+\texttt{Model.DS.Phi.DrivingForce.dGdT}
+  & 必填 & 平衡点处的 \(\partial\Delta G/\partial T\)。\\
+\texttt{Model.DS.Phi.DrivingForce.components}
+  & 多成分必填 & 行格式为 \((\text{成分名},c_l^{\mathrm{eq}},\partial\Delta G/\partial c_l)\)，必须完整覆盖全部 \(K\) 个成分；无成分模式不读取。\\
+\texttt{Model.DS.Con.Mobility.const}
+  & \(0\) & 多成分模式下全部 \(2K\) 个浓度字段的默认迁移率；无成分模式不读取。\\
+\texttt{Model.DS.Con.Mobility.matrix}
+  & 空 & 多成分模式下行格式为 \((\texttt{liquid/solid},\text{成分名},M)\)，覆盖共享常数；无成分模式不读取。\\
+\texttt{Model.DS.Temp.Mobility.const}
+  & \(0\) & 默认热扩散率。\\
+\texttt{Model.DS.Temp.Mobility.matrix}
+  & 空 & 行格式为 \((\alpha,M_{T,\alpha})\)。\\
+\texttt{Model.DS.Temp.Source.dphidtemp}
+  & 空 & 行格式为 \((\alpha,K_\alpha)\)。\\
+\bottomrule
+\end{longtable}
+
+管理器还检查 cutoff 范围、非负界面能和迁移率，并为每个晶粒初始化旋转矩阵。
+当前版本不读取旧的
+\texttt{SimulationModels.GrainGrowsSpinodal.*} 参数。
+
+\section{退化情形与数值不变量}
+
+\begin{itemize}
+  \item 当 \(\mathrm{PCT}=(N_\phi,0,\mathrm{true})\) 时，模型自动进入无成分模式，
+        驱动力采用式 \eqref{eq:delta-g-thermal}，浓度缓存为零容量且整个时间步不访问浓度主场。
+  \item 无成分模式中 \(T=T^{\mathrm{eq}}\) 时 \(\Delta G=0\)；单独扰动温度
+        \(\Delta T\) 时，驱动力增量严格为
+        \((\partial\Delta G/\partial T)_{\mathrm{eq}}\Delta T\)。
+  \item 当 \(\delta=0\) 时，\(\vct h=0\)、\(\sigma=\widetilde\sigma\)，
+        所有各向异性修正通量消失，模型精确退化为七点离散的
+        S1999 梯度项和 Nestler 障碍势。
+  \item 当 \(\delta_L=0\) 时默认界面迁移率严格等于 \(L^0_{\alpha\beta}\)；
+        法向长度低于阈值时也采用这一各向同性值。
+  \item 当界面法向长度低于阈值时采用零法向导数，不产生 NaN 或 Inf。
+  \item 式 \eqref{eq:antisymmetric} 保证归一化前逐点
+        \(\sum_\alpha\dot\phi_\alpha=0\)。
+  \item 开启归一化时，截断和归一化后满足
+        \(0\leq\phi_\alpha\leq1\) 及 \(\sum_\alpha\phi_\alpha=1\)。
+  \item 在多成分模式中，\(c_l^i=c_l^{i,\mathrm{eq}}\) 且 \(T=T^{\mathrm{eq}}\) 时，
+        \(\Delta G=0\)；单独扰动任一液相成分或温度时斜率等于对应输入偏导。
+  \item 固相浓度变化不影响 \(\Delta G\)，固相--固相相对不产生内置驱动力。
+  \item 周期或零通量边界、且无浓度源时，守恒扩散形式应分别保持每个浓度字段的积分。
+  \item 均匀温度、无相变且无温度源时，温度保持不变。
+  \item 仅开启潜热时，局部温度增量与实际接受的
+        \(\sum_\alpha K_\alpha\Delta\phi_\alpha\) 一致。
+\end{itemize}
+
+\section{实现约定}
+
+本模型使用每个无序相对唯一的规范顺序 \(\alpha<\beta\)。
+同一相对两侧的变分共享同一个 \(R_\beta\)、\(\sigma_{\alpha\beta}\) 和
+\(\vct h_{\alpha\beta}\)，从而避免在一次相对更新中交换取向造成不一致。
+当前第一版只实现七点空间格式和逐字段对角扩散，不实现液固浓度重构、分配关系或交叉迁移率。
+默认 cubic 迁移率用于所有液固和固固规范相对，并同时缩放界面势差项和液固线性驱动力；
+若注册自定义 \texttt{interface\_mobility}，其返回值直接作为完整局部迁移率。
+CALPHAD、AI、相区浓度及能量最小化机制不属于本模块，
+如有需要应通过相应回调显式接入。
+
+\end{document}

@@ -49,6 +49,9 @@
     <Filter Include="modules\model\DS">
       <UniqueIdentifier>{074e017e-021f-49f6-b8c3-3b434bc92b23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\model\DDCDS">
+      <UniqueIdentifier>{e2c2de84-378e-483e-968a-779e1a890357}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -202,6 +205,21 @@
     </ClCompile>
     <ClCompile Include="src\modules\model_modules\dendrite_solidification\DS_Functions.cpp">
       <Filter>modules\model\DS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_BulkEnergy.cpp">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Con_Functions.cpp">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Functions.cpp">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Phi_Functions.cpp">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Temp_Functions.cpp">
+      <Filter>modules\model\DDCDS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -422,6 +440,27 @@
     </ClInclude>
     <ClInclude Include="src\modules\model_modules\dendrite_solidification\DS_Manager.h">
       <Filter>modules\model\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_BulkEnergy.h">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Con_Functions.h">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Functions.h">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Manager.h">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Params.h">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Phi_Functions.h">
+      <Filter>modules\model\DDCDS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\model_modules\ddc_dendrite_solidification\DDCDS_Temp_Functions.h">
+      <Filter>modules\model\DDCDS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

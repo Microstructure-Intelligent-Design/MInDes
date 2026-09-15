@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "../../base/Mesh_0.h"
 #include "../../base/RotationMatrix.h"
 #include "../../Modules_Params.h"
@@ -7,10 +7,8 @@
 #include "../GrainsOrientations.h"
 #include <random>
 namespace pf {
-	namespace ddc_calphad_ai_model {
+	namespace ddc_dendrite_solidification {
 		// Statement
-		enum Int_Gradient { Steinbach_1996, Steinbach_1999, Steinbach_G2009 };
-		enum Int_Potential { Nestler_Well, Nestler_Obstacle, Steinbach_P2009 };
 		enum DifferenceMethod { SEVEN_POINT, NINETEEN_POINT };
 		enum InterfaceFlag { IF_BULK, IF_NEAR_INTERFACE, IF_INTERFACE };
 		struct ThermoCalcScanRange {
@@ -28,6 +26,8 @@ namespace pf {
 			std::vector<REAL> new_phi;
 			std::vector<REAL> lap_phi;
 			std::vector<Vector3> grad_phi;
+			std::vector<REAL> mu_phi;
+			std::vector<Vector3> interface_flux;
 			// - temp
 			REAL old_temp = 0;
 			REAL new_temp = 0;
@@ -40,73 +40,83 @@ namespace pf {
 				new_phi.resize(phi_number, 0);
 				lap_phi.resize(phi_number, 0);
 				grad_phi.resize(phi_number, Vector3(0, 0, 0));
+				mu_phi.resize(phi_number, 0);
+				interface_flux.resize(phi_number, Vector3(0, 0, 0));
 			}
-			// ¾ØÕó¼Ó·¨ (+)
+			// çŸ©é˜µåŠ æ³• (+)
 			FIELD_PhiTemp operator+(const FIELD_PhiTemp& other) const {
 				FIELD_PhiTemp result = *this;
 				result += other;
 				return result;
 			}
-			// ¾ØÕó¼õ·¨ (-)
+			// çŸ©é˜µå‡æ³• (-)
 			FIELD_PhiTemp operator-(const FIELD_PhiTemp& other) const {
 				FIELD_PhiTemp result = *this;
 				result -= other;
 				return result;
 			}
-			// ¾ØÕó³ı·¨ (*) - ÖğÔªËØÏà³Ë
+			// çŸ©é˜µé™¤æ³• (*) - é€å…ƒç´ ç›¸ä¹˜
 			FIELD_PhiTemp operator*(const REAL& other) const {
 				FIELD_PhiTemp result = *this;
 				result *= other;
 				return result;
 			}
-			// ¾ØÕó³ı·¨ (/) - ÖğÔªËØÏà³ı
+			// çŸ©é˜µé™¤æ³• (/) - é€å…ƒç´ ç›¸é™¤
 			FIELD_PhiTemp operator/(const REAL& other) const {
 				FIELD_PhiTemp result = *this;
 				result /= other;
 				return result;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (+=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (+=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhiTemp& operator+=(const FIELD_PhiTemp& other) {
 				size_t phi_number = old_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
 					old_phi[i] += other.old_phi[i];
 					new_phi[i] += other.new_phi[i];
+					mu_phi[i] += other.mu_phi[i];
+					interface_flux[i] += other.interface_flux[i];
 				}
 				old_temp += other.old_temp;
 				new_temp += other.new_temp;
 				mob_temp += other.mob_temp;
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (-=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (-=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhiTemp& operator-=(const FIELD_PhiTemp& other) {
 				size_t phi_number = old_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
 					old_phi[i] -= other.old_phi[i];
 					new_phi[i] -= other.new_phi[i];
+					mu_phi[i] -= other.mu_phi[i];
+					interface_flux[i] -= other.interface_flux[i];
 				}
 				old_temp -= other.old_temp;
 				new_temp -= other.new_temp;
 				mob_temp -= other.mob_temp;
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (*=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (*=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhiTemp& operator*=(const REAL& other) {
 				size_t phi_number = old_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
 					old_phi[i] *= other;
 					new_phi[i] *= other;
+					mu_phi[i] *= other;
+					interface_flux[i] *= other;
 				}
 				old_temp *= other;
 				new_temp *= other;
 				mob_temp *= other;
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (/=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (/=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhiTemp& operator/=(const REAL& other) {
 				size_t phi_number = old_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
 					old_phi[i] /= other;
 					new_phi[i] /= other;
+					mu_phi[i] /= other;
+					interface_flux[i] /= other;
 				}
 				old_temp /= other;
 				new_temp /= other;
@@ -132,31 +142,31 @@ namespace pf {
 				old_region.resize(region_number, 0);
 				new_region.resize(region_number, 0);
 			}
-			// ¾ØÕó¼Ó·¨ (+)
+			// çŸ©é˜µåŠ æ³• (+)
 			FIELD_Con operator+(const FIELD_Con& other) const {
 				FIELD_Con result = *this;
 				result += other;
 				return result;
 			}
-			// ¾ØÕó¼õ·¨ (-)
+			// çŸ©é˜µå‡æ³• (-)
 			FIELD_Con operator-(const FIELD_Con& other) const {
 				FIELD_Con result = *this;
 				result -= other;
 				return result;
 			}
-			// ¾ØÕó³ı·¨ (*) - ÖğÔªËØÏà³Ë
+			// çŸ©é˜µé™¤æ³• (*) - é€å…ƒç´ ç›¸ä¹˜
 			FIELD_Con operator*(const REAL& other) const {
 				FIELD_Con result = *this;
 				result *= other;
 				return result;
 			}
-			// ¾ØÕó³ı·¨ (/) - ÖğÔªËØÏà³ı
+			// çŸ©é˜µé™¤æ³• (/) - é€å…ƒç´ ç›¸é™¤
 			FIELD_Con operator/(const REAL& other) const {
 				FIELD_Con result = *this;
 				result /= other;
 				return result;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (+=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (+=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_Con& operator+=(const FIELD_Con& other) {
 				size_t con_number = old_con.size(), region_number = old_region.size();
 				for (size_t i = 0; i < con_number; ++i) {
@@ -171,7 +181,7 @@ namespace pf {
 				}
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (-=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (-=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_Con& operator-=(const FIELD_Con& other) {
 				size_t con_number = old_con.size(), region_number = old_region.size();
 				for (size_t i = 0; i < con_number; ++i) {
@@ -186,7 +196,7 @@ namespace pf {
 				}
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (*=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (*=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_Con& operator*=(const REAL& other) {
 				size_t con_number = old_con.size(), region_number = old_region.size();
 				for (size_t i = 0; i < con_number; ++i) {
@@ -201,7 +211,7 @@ namespace pf {
 				}
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (/=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (/=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_Con& operator/=(const REAL& other) {
 				size_t con_number = old_con.size(), region_number = old_region.size();
 				for (size_t i = 0; i < con_number; ++i) {
@@ -237,31 +247,31 @@ namespace pf {
 					phase_miu[index].resize(con_number, 0);
 				}
 			}
-			// ¾ØÕó¼Ó·¨ (+)
+			// çŸ©é˜µåŠ æ³• (+)
 			FIELD_PhaseCon operator+(const FIELD_PhaseCon& other) const {
 				FIELD_PhaseCon result = *this;
 				result += other;
 				return result;
 			}
-			// ¾ØÕó¼õ·¨ (-)
+			// çŸ©é˜µå‡æ³• (-)
 			FIELD_PhaseCon operator-(const FIELD_PhaseCon& other) const {
 				FIELD_PhaseCon result = *this;
 				result -= other;
 				return result;
 			}
-			// ¾ØÕó³ı·¨ (*) - ÖğÔªËØÏà³Ë
+			// çŸ©é˜µé™¤æ³• (*) - é€å…ƒç´ ç›¸ä¹˜
 			FIELD_PhaseCon operator*(const REAL& other) const {
 				FIELD_PhaseCon result = *this;
 				result *= other;
 				return result;
 			}
-			// ¾ØÕó³ı·¨ (/) - ÖğÔªËØÏà³ı
+			// çŸ©é˜µé™¤æ³• (/) - é€å…ƒç´ ç›¸é™¤
 			FIELD_PhaseCon operator/(const REAL& other) const {
 				FIELD_PhaseCon result = *this;
 				result /= other;
 				return result;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (+=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (+=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhaseCon& operator+=(const FIELD_PhaseCon& other) {
 				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
@@ -274,7 +284,7 @@ namespace pf {
 				}
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (-=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (-=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhaseCon& operator-=(const FIELD_PhaseCon& other) {
 				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
@@ -287,7 +297,7 @@ namespace pf {
 				}
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (*=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (*=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhaseCon& operator*=(const REAL& other) {
 				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
@@ -300,7 +310,7 @@ namespace pf {
 				}
 				return *this;
 			}
-			// ¸´ºÏ¸³ÖµÔËËã·û (/=)£¬¿ÉÒÔÌáÉıÁ¬ĞøÔËËãÊ±µÄĞÔÄÜ
+			// å¤åˆèµ‹å€¼è¿ç®—ç¬¦ (/=)ï¼Œå¯ä»¥æå‡è¿ç»­è¿ç®—æ—¶çš„æ€§èƒ½
 			FIELD_PhaseCon& operator/=(const REAL& other) {
 				size_t con_number = phase_con[0].size(), phi_number = phase_phi.size();
 				for (size_t i = 0; i < phi_number; ++i) {
@@ -355,26 +365,17 @@ namespace pf {
 			inline Matrix2D<REAL> Qij; // <- phi index i j
 			const REAL R = REAL(8.314);
 			// - interface mobility anisotropy
-			enum Int_Mobility_Anisotropic { IMA_ISO, IMA_CUBIC, IMA_HEX_BOETTGER, IMA_HEX_SUN, IMA_HEX_YANG };
+			enum Int_Mobility_Anisotropic { IMA_ISO, IMA_CUBIC, IMA_HEX_BOETTGER, IMA_CUBIC_DENDRITE };
 			inline Int_Mobility_Anisotropic intMobAniso_model = Int_Mobility_Anisotropic::IMA_ISO;
 			inline REAL intMobAniso_param1;
-			inline REAL intMobAniso_param2;
-			inline REAL intMobAniso_param3;
-			inline REAL intMobAniso_param4;
-			// - interface energy models
-			inline Int_Gradient interface_gradient = Int_Gradient::Steinbach_G2009;
-			inline Int_Potential interface_potential = Int_Potential::Steinbach_P2009;
 			// interface energy
 			inline REAL interface_width = REAL(4.0);
 			inline Matrix2D<REAL> xi_ab; // <- phi property 
 			inline Matrix3D<REAL> xi_abc; // <- phi property 
 			// interface energy anisotropy 
-			enum Int_Energy_Anisotropic { IEA_ISO, IEA_CUBIC, IEA_HEX_BOETTGER, IEA_HEX_SUN, IEA_HEX_YANG };
+			enum Int_Energy_Anisotropic { IEA_ISO, IEA_CUBIC, IEA_HEX_BOETTGER, IEA_CUBIC_DENDRITE };
 			inline Int_Energy_Anisotropic intEnAniso_model = Int_Energy_Anisotropic::IEA_ISO;
 			inline REAL intEnAniso_param1;
-			inline REAL intEnAniso_param2;
-			inline REAL intEnAniso_param3;
-			inline REAL intEnAniso_param4;
 			// const bulk energy density
 			inline std::vector<REAL> f_bulk_0; // <- phi property 
 			// phi noise
@@ -394,6 +395,8 @@ namespace pf {
 			// - moving region method 
 			inline void (*init_con_in_moving_region)(size_t x, size_t y, size_t z, size_t region_index);
 			inline void (*deinit_con_in_moving_region)(size_t x, size_t y, size_t z, size_t region_index);
+			// - interface energy functions
+			inline REAL(*interface_variation)(FIELD_PhiTemp& field_var, size_t alpha_index, size_t beta_index);
 			// - driving force functions 
 			inline std::vector<REAL(*)(size_t x, size_t y, size_t z, size_t region_index, size_t con_index)> delt_Fbulk_delt_con;
 			// - mobility functions 
