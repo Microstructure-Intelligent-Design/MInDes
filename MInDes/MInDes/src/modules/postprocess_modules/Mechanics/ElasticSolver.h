@@ -31,6 +31,19 @@ namespace pf {
 		inline bool is_displacement_field_output = false;
 		// plastic solver
 		inline int mechanic_map_steps = 1;
+		// - statistic
+		const std::pair<std::string, std::string> statistic_app_strain = { "app_strain", "applied strain on each direction" };
+		const std::pair<std::string, std::string> statistic_app_stress = { "app_stress", "applied stress on each direction" };
+		const std::pair<std::string, std::string> statistic_ave_strain = { "ave_strain", "average strain on each direction" };
+		const std::pair<std::string, std::string> statistic_ave_stress = { "ave_stress", "average stress on each direction" };
+		const std::pair<std::string, std::string> statistic_max_vMises = { "max_vMises_stress", "max von Mises stress" };
+		const std::pair<std::string, std::string> statistic_ave_plas_strain = { "ave_plas_strain", "average cumulative plastic strain" };
+		inline bool is_app_strain_statistic = false;
+		inline bool is_app_stress_statistic = false;
+		inline bool is_ave_strain_statistic = false;
+		inline bool is_ave_stress_statistic = false;
+		inline bool is_ave_plas_strain_statistic = false;
+		inline bool is_max_vMises_stress_statistic = false;
 		// boundary condition
 		void change_fix_boundaty_condition_implicity();
 		// get infomation
@@ -46,6 +59,8 @@ namespace pf {
 		void exec_loop_im_khachaturyan();
 
 		void init();
+
+		void exec_pre_i();
 
 		void exec_pre();
 

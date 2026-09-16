@@ -314,7 +314,7 @@ namespace pf {
 							infile_reader::read_real_value(fix_boundary_val_key, stress, true);
 							mechanical_field_solver_im.applied_stress[direction] = stress;
 							// [(time_begin,time_end,change rate), ... ]
-							WriteDebugFile("# Postprocess.SolidMechanics.Elasticity.fix_boundary.stress_? = [(real_time_begin, real_time_end, dstress_dt), ... ] \n");
+							WriteDebugFile("# Postprocess.SolidMechanics.Elasticity.fix_boundary.stress_XX = [(real_time_begin, real_time_end, dstress_dt), ... ] \n");
 							std::string fix_boundary_rate_key = "Postprocess.SolidMechanics.Elasticity.fix_boundary.stress_" + _d + ".rate", fix_boundary_rate_input = "[()]";
 							if (infile_reader::read_string_value(fix_boundary_rate_key, fix_boundary_rate_input, true)) {
 								std::vector<std::vector<input_value>> fix_boundary_rate_value = InputFileReader::get_instance()->trans_matrix_2d_const_const_to_input_value
@@ -473,12 +473,69 @@ namespace pf {
 			infile_reader::read_real_value("Postprocess.SolidMechanics.Elasticity.strain_accuracy", solver_strain_accuracy, true);
 			if (external_physical_field::is_mech_plastic_field_on)
 				plastic_solver::init();
+
+			WriteDebugFile("# Postprocess.SolidMechanics.statistic  = ( STA_KEY , ... ) \n");
+			WriteDebugFile("#       STA_KEY = \n");
+			WriteDebugFile("#                 " + statistic_app_strain.first + " : " + statistic_app_strain.second + "\n");
+			WriteDebugFile("#                 " + statistic_app_stress.first + " : " + statistic_app_stress.second + "\n");
+			WriteDebugFile("#                 " + statistic_ave_strain.first + " : " + statistic_ave_strain.second + "\n");
+			WriteDebugFile("#                 " + statistic_ave_stress.first + " : " + statistic_ave_stress.second + "\n");
+			WriteDebugFile("#                 " + statistic_max_vMises.first + " : " + statistic_max_vMises.second + "\n");
+			if (external_physical_field::is_mech_plastic_field_on)
+				WriteDebugFile("#                 " + statistic_ave_plas_strain.first + " : " + statistic_ave_plas_strain.second + "\n");
+			std::string statistic_key = "Postprocess.SolidMechanics.statistic", statistic_input = "()";
+			if (infile_reader::read_string_value(statistic_key, statistic_input, true)) {
+				std::vector<input_value> statistic_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value
+					(InputValueType::IVType_STRING, statistic_key, statistic_input, true);
+				for (size_t index = 0; index < statistic_value.size(); index++) {
+					if (statistic_value[index].string_value == statistic_app_strain.first)
+						is_app_strain_statistic = true;
+					else if (statistic_value[index].string_value == statistic_app_stress.first)
+						is_app_stress_statistic = true;
+					else if (statistic_value[index].string_value == statistic_ave_strain.first)
+						is_ave_strain_statistic = true;
+					else if (statistic_value[index].string_value == statistic_ave_stress.first)
+						is_ave_stress_statistic = true;
+					else if (statistic_value[index].string_value == statistic_max_vMises.first)
+						is_ave_plas_strain_statistic = true;
+					else if (statistic_value[index].string_value == statistic_ave_plas_strain.first 
+						&& external_physical_field::is_mech_plastic_field_on)
+						is_max_vMises_stress_statistic = true;
+				}
+			}
+
 			// ==========================================================================================================================
-			load_a_new_module(nullptr, nullptr, exec_pre,  // exec_pre_i   exec_pre_ii    exec_pre_iii
+			load_a_new_module(exec_pre_i, nullptr, exec_pre,  // exec_pre_i   exec_pre_ii    exec_pre_iii
 				nullptr, nullptr, nullptr,  // exec_i   exec_ii   exec_iii
 				exec_loop, nullptr, nullptr,   // exec_pos_i   exec_pos_ii   exec_pos_iii
 				deinit);  // deinit
 			WriteLog("> MODULE INIT : Elastic Solver On ! \n");
+		}
+
+		void exec_pre_i() {
+			std::vector<std::string> direction = { "x", "y", "z" };
+			if (is_app_strain_statistic) {
+				for (std::string dir : direction)
+					data_statistics_functions::statistics_data.push_back({ statistic_app_strain.first + "_" + dir, REAL(0) });
+			}
+			if (is_app_stress_statistic) {
+				for (std::string dir : direction)
+					data_statistics_functions::statistics_data.push_back({ statistic_app_stress.first + "_" + dir, REAL(0) });
+			}
+			if (is_ave_strain_statistic) {
+				for (std::string dir : direction)
+					data_statistics_functions::statistics_data.push_back({ statistic_ave_strain.first + "_" + dir, REAL(0) });
+			}
+			if (is_ave_stress_statistic) {
+				for (std::string dir : direction)
+					data_statistics_functions::statistics_data.push_back({ statistic_ave_stress.first + "_" + dir, REAL(0) });
+			}
+			if (is_ave_plas_strain_statistic) {
+				data_statistics_functions::statistics_data.push_back({ statistic_max_vMises.first, REAL(0) });
+			}
+			if (is_max_vMises_stress_statistic) {
+				data_statistics_functions::statistics_data.push_back({ statistic_ave_plas_strain.first, REAL(0) });
+			}
 		}
 
 		void exec_pre() {
@@ -541,6 +598,50 @@ namespace pf {
 						if (external_physical_field::is_mech_plastic_field_on)
 							external_physical_field::plastic_field.do_boundary_condition();
 					}
+			}
+			if (main_iterator::Current_ITE_step % show_loop_information::screen_output_step == 0) {
+				REAL SIZE = REAL(mesh_parameters::MESH_NX * mesh_parameters::MESH_NY * mesh_parameters::MESH_NZ);
+				vStrain app_strain = elastic_solver::get_applied_strain();
+				vStress app_stress = elastic_solver::get_applied_stress();
+				Vector6 ave_strain, ave_stress;
+				REAL max_vMises = 0, ave_plas_strain = 0;
+				for (long long x = external_physical_field::elastic_field.COMP_X_BGN(); x <= external_physical_field::elastic_field.COMP_X_END(); x++)
+					for (long long y = external_physical_field::elastic_field.COMP_Y_BGN(); y <= external_physical_field::elastic_field.COMP_Y_END(); y++)
+						for (long long z = external_physical_field::elastic_field.COMP_Z_BGN(); z <= external_physical_field::elastic_field.COMP_Z_END(); z++) {
+							ElasticPoint& epoint = external_physical_field::elastic_field(x, y, z);
+							ave_stress += epoint.Stress;
+							ave_strain += epoint.Strain;
+							REAL von_mises_stress = epoint.Stress.Mises();
+							if (von_mises_stress > max_vMises)
+								max_vMises = von_mises_stress;
+							if (external_physical_field::is_mech_plastic_field_on) {
+								PlasticPoint& ppoint = external_physical_field::plastic_field(x, y, z);
+								ave_plas_strain += ppoint.AvePlasticStrain;
+							}
+						}
+				std::vector<std::string> direction = { "x", "y", "z" };
+				if (is_app_strain_statistic) {
+					for (size_t index = 0; index < 3; index++)
+						data_statistics_functions::update_statistics(statistic_app_strain.first + "_" + direction[index], app_strain[index] / SIZE);
+				}
+				if (is_app_stress_statistic) {
+					for (size_t index = 0; index < 3; index++)
+						data_statistics_functions::update_statistics(statistic_app_stress.first + "_" + direction[index], app_stress[index] / SIZE);
+				}
+				if (is_ave_strain_statistic) {
+					for (size_t index = 0; index < 3; index++)
+						data_statistics_functions::update_statistics(statistic_ave_strain.first + "_" + direction[index], ave_strain[index] / SIZE);
+				}
+				if (is_ave_stress_statistic) {
+					for (size_t index = 0; index < 3; index++)
+						data_statistics_functions::update_statistics(statistic_ave_stress.first + "_" + direction[index], ave_stress[index] / SIZE);
+				}
+				if (is_ave_plas_strain_statistic) {
+					data_statistics_functions::update_statistics(statistic_max_vMises.first, max_vMises);
+				}
+				if (is_max_vMises_stress_statistic) {
+					data_statistics_functions::update_statistics(statistic_ave_plas_strain.first, ave_plas_strain / SIZE);
+				}
 			}
 		}
 

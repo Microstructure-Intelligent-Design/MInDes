@@ -72,7 +72,7 @@ namespace pf {
 			phi_yield_stress.resize(phi_number, 0);
 			phi_hardening_modulus.resize(phi_number, 0);
 			phi_shear_modulus.resize(phi_number, 0);
-
+			cal_plastic_parameters = default_functions::cal_plastic_parameters_norm;
 			if (PhiProperties::instance().is_init()) {
 				phi_property_number = PhiProperties::instance().phi_property_number();
 				phase_yield_stress.resize(phi_property_number, 0);
