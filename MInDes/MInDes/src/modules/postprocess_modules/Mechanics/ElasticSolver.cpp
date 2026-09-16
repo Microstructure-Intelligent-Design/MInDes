@@ -651,7 +651,7 @@ namespace pf {
 
 		void write_vts_displacement(std::ofstream& fout) {
 			std::string name = "mech_displacement";
-			fout << "<DataArray type = \"Float64\" Name = \"" << name << "\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+			fout << "<DataArray type = \"Float64\" Name = \"" << name << "\" NumberOfComponents=\"3\" format=\"ascii\">" << '\n';
 			for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 				for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 					for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
@@ -660,15 +660,15 @@ namespace pf {
 							&& k > 0 && k <= mesh_parameters::MESH_NZ) {
 							fout << mechanical_field_solver_im.get_u_main_node(int(i), int(j), int(k)) << " "
 								 << mechanical_field_solver_im.get_v_main_node(int(i), int(j), int(k)) << " "
-								 << mechanical_field_solver_im.get_w_main_node(int(i), int(j), int(k)) << std::endl;
+								 << mechanical_field_solver_im.get_w_main_node(int(i), int(j), int(k)) << '\n';
 						}
 						else {
 							fout << 0 << " "
 								<< 0 << " "
-								<< 0 << std::endl;
+								<< 0 << '\n';
 						}
 					}
-			fout << "</DataArray>" << std::endl;
+			fout << "</DataArray>" << '\n';
 		}
 	}
 }

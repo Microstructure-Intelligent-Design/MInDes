@@ -566,14 +566,14 @@ namespace pf {
 					size_t region_index = ConRegions::instance().con_region(cindex);
 					std::string con_name = "ddc_con_" + std::to_string(cindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << con_name <<
-						"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 								FIELD_Con& field_con = parameters::Con_field(i, j, k);
-								fout << field_con.new_con[cindex] * field_con.new_region[region_index] << std::endl;
+								fout << field_con.new_con[cindex] * field_con.new_region[region_index] << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 

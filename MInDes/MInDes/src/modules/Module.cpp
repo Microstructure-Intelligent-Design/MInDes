@@ -11,11 +11,13 @@
 #include "model_modules/data_driven_complex/DDC_Manager.h"
 // - simlulation models
 #include "model_modules/grain_grows_spinodal/GGS_Manager.h"
+#include "model_modules/dendrite_solidification/DS_Manager.h"
+#include "model_modules/solid_state_sintering/SSS_Manager.h"
 // - external field
 #include "postprocess_modules/FluidDynamics/LatticeBoltzmann.h"
 #include "postprocess_modules/Mechanics/ElasticSolver.h"
 namespace pf {
-	enum SimulationModels { SM_None, SM_GGS, SM_DDC };
+	enum SimulationModels { SM_None, SM_GGS, SM_DS, SM_SSS, SM_DDC };
 	void register_all_modules() {
 		// - basic functions
 		microstructure_init::init_microstructure();
@@ -25,7 +27,9 @@ namespace pf {
 		WriteDebugFile("========================================================================================= \n");
 		WriteDebugFile("# SimulationModels.model =  0 - None \n");
 		WriteDebugFile("#                           1 - Grain Grows Spinodal , PCT = (N,1,false) \n");
-		WriteDebugFile("#                           2 - Data Driven Complex Model , PCT = (N > 0, K, true/false) \n");
+		WriteDebugFile("#                           2 - Dendrite Solidification , PCT = (1,0,true), 2D \n");
+		WriteDebugFile("#                           3 - Solid State Sintering , PCT = (N >= 1,1,false) \n");
+		WriteDebugFile("#                           4 - Data Driven Complex Model , PCT = (N > 0, K, true/false) \n");
 		int sm_model = SimulationModels::SM_None;
 		infile_reader::read_int_value("SimulationModels.model", sm_model, true);
 		switch (SimulationModels(sm_model)) {
@@ -36,6 +40,14 @@ namespace pf {
 		case SimulationModels::SM_GGS: {
 			// - model settings
 			grain_grows_spinodal_model::init_model_modules();
+			break;
+		}
+		case SimulationModels::SM_DS: {
+			dendrite_solidification_model::init_model_modules();
+			break;
+		}
+		case SimulationModels::SM_SSS: {
+			solid_state_sintering_model::init_model_modules();
 			break;
 		}
 		case SimulationModels::SM_DDC: {

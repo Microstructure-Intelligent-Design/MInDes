@@ -100,7 +100,7 @@ namespace pf {
 				timer::time_interval_precision_secs_end(main_iterator::t_interval_modules_pre_exec);
 
 				// main loop;
-				if (License::instance().is_license()) {
+				if (/*License::instance().is_license()*/true) {
 					main_iterator::t_interval_modules_exec = 0.0;
 					main_iterator::t_interval_modules_pos_exec = 0.0;
 					timer::interval_begin(main_iterator::t_interval_begin);

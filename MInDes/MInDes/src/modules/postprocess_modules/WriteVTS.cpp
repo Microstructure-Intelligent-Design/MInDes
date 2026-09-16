@@ -17,17 +17,17 @@ namespace pf {
 					fout.close();
 					return;
 				}
-				fout << "<?xml version= \"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << std::endl;
-				fout << "<VTKFile type=\"StructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+				fout << "<?xml version= \"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << '\n';
+				fout << "<VTKFile type=\"StructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << '\n';
 				fout << "<StructuredGrid WholeExtent=\""
 					<< x_begin << " " << x_end << " "
 					<< y_begin << " " << y_end << " "
-					<< z_begin << " " << z_end << "\"> " << std::endl;
-				fout << "<PointData Scalars= \"ScalarData\"  Vectors= \"VectorData\">" << std::endl;
+					<< z_begin << " " << z_end << "\"> " << '\n';
+				fout << "<PointData Scalars= \"ScalarData\"  Vectors= \"VectorData\">" << '\n';
 			}
 			void write_scalar_grains(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "phi2_summary" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
@@ -36,15 +36,15 @@ namespace pf {
 							for (size_t index = 0; index < main_field::phi_number; index++)
 								fix += point[index] * point[index];
 							if (std::isnan(fix))
-								fout << NaN() << std::endl;
+								fout << NaN() << '\n';
 							else
-								fout << 1.0 - fix << std::endl;
+								fout << 1.0 - fix << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_scalar_phi_index(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "phi_index" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
@@ -52,27 +52,27 @@ namespace pf {
 							REAL fix = 0.0;
 							for (size_t index = 0; index < main_field::phi_number; index++)
 								fix += point[index] * index;
-							fout << fix << std::endl;
+							fout << fix << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_scalar_phi_all(std::ofstream& fout) {
 				for (size_t pindex = 0; pindex < main_field::phi_number; pindex++) {
 					std::string phi_name = "phi_" + std::to_string(pindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << phi_name <<
-						"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i)
-								fout << main_field::phase_field(i, j, k)[pindex] << std::endl;
-					fout << "</DataArray>" << std::endl;
+								fout << main_field::phase_field(i, j, k)[pindex] << '\n';
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_scalar_grad_phi_all(std::ofstream& fout) {
 				for (size_t pindex = 0; pindex < main_field::phi_number; pindex++) {
 					std::string phi_name = "phi_grad_" + std::to_string(pindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << phi_name <<
-						"\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+						"\" NumberOfComponents=\"3\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
@@ -81,30 +81,30 @@ namespace pf {
 									k >= size_t(main_field::phase_field.COMP_Z_BGN()) && k <= size_t(main_field::phase_field.COMP_Z_END()))
 									fout << (main_field::phase_field(i + 1, j, k)[pindex] - main_field::phase_field(i - 1, j, k)[pindex]) / 2 / mesh_parameters::delt_r << " "
 									<< (main_field::phase_field(i, j + 1, k)[pindex] - main_field::phase_field(i, j - 1, k)[pindex]) / 2 / mesh_parameters::delt_r << " "
-									<< (main_field::phase_field(i, j, k + 1)[pindex] - main_field::phase_field(i, j, k - 1)[pindex]) / 2 / mesh_parameters::delt_r << std::endl;
+									<< (main_field::phase_field(i, j, k + 1)[pindex] - main_field::phase_field(i, j, k - 1)[pindex]) / 2 / mesh_parameters::delt_r << '\n';
 								else
-									fout << 0 << " " << 0 << " " << 0 << std::endl;
+									fout << 0 << " " << 0 << " " << 0 << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_scalar_con_all(std::ofstream& fout) {
 				for (size_t cindex = 0; cindex < main_field::con_number; cindex++) {
 					std::string con_name = "con_" + std::to_string(cindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << con_name <<
-						"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i)
-								fout << main_field::concentration_field(i, j, k)[cindex] << std::endl;
-					fout << "</DataArray>" << std::endl;
+								fout << main_field::concentration_field(i, j, k)[cindex] << '\n';
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_scalar_grad_con_all(std::ofstream& fout) {
 				for (size_t cindex = 0; cindex < main_field::con_number; cindex++) {
 					std::string con_name = "con_grad_" + std::to_string(cindex);
 					fout << "<DataArray type = \"Float64\" Name = \"" << con_name <<
-						"\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+						"\" NumberOfComponents=\"3\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
@@ -113,26 +113,26 @@ namespace pf {
 									k >= size_t(main_field::concentration_field.COMP_Z_BGN()) && k <= size_t(main_field::concentration_field.COMP_Z_END()))
 									fout << (main_field::concentration_field(i + 1, j, k)[cindex] - main_field::concentration_field(i - 1, j, k)[cindex]) / 2 / mesh_parameters::delt_r << " "
 									<< (main_field::concentration_field(i, j + 1, k)[cindex] - main_field::concentration_field(i, j - 1, k)[cindex]) / 2 / mesh_parameters::delt_r << " "
-									<< (main_field::concentration_field(i, j, k + 1)[cindex] - main_field::concentration_field(i, j, k - 1)[cindex]) / 2 / mesh_parameters::delt_r << std::endl;
+									<< (main_field::concentration_field(i, j, k + 1)[cindex] - main_field::concentration_field(i, j, k - 1)[cindex]) / 2 / mesh_parameters::delt_r << '\n';
 								else
-									fout << 0 << " " << 0 << " " << 0 << std::endl;
+									fout << 0 << " " << 0 << " " << 0 << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_scalar_temperature(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "temp" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << main_field::temperature_field(i, j, k) << std::endl;
+							fout << main_field::temperature_field(i, j, k) << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_scalar_grad_temperature(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "temp_grad" <<
-					"\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"3\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
@@ -141,53 +141,53 @@ namespace pf {
 								k >= size_t(main_field::temperature_field.COMP_Z_BGN()) && k <= size_t(main_field::temperature_field.COMP_Z_END()))
 								fout << (main_field::temperature_field(i + 1, j, k) - main_field::temperature_field(i - 1, j, k)) / 2 / mesh_parameters::delt_r << " "
 								<< (main_field::temperature_field(i, j + 1, k) - main_field::temperature_field(i, j - 1, k)) / 2 / mesh_parameters::delt_r << " "
-								<< (main_field::temperature_field(i, j, k + 1) - main_field::temperature_field(i, j, k - 1)) / 2 / mesh_parameters::delt_r << std::endl;
+								<< (main_field::temperature_field(i, j, k + 1) - main_field::temperature_field(i, j, k - 1)) / 2 / mesh_parameters::delt_r << '\n';
 							else
-								fout << 0 << " " << 0 << " " << 0 << std::endl;
+								fout << 0 << " " << 0 << " " << 0 << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_velocity(std::ofstream& fout) {
-				fout << "<DataArray type = \"Float64\" Name = \"fluid_velocity\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+				fout << "<DataArray type = \"Float64\" Name = \"fluid_velocity\" NumberOfComponents=\"3\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
 							LBMPoint& point = external_physical_field::lbm_field(i, j, k);
 							fout << point.velocity[0] << " "
 								<< point.velocity[1] << " "
-								<< point.velocity[2] << std::endl;
+								<< point.velocity[2] << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_abs_velocity(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_abs_velocity" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << external_physical_field::lbm_field(i, j, k).velocity.abs() << std::endl;
+							fout << external_physical_field::lbm_field(i, j, k).velocity.abs() << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_pressure(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_pressure" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << external_physical_field::lbm_field(i, j, k).pressure << std::endl;
+							fout << external_physical_field::lbm_field(i, j, k).pressure << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_density(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "fluid_density" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << external_physical_field::lbm_field(i, j, k).mass << std::endl;
+							fout << external_physical_field::lbm_field(i, j, k).mass << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_stress(std::ofstream& fout) {
 				vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
@@ -195,13 +195,13 @@ namespace pf {
 				{
 					string compname = "\"stress_" + compNameV[ele_index] + "\" ";
 					fout << "<DataArray type = \"Float64\" Name = " << compname <<
-						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-								fout << external_physical_field::elastic_field(i, j, k).Stress[ele_index] << std::endl;
+								fout << external_physical_field::elastic_field(i, j, k).Stress[ele_index] << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_strain(std::ofstream& fout) {
@@ -210,13 +210,13 @@ namespace pf {
 				{
 					string compname = "\"strain_" + compNameV[ele_index] + "\" ";
 					fout << "<DataArray type = \"Float64\" Name = " << compname <<
-						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-								fout << external_physical_field::elastic_field(i, j, k).Strain[ele_index] << std::endl;
+								fout << external_physical_field::elastic_field(i, j, k).Strain[ele_index] << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_nonElasticStrain(std::ofstream& fout) {
@@ -225,34 +225,34 @@ namespace pf {
 				{
 					string compname = "\"nonElasticStrain_" + compNameV[ele_index] + "\" ";
 					fout << "<DataArray type = \"Float64\" Name = " << compname <<
-						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-								fout << external_physical_field::elastic_field(i, j, k).EffectiveEigenStrain[ele_index] << std::endl;
+								fout << external_physical_field::elastic_field(i, j, k).EffectiveEigenStrain[ele_index] << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_J1(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "stress_J1" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << external_physical_field::elastic_field(i, j, k).Stress.J1() << std::endl;
+							fout << external_physical_field::elastic_field(i, j, k).Stress.J1() << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_vMises(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "stress_vMises" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << external_physical_field::elastic_field(i, j, k).Stress.Mises() << std::endl;
+							fout << external_physical_field::elastic_field(i, j, k).Stress.Mises() << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void write_plastic_strain(std::ofstream& fout) {
 				vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
@@ -260,39 +260,39 @@ namespace pf {
 				{
 					string compname = "\"plastic_strain_" + compNameV[ele_index] + "\" ";
 					fout << "<DataArray type = \"Float64\" Name = " << compname <<
-						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+						"NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-								fout << external_physical_field::plastic_field(i, j, k).PlasticStrain[ele_index] << std::endl;
+								fout << external_physical_field::plastic_field(i, j, k).PlasticStrain[ele_index] << '\n';
 							}
-					fout << "</DataArray>" << std::endl;
+					fout << "</DataArray>" << '\n';
 				}
 			}
 			void write_ave_plastic_strain(std::ofstream& fout) {
 				string compname = "\"ave_plastic_strain\" ";
 				fout << "<DataArray type = \"Float64\" Name = " << compname <<
-					"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << external_physical_field::plastic_field(i, j, k).AvePlasticStrain << std::endl;
+							fout << external_physical_field::plastic_field(i, j, k).AvePlasticStrain << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 			void close_vts_file(std::ofstream& fout) {
-				fout << "</PointData>" << std::endl;
-				fout << "<Points>" << std::endl;
-				fout << "<DataArray type = \"Float64\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+				fout << "</PointData>" << '\n';
+				fout << "<Points>" << '\n';
+				fout << "<DataArray type = \"Float64\" NumberOfComponents=\"3\" format=\"ascii\">" << '\n';
 				for (size_t k = z_begin; k <= z_end; ++k)
 					for (size_t j = y_begin; j <= y_end; ++j)
 						for (size_t i = x_begin; i <= x_end; ++i) {
 							fout << i * mesh_parameters::delt_r << " " << j * mesh_parameters::delt_r << " " << k * mesh_parameters::delt_r << "\n";
 						}
-				fout << "</DataArray>" << std::endl;
-				fout << "</Points>" << std::endl;
-				fout << "</StructuredGrid>" << std::endl;
-				fout << "</VTKFile>" << std::endl;
+				fout << "</DataArray>" << '\n';
+				fout << "</Points>" << '\n';
+				fout << "</StructuredGrid>" << '\n';
+				fout << "</VTKFile>" << '\n';
 				fout.close();
 			}
 		}

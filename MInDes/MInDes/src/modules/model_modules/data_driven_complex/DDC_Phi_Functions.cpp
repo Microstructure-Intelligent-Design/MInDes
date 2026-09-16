@@ -832,13 +832,13 @@ namespace pf {
 			// - output
 			void write_scalar_active_phi_number(std::ofstream& fout) {
 				fout << "<DataArray type = \"Float64\" Name = \"" << "active_phis" <<
-					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << '\n';
 				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
 					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
 						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
-							fout << parameters::PhiTemp_field(i, j, k).active_number << std::endl;
+							fout << parameters::PhiTemp_field(i, j, k).active_number << '\n';
 						}
-				fout << "</DataArray>" << std::endl;
+				fout << "</DataArray>" << '\n';
 			}
 		}
 	}
