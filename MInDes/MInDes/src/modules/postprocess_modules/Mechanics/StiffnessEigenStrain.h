@@ -30,11 +30,11 @@ namespace pf {
 		inline vStrain get_phi_eigen_strain(size_t phi_index) {
 			return phi_index_eigen_strain[phi_index];
 		}
-		void do_phi_index_orientation(size_t phi_index, size_t phi_property);
+		void do_phi_index_orientation(size_t phi_index);
 		// stiffness and eigenstain
 		inline void(*stiffness)(long long, long long, long long, Matrix6x6&);
 		inline void(*eigen_strain)(long long, long long, long long, vStrain&);
 		// 
-		void init(size_t _phi_number, size_t _phi_property_number);
+		void init();
 	}
 }

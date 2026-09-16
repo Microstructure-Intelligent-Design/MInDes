@@ -21,8 +21,11 @@ namespace pf {
 		bool is_con_in_region(size_t region_index, size_t con_index);
 		bool is_phi_in_region(size_t region_index, size_t phi_index);
 
-		inline size_t region_number() {
+		inline size_t region_number() const {
 			return _region_number;
+		}
+		bool is_init() const {
+			return _is_init;
 		}
 
 		inline size_t region_con(size_t region_index, size_t index) {

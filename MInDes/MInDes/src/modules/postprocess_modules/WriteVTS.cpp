@@ -189,6 +189,97 @@ namespace pf {
 						}
 				fout << "</DataArray>" << std::endl;
 			}
+			void write_stress(std::ofstream& fout) {
+				vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
+				for (int ele_index = 0; ele_index < 6; ele_index++)
+				{
+					string compname = "\"stress_" + compNameV[ele_index] + "\" ";
+					fout << "<DataArray type = \"Float64\" Name = " << compname <<
+						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+								fout << external_physical_field::elastic_field(i, j, k).Stress[ele_index] << std::endl;
+							}
+					fout << "</DataArray>" << std::endl;
+				}
+			}
+			void write_strain(std::ofstream& fout) {
+				vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
+				for (int ele_index = 0; ele_index < 6; ele_index++)
+				{
+					string compname = "\"strain_" + compNameV[ele_index] + "\" ";
+					fout << "<DataArray type = \"Float64\" Name = " << compname <<
+						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+								fout << external_physical_field::elastic_field(i, j, k).Strain[ele_index] << std::endl;
+							}
+					fout << "</DataArray>" << std::endl;
+				}
+			}
+			void write_nonElasticStrain(std::ofstream& fout) {
+				vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
+				for (int ele_index = 0; ele_index < 6; ele_index++)
+				{
+					string compname = "\"nonElasticStrain_" + compNameV[ele_index] + "\" ";
+					fout << "<DataArray type = \"Float64\" Name = " << compname <<
+						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+								fout << external_physical_field::elastic_field(i, j, k).EffectiveEigenStrain[ele_index] << std::endl;
+							}
+					fout << "</DataArray>" << std::endl;
+				}
+			}
+			void write_J1(std::ofstream& fout) {
+				fout << "<DataArray type = \"Float64\" Name = \"" << "stress_J1" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							fout << external_physical_field::elastic_field(i, j, k).Stress.J1() << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
+			void write_vMises(std::ofstream& fout) {
+				fout << "<DataArray type = \"Float64\" Name = \"" << "stress_vMises" <<
+					"\" NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							fout << external_physical_field::elastic_field(i, j, k).Stress.Mises() << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
+			void write_plastic_strain(std::ofstream& fout) {
+				vector<string> compNameV{ "xx", "yy", "zz", "yz", "xz", "xy" };
+				for (int ele_index = 0; ele_index < 6; ele_index++)
+				{
+					string compname = "\"plastic_strain_" + compNameV[ele_index] + "\" ";
+					fout << "<DataArray type = \"Float64\" Name = " << compname <<
+						"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+					for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+						for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+							for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+								fout << external_physical_field::plastic_field(i, j, k).PlasticStrain[ele_index] << std::endl;
+							}
+					fout << "</DataArray>" << std::endl;
+				}
+			}
+			void write_ave_plastic_strain(std::ofstream& fout) {
+				string compname = "\"ave_plastic_strain\" ";
+				fout << "<DataArray type = \"Float64\" Name = " << compname <<
+					"NumberOfComponents=\"1\" format=\"ascii\">" << std::endl;
+				for (size_t k = write_vts::z_begin; k <= write_vts::z_end; ++k)
+					for (size_t j = write_vts::y_begin; j <= write_vts::y_end; ++j)
+						for (size_t i = write_vts::x_begin; i <= write_vts::x_end; ++i) {
+							fout << external_physical_field::plastic_field(i, j, k).AvePlasticStrain << std::endl;
+						}
+				fout << "</DataArray>" << std::endl;
+			}
 			void close_vts_file(std::ofstream& fout) {
 				fout << "</PointData>" << std::endl;
 				fout << "<Points>" << std::endl;
@@ -343,6 +434,37 @@ namespace pf {
 				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.fluid_density", buff, true);
 				if (buff)
 					write_vts::load_vts_func(default_functions::write_density);
+			}
+			if (external_physical_field::is_mech_field_on) {
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_stress", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_stress);
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_strain", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_strain);
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_non_elastic_strain", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_nonElasticStrain);
+				buff = false;
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_J1", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_J1);
+				InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_vMises", buff, true);
+				if (buff)
+					write_vts::load_vts_func(default_functions::write_vMises);
+				if (external_physical_field::is_mech_plastic_field_on) {
+					buff = false;
+					InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_plastic_strain", buff, true);
+					if (buff)
+						write_vts::load_vts_func(default_functions::write_plastic_strain);
+					buff = false;
+					InputFileReader::get_instance()->read_bool_value("Solver.Output.VTS.mech_ave_plastic_strain", buff, true);
+					if (buff)
+						write_vts::load_vts_func(default_functions::write_ave_plastic_strain);
+				}
 			}
 		}
 	}

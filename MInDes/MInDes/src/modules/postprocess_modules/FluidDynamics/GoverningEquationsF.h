@@ -28,9 +28,7 @@ namespace pf {
 	{
 	public:
 		LBM() {};
-		~LBM() {
-			free();
-		}
+		~LBM() {};
 		void init(Mesh_Boundry<LBMPoint>& _lbm_field, size_t Nx, size_t Ny, size_t Nz, REAL dr, BoundaryCondition x_down, BoundaryCondition x_up
 			, BoundaryCondition y_down, BoundaryCondition y_up, BoundaryCondition z_down, BoundaryCondition z_up) {
 			lbm_field = &_lbm_field; 

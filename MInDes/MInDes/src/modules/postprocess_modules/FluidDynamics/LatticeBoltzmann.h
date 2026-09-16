@@ -10,6 +10,7 @@ namespace pf {
 	namespace lattice_boltzmann {
 		// FST_LBM_Difference
 		inline LBM fluid_lbm_solver;
+		inline std::vector<size_t> calculation_step;
 		inline double momentum_accuracy = 1e-4;
 		inline bool debug_solver = false;
 		inline int debug_output_step = 1000;

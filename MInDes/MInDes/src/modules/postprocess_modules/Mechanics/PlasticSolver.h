@@ -47,6 +47,5 @@ namespace pf {
 
 		void deinit();
 
-		void write_scalar(std::ofstream& fout);
 	}
 }

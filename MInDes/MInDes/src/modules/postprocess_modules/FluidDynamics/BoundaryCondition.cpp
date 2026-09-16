@@ -1328,15 +1328,37 @@ namespace pf {
 			bool is_solid_phase_in_simulation = false;
 			fluid_boundary_condition.resize(Fluid_Boundary_Condition::FBC_SIZE, std::vector<REAL>(Fluid_Boundary_Property::FBP_SIZE, 0));
 			if (main_field::is_phi_field_on) {
-				WriteDebugFile("# Postprocess.FluidDynamics.solid_phi_index = ( index_0, ... ) \n");
-				std::string fluid_phase_key = "Postprocess.FluidDynamics.solid_phi_index", fluid_phase_input = "()";
-				infile_reader::read_string_value(fluid_phase_key, fluid_phase_input, true);
-				std::vector<input_value> fluid_phase_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, fluid_phase_key, fluid_phase_input, true);
-				is_solid_phases.resize(main_field::phi_number, false);
-				for (int index = 0; index < fluid_phase_value.size(); index++) {
-					size_t phi_index = size_t(fluid_phase_value[index].int_value);
-					if (phi_index < main_field::phi_number)
-						is_solid_phases[index] = true;
+				if (PhiProperties::instance().is_init()) {
+					WriteDebugFile("# Postprocess.FluidDynamics.solid_phase = ( phase_name_0, ... ) \n");
+					std::string fluid_phase_key = "Postprocess.FluidDynamics.solid_phase", fluid_phase_input = "()";
+					infile_reader::read_string_value(fluid_phase_key, fluid_phase_input, true);
+					std::vector<input_value> fluid_phase_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_STRING, fluid_phase_key, fluid_phase_input, true);
+					is_solid_phases.resize(main_field::phi_number, false);
+					for (int index = 0; index < fluid_phase_value.size(); index++) {
+						if (PhiProperties::instance().is_phi_property(fluid_phase_value[index].string_value)) {
+							std::vector<size_t> property_phi_index = PhiProperties::instance().property_phi(fluid_phase_value[index].string_value);
+							for (int index2 = 0; index2 < property_phi_index.size(); index2++) {
+								size_t phi_index = property_phi_index[index2];
+								if (phi_index < main_field::phi_number)
+									is_solid_phases[index] = true;
+							}
+						}
+						else {
+							WriteDebugFile("> ERROR : Phase : " + fluid_phase_value[index].string_value + " has not been defined in property info ! \n");
+						}
+					}
+				}
+				else {
+					WriteDebugFile("# Postprocess.FluidDynamics.solid_phi_index = ( index_0, ... ) \n");
+					std::string fluid_phase_key = "Postprocess.FluidDynamics.solid_phi_index", fluid_phase_input = "()";
+					infile_reader::read_string_value(fluid_phase_key, fluid_phase_input, true);
+					std::vector<input_value> fluid_phase_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, fluid_phase_key, fluid_phase_input, true);
+					is_solid_phases.resize(main_field::phi_number, false);
+					for (int index = 0; index < fluid_phase_value.size(); index++) {
+						size_t phi_index = size_t(fluid_phase_value[index].int_value);
+						if (phi_index < main_field::phi_number)
+							is_solid_phases[index] = true;
+					}
 				}
 			}
 			WriteDebugFile("# tau = viscosity / fluid_dt / Cs2 + 0.5 \n");

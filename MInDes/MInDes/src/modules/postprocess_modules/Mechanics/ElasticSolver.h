@@ -12,6 +12,7 @@ namespace pf {
 	enum FixBoundaryCondition { FixBC_Average, FixBC_Strain, FixBC_Stress };
 	namespace elastic_solver {
 		inline MechanicalField_Implicit mechanical_field_solver_im;
+		inline std::vector<size_t> calculation_step;
 		// General Parameters
 		inline MechanicalFieldType MFType = MechanicalFieldType::MFType_None;
 		inline double bc_incre_rate = 1.0;
@@ -24,12 +25,11 @@ namespace pf {
 		inline std::vector<Vector3> fix_boundary_y_change_rate;
 		inline std::vector<Vector3> fix_boundary_z_change_rate;
 		// MFType_Implicit Parameters
-		inline bool output_displacement_field = false;
 		inline double virtual_strain_iterate_rate = 1.0;
 		inline bool restart_iterator_in_loop = false;
 		inline int restart_iterator_in_loop_steps = 1;
+		inline bool is_displacement_field_output = false;
 		// plastic solver
-		inline bool is_plastic_on = false;
 		inline int mechanic_map_steps = 1;
 		// boundary condition
 		void change_fix_boundaty_condition_implicity();
@@ -37,23 +37,23 @@ namespace pf {
 		vStrain get_applied_strain();
 		vStress get_applied_stress();
 		// eigenstrain and stiffness
-		Matrix6x6 cal_stiffness(int x, int y, int z);
-		vStrain cal_eigenstrain(int x, int y, int z);
+		Matrix6x6 cal_stiffness(long long x, long long y, long long z);
+		vStrain cal_eigenstrain(long long x, long long y, long long z);
 		// solver loop for MFType_Implicit
 		void exec_pre_im_steinbach();
-		std::string exec_loop_im_steinbach();
+		void exec_loop_im_steinbach();
 		void exec_pre_im_khachaturyan();
-		std::string exec_loop_im_khachaturyan();
+		void exec_loop_im_khachaturyan();
 
 		void init();
 
 		void exec_pre();
 
-		std::string exec_loop();
+		void exec_loop();
 
 		void deinit();
 
-		void write_vts(std::ofstream& fout);
+		void write_vts_displacement(std::ofstream& fout);
 
 	}
 }

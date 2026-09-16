@@ -22,6 +22,9 @@ namespace pf {
 		size_t operator[](size_t phi_index) {
 			return _phi_property[phi_index];
 		}
+		bool is_init() const {
+			return _is_init;
+		}
 	private:
 		void add_property_name(std::string _property_name);
 		PhiProperties();

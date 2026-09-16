@@ -104,6 +104,7 @@ namespace pf {
 				if (main_field::is_temp_field_on)
 					log << "#  Temp " << " = "
 					<< setprecision(5) << temp_info << endl;
+				log << "#----------------------------------------------------------------------------------------------------" << endl;
 				WriteLog(log.str());
 				timer::interval_begin(main_iterator::t_interval_begin);
 				data_statistics_functions::update_statistics("progress", REAL(main_iterator::Current_ITE_step - main_iterator::ITE_Begin_Step) 

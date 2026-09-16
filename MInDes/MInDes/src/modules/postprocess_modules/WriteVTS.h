@@ -32,6 +32,13 @@ namespace pf {
 			void write_abs_velocity(std::ofstream& fout);
 			void write_pressure(std::ofstream& fout);
 			void write_density(std::ofstream& fout);
+			void write_stress(std::ofstream& fout);
+			void write_strain(std::ofstream& fout);
+			void write_nonElasticStrain(std::ofstream& fout);
+			void write_J1(std::ofstream& fout);
+			void write_vMises(std::ofstream& fout);
+			void write_plastic_strain(std::ofstream& fout);
+			void write_ave_plastic_strain(std::ofstream& fout);
 			void close_vts_file(std::ofstream& fout);
 		}
 		void write_vts_pre_iii();

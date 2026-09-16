@@ -13,10 +13,10 @@ const std::complex<double> I(0.0, 1.0);
 namespace pf {
 	enum VelocityDomainIndex { VDIndex_OLD, VDIndex_NOW, VDIndex_FUTURE };
 	namespace mechanical_boundary_condition_funcs {
-		inline Matrix6x6 cal_stiffness(int Nx, int Ny, int Nz) {
+		inline Matrix6x6 cal_stiffness(long long Nx, long long Ny, long long Nz) {
 			return Matrix6x6();
 		}
-		inline vStrain cal_eigenstrain(int Nx, int Ny, int Nz) {
+		inline vStrain cal_eigenstrain(long long Nx, long long Ny, long long Nz) {
 			return vStrain();
 		}
 	};
@@ -24,14 +24,12 @@ namespace pf {
 	{
 	public:
 		MechanicalField_Implicit() {};
-		~MechanicalField_Implicit() {
-			free();
-		}
-		void init(int _Nx, int _Ny, int _Nz, BoundaryCondition _x_bc, BoundaryCondition _y_bc, BoundaryCondition _z_bc, Mesh<ElasticPoint>& _elastic_field) {
+		~MechanicalField_Implicit() {};
+		void init(int _Nx, int _Ny, int _Nz, BoundaryCondition _x_bc, BoundaryCondition _y_bc, BoundaryCondition _z_bc, Mesh_Boundry<ElasticPoint>& _elastic_field) {
 			AvgStrainMask.resize(3);
 			LoadStressMask.resize(3);
 			AppStrainMask.resize(3);
-			for (int index = 0; index < 3; index++) {
+			for (size_t index = 0; index < 3; index++) {
 				AvgStrainMask[index] = 1;
 				LoadStressMask[index] = 0;
 				AppStrainMask[index] = 0;
@@ -46,7 +44,8 @@ namespace pf {
 			if (_z_bc != BoundaryCondition::PERIODIC)
 				mech_Nz = _Nz * 2;
 			elastic_field = &_elastic_field;
-			elastic_field->init(mech_Nx, mech_Ny, mech_Nz, 1);
+			elastic_field->init(mech_Nx, mech_Ny, mech_Nz, 1, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, 
+				BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC, BoundaryCondition::PERIODIC);
 
 			Nz2 = (mech_Nz) / 2 + 1;
 			rlSIZE = mech_Nx * mech_Ny * mech_Nz;
@@ -60,18 +59,18 @@ namespace pf {
 
 			Norm = 1.0 / double(rlSIZE);
 			// Arrays allocation:
-			for (int n = 0; n < 6; n++)
+			for (size_t n = 0; n < 6; n++)
 			{
 				rlRHSide[n] = new double[rlSIZE]();
 				rcRHSide[n] = new std::complex<double>[rcSIZE]();
 			}
-			for (int n = 0; n < 3; n++)
+			for (size_t n = 0; n < 3; n++)
 			{
 				rlU[n] = new double[rlSIZE]();
 				rcU[n] = new std::complex<double>[rcSIZE]();
 				Q[n] = new double[rcSIZE]();
 			}
-			for (int n = 0; n < 9; n++)
+			for (size_t n = 0; n < 9; n++)
 			{
 				rlDefGrad[n] = new double[rlSIZE]();
 				rcDefGrad[n] = new std::complex<double>[rcSIZE]();
@@ -82,7 +81,7 @@ namespace pf {
 				for (int j = 0; j < mech_Ny; j++)
 					for (int k = 0; k < Nz2; k++)
 					{
-						int XYZ = k + Nz2 * (j + mech_Ny * i);
+						size_t XYZ = k + Nz2 * (j + mech_Ny * i);
 
 						Q[0][XYZ] = DPi_Nx * (i * (i <= mech_Nx / 2) - (mech_Nx - i) * (i > mech_Nx / 2)) / 1.0;
 						Q[1][XYZ] = DPi_Ny * (j * (j <= mech_Ny / 2) - (mech_Ny - j) * (j > mech_Ny / 2)) / 1.0;
@@ -117,8 +116,8 @@ namespace pf {
 		}
 		void define_funcs_for_mechanics(std::vector<bool> _avgStrainMask, std::vector<bool> _loadStressMask, std::vector<bool> _appStrainMask,
 			vStress _applied_stress, vStrain _applied_strain,
-			Matrix6x6(*_cal_stiffness)(int, int, int) = mechanical_boundary_condition_funcs::cal_stiffness,
-			vStrain(*_cal_eigenstrain)(int, int, int) = mechanical_boundary_condition_funcs::cal_eigenstrain) {
+			Matrix6x6(*_cal_stiffness)(long long, long long, long long) = mechanical_boundary_condition_funcs::cal_stiffness,
+			vStrain(*_cal_eigenstrain)(long long, long long, long long) = mechanical_boundary_condition_funcs::cal_eigenstrain) {
 			AvgStrainMask = _avgStrainMask;
 			LoadStressMask = _loadStressMask;
 			AppStrainMask = _appStrainMask;
@@ -157,17 +156,17 @@ namespace pf {
 		void recal_eigenstrain();
 		void SetMAXElasticConstants(std::vector<Matrix6x6> Cijs);
 
-		double get_u_main_node(size_t _x, size_t _y, size_t _z);
-		double get_v_main_node(size_t _x, size_t _y, size_t _z);
-		double get_w_main_node(size_t _x, size_t _y, size_t _z);
+		double get_u_main_node(int _x, int _y, int _z);
+		double get_v_main_node(int _x, int _y, int _z);
+		double get_w_main_node(int _x, int _y, int _z);
 
 		// Ingo Steinbach Method
 		void initStrainIncrements();
-		std::string Solve(double StrainAccuracy, int MAXIterations, double incre_rate = 1.0, bool is_dvStraindt_output = false, bool getU = false);
+		std::string Solve(double StrainAccuracy, size_t MAXIterations, double incre_rate = 1.0, bool is_dvStraindt_output = false, bool getU = false);
 
 		// Armen G. Khachaturyan Method
 		void initVirtualEigenstrain();
-		std::string Solve2(double StrainAccuracy, int MAXIterations, double iterate_rate, bool is_dvStraindt_output = false, bool getU = false);
+		std::string Solve2(double StrainAccuracy, size_t MAXIterations, double iterate_rate, bool is_dvStraindt_output = false, bool getU = false);
 
 		//----------------------------------------------------------------- settings
 		vStress applied_stress;
@@ -177,8 +176,8 @@ namespace pf {
 		std::vector<bool>     LoadStressMask;
 		std::vector<bool>     AppStrainMask;
 
-		Matrix6x6(*cal_stiffness)(int x, int y, int z);
-		vStrain(*cal_eigenstrain)(int x, int y, int z);
+		Matrix6x6(*cal_stiffness)(long long x, long long y, long long z);
+		vStrain(*cal_eigenstrain)(long long x, long long y, long long z);
 		//----------------------------------------------------------------- settings
 
 	private:
@@ -202,7 +201,7 @@ namespace pf {
 		int mech_Nz;
 		vStrain average_strain;
 		vStrain average_virtual_strain;
-		Mesh<ElasticPoint>* elastic_field;
+		Mesh_Boundry<ElasticPoint>* elastic_field;
 		//Elasticity Tensors:
 		Matrix6x6   average_stiffness;
 		Matrix6x6   average_compliences;

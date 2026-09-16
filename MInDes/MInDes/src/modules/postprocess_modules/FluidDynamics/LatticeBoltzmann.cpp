@@ -74,6 +74,22 @@ namespace pf {
 				mesh_parameters::delt_r, mesh_parameters::x_down, mesh_parameters::x_up, mesh_parameters::y_down, mesh_parameters::y_up,
 				mesh_parameters::z_down, mesh_parameters::z_up);
 			WriteDebugFile("# Parameters in FluidDynamics module : \n");
+			WriteDebugFile("# Postprocess.FluidDynamics.calculate_step = ( simulation_step , ... ) \n");
+			WriteDebugFile("#                                          = empty - solver calculated every step , otherwise - solver calculated at the defined step \n");
+			std::string cal_step = "Postprocess.FluidDynamics.calculate_step", cal_input = "()";
+			if (infile_reader::read_string_value(cal_step, cal_input, true)) {
+				std::vector<input_value> cal_value = InputFileReader::get_instance()->trans_matrix_1d_const_to_input_value(InputValueType::IVType_INT, cal_step, cal_input, true);
+				for (int index = 0; index < cal_value.size(); index++) {
+					size_t aim_step = size_t(cal_value[index].int_value);
+					bool is_defined = false;
+					for (size_t step : calculation_step)
+						if (aim_step == step)
+							is_defined = true;
+					if (!is_defined)
+						calculation_step.push_back(aim_step);
+				}
+			}
+			// -
 			infile_reader::read_int_value("Postprocess.FluidDynamics.max_iterate_steps", max_iterate_steps, true);
 			if (infile_reader::read_int_value("Postprocess.FluidDynamics.debug_output_step", debug_output_step, true))
 				if (debug_output_step > 0)
@@ -100,9 +116,18 @@ namespace pf {
 				nullptr, nullptr, nullptr,  // exec_i   exec_ii   exec_iii
 				exec_loop, nullptr, nullptr,   // exec_pos_i   exec_pos_ii   exec_pos_iii
 				deinit);  // deinit
+			WriteLog("> MODULE INIT : Lattice Boltzmann Solver On ! \n");
 		}
 		void exec_pre() {
-			stringstream output;
+			if (calculation_step.size() != 0) {
+				bool is_cal = false;
+				for (size_t istep : calculation_step)
+					if (istep == 0)
+						is_cal = true;
+				if (!is_cal)
+					return;
+			}
+			std::stringstream output;
 			lbm_properties_automatically_change();
 			if (fluid_lbm_solver.lbm_lattice_model == LBM_LATTICE_MODEL::LBM_D2Q9) {
 				init_distribution_functions_d2q9();
@@ -161,8 +186,16 @@ namespace pf {
 			WriteLog(output.str());
 		}
 		void exec_loop() {
+			if (calculation_step.size() != 0) {
+				bool is_cal = false;
+				for (size_t istep : calculation_step)
+					if (istep == main_iterator::Current_ITE_step)
+						is_cal = true;
+				if (!is_cal)
+					return;
+			}
 			lbm_properties_automatically_change();
-			stringstream report;
+			std::stringstream report;
 			MACRO_MAX_VARIATION MAX_CHANGE;
 			lbm_boundary_condition::cal_fluid_domain();
 			int istep = 0;

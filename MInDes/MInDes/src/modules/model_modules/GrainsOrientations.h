@@ -54,6 +54,9 @@ namespace pf {
         Matrix3x3 RotationMatrix(int phi_index) {
             return RotationMatrix::rotationMatrix(orientations[phi_index], _rotation_gauge);
         }
+        bool is_init() const {
+            return _is_init;
+        }
     private:
         GrainsOrientations();
         ~GrainsOrientations() = default;

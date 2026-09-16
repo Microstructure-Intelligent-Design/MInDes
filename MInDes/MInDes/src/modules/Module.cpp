@@ -13,6 +13,7 @@
 #include "model_modules/grain_grows_spinodal/GGS_Manager.h"
 // - external field
 #include "postprocess_modules/FluidDynamics/LatticeBoltzmann.h"
+#include "postprocess_modules/Mechanics/ElasticSolver.h"
 namespace pf {
 	enum SimulationModels { SM_None, SM_GGS, SM_DDC };
 	void register_all_modules() {
@@ -44,15 +45,17 @@ namespace pf {
 		}
 		}
 		WriteDebugFile("========================================================================================= \n");
+		show_loop_information::init_show_loop_information();
 		// - other method
 		automatic_change_delt_time::init_auto_time();
 		if (external_physical_field::is_fluid_field_on)
 			lattice_boltzmann::init();
+		if (external_physical_field::is_mech_field_on)
+			elastic_solver::init();
 		// - tail
 		WriteDebugFile("========================================================================================= \n");
-		show_loop_information::init_show_loop_information();
-		write_vts::init_write_vts();
 		cpu_memory_usage::init_cpu_memory_usage();
+		write_vts::init_write_vts();
 		WriteDebugFile("========================================================================================= \n");
 		WriteDebugFile("=============================== Parameters Definition End ===============================\n");
 		WriteDebugFile("=========================================================================================\n");

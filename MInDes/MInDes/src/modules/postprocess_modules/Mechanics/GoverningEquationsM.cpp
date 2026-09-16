@@ -17,16 +17,16 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
-                    int mirror_x = i, mirror_y = j, mirror_z = k;
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
+                    long long mirror_x = i, mirror_y = j, mirror_z = k;
                     if (i >= Nx)
-                        mirror_x = mech_Nx - 1 - i;
+                        mirror_x = mech_Nx - 1LL - i;
                     if (j >= Ny)
-                        mirror_y = mech_Ny - 1 - j;
+                        mirror_y = mech_Ny - 1LL - j;
                     if (k >= Nz)
-                        mirror_z = mech_Nz - 1 - k;
-                    mech.EffectiveEigenStrain = cal_eigenstrain(mirror_x, mirror_y, mirror_z);
-                    mech.EffectiveElasticConstant = cal_stiffness(mirror_x, mirror_y, mirror_z);
+                        mirror_z = mech_Nz - 1LL - k;
+                    mech.EffectiveEigenStrain = cal_eigenstrain(mirror_x + 1LL, mirror_y + 1LL, mirror_z + 1LL);
+                    mech.EffectiveElasticConstant = cal_stiffness(mirror_x + 1LL, mirror_y + 1LL, mirror_z + 1LL);
 #ifdef _OPENMP
 #pragma omp critical
 #endif
@@ -49,15 +49,15 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
-                    int mirror_x = i, mirror_y = j, mirror_z = k;
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
+                    long long mirror_x = i, mirror_y = j, mirror_z = k;
                     if (i >= Nx)
-                        mirror_x = mech_Nx - 1 - i;
+                        mirror_x = mech_Nx - 1LL - i;
                     if (j >= Ny)
-                        mirror_y = mech_Ny - 1 - j;
+                        mirror_y = mech_Ny - 1LL - j;
                     if (k >= Nz)
-                        mirror_z = mech_Nz - 1 - k;
-                    mech.EffectiveEigenStrain = cal_eigenstrain(mirror_x, mirror_y, mirror_z);
+                        mirror_z = mech_Nz - 1LL - k;
+                    mech.EffectiveEigenStrain = cal_eigenstrain(mirror_x + 1LL, mirror_y + 1LL, mirror_z + 1LL);
 #ifdef _DEBUG
                     if (mech.EffectiveEigenStrain.is_nan_val_exist()) {
                         std::cout << "DEBUG: mech.EffectiveEigenStrain error !" << std::endl;
@@ -69,17 +69,17 @@ namespace pf {
 
     void MechanicalField_Implicit::initStrainIncrements() {
 #pragma omp parallel for
-        for (int i = 0; i < mech_Nx; i++)
-            for (int j = 0; j < mech_Ny; j++)
-                for (int k = 0; k < mech_Nz; k++) {
+        for (long long i = elastic_field->COMP_X_BGN(); i <= elastic_field->COMP_X_END(); i++)
+            for (long long j = elastic_field->COMP_Y_BGN(); j <= elastic_field->COMP_Y_END(); j++)
+                for (long long k = elastic_field->COMP_Z_BGN(); k <= elastic_field->COMP_Z_END(); k++) {
                     ElasticPoint& mech = elastic_field->at(i, j, k);
-                    for (int n = 0; n < 6; n++) {
+                    for (size_t n = 0; n < 6; n++) {
                         mech.StrainIncrement[n] = 0.0;
                     }
                 }
     }
 
-    std::string MechanicalField_Implicit::Solve(double StrainAccuracy, int MAXIterations, double incre_rate, bool is_dvStraindt_output, bool getU)
+    std::string MechanicalField_Implicit::Solve(double StrainAccuracy, size_t MAXIterations, double incre_rate, bool is_dvStraindt_output, bool getU)
     {
         std::stringstream output;
         Matrix6x6 Cij;
@@ -95,7 +95,7 @@ namespace pf {
         oldTargetStrain.set_to_zero();
         average_strain.set_to_zero();
 
-        int    IterationCount = 0;
+        size_t    IterationCount = 0;
         double MAXStrainDifference = 0.0;
         double MAXTargetStrainDifference = 0.0;
 
@@ -165,13 +165,15 @@ namespace pf {
                 output << "(Elastic solver) iterate step:                     " << IterationCount << std::endl
                     << "                 MAX dvstrain/dt:                  " << MAXStrainDifference << std::endl
                     << "                 MAX dTargetStrainDifference/dt:   " << MAXTargetStrainDifference << std::endl
-                    << "                 Average Strain:                   " << "( " << average_strain[0] << ", "
+                    << "                 Average Strain:                   " << "( " 
+                    << average_strain[0] << ", "
                     << average_strain[1] << ", "
                     << average_strain[2] << ", "
                     << average_strain[3] << ", "
                     << average_strain[4] << ", "
                     << average_strain[5] << " )" << std::endl
-                    << "                 Average Stress:                   " << "( " << AverageStress[0] << ", "
+                    << "                 Average Stress:                   " << "( " 
+                    << AverageStress[0] << ", "
                     << AverageStress[1] << ", "
                     << AverageStress[2] << ", "
                     << AverageStress[3] << ", "
@@ -194,13 +196,15 @@ namespace pf {
             << "  iterate step:                     " << IterationCount << std::endl
             << "  MAX dvstrain/dt:                  " << MAXStrainDifference << std::endl
             << "  MAX dTargetStrainDifference/dt:   " << MAXTargetStrainDifference << std::endl
-            << "  Average Strain:                   " << "( " << average_strain[0] << ", "
+            << "  Average Strain:                   " << "( " 
+            << average_strain[0] << ", "
             << average_strain[1] << ", "
             << average_strain[2] << ", "
             << average_strain[3] << ", "
             << average_strain[4] << ", "
             << average_strain[5] << " )" << std::endl
-            << "  Average Stress:                   " << "( " << AverageStress[0] << ", "
+            << "  Average Stress:                   " << "( " 
+            << AverageStress[0] << ", "
             << AverageStress[1] << ", "
             << AverageStress[2] << ", "
             << AverageStress[3] << ", "
@@ -215,7 +219,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
                     for (int n = 0; n < 6; n++) {
                         rlRHSide[n][k + mech_Nz * (j + mech_Ny * i)] = 0.0;
                         for (int m = 0; m < 6; m++) {
@@ -322,7 +326,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
                     // - OpenPhase.3999.Mar2018
                     vStrain locStrain;
                     for (int n = 0; n < 6; n++)
@@ -396,7 +400,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
                     // - OpenPhase.3999.Mar2018
                     vStrain locStrain;
                     for (int n = 0; n < 6; n++)
@@ -622,16 +626,16 @@ namespace pf {
 
     void MechanicalField_Implicit::initVirtualEigenstrain() {
 #pragma omp parallel for
-        for (int i = 0; i < mech_Nx; i++)
-            for (int j = 0; j < mech_Ny; j++)
-                for (int k = 0; k < mech_Nz; k++) {
+        for (long long i = elastic_field->COMP_X_BGN(); i <= elastic_field->COMP_X_END(); i++)
+            for (long long j = elastic_field->COMP_Y_BGN(); j <= elastic_field->COMP_Y_END(); j++)
+                for (long long k = elastic_field->COMP_Z_BGN(); k <= elastic_field->COMP_Z_END(); k++) {
                     ElasticPoint& mech = elastic_field->at(i, j, k);
                     mech.VirtualEigenStrain.set_to_zero();
                     //mech.VirtualEigenStrain = mech.EffectiveEigenStrain;
                 }
     }
 
-    std::string MechanicalField_Implicit::Solve2(double StrainAccuracy, int MAXIterations, double iterate_rate, bool is_dvStraindt_output, bool getU) {
+    std::string MechanicalField_Implicit::Solve2(double StrainAccuracy, size_t MAXIterations, double iterate_rate, bool is_dvStraindt_output, bool getU) {
         std::stringstream output;
 
         Matrix6x6 Cij;                                                             ///< assuming homogeneous elastic constants values
@@ -640,7 +644,7 @@ namespace pf {
         Sij = Cij.get_inverted_matrix();
 
         double MAXStrainDifference = 0.0;
-        int IterationCount = 0;
+        size_t IterationCount = 0;
 
         for (IterationCount = 1; IterationCount <= MAXIterations; IterationCount++) {
             MAXStrainDifference = 0.0;
@@ -691,7 +695,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
                     for (int n = 0; n < 6; n++) {
                         rlRHSide[n][k + mech_Nz * (j + mech_Ny * i)] = 0.0;
                         for (int m = 0; m < 6; m++) {
@@ -720,7 +724,7 @@ namespace pf {
         for (int i = 0; i < mech_Nx; i++)
             for (int j = 0; j < mech_Ny; j++)
                 for (int k = 0; k < mech_Nz; k++) {
-                    ElasticPoint& mech = elastic_field->at(i, j, k);
+                    ElasticPoint& mech = elastic_field->at(i + 1, j + 1, k + 1);
                     vStrain strain1, strain2, strain3, vStrain_increment;
                     Matrix6x6 deltS;
                     deltS = Cij - mech.EffectiveElasticConstant;
@@ -782,13 +786,25 @@ namespace pf {
         }
     }
 
-    double MechanicalField_Implicit::get_u_main_node(size_t _x, size_t _y, size_t _z) {
-        return rlU[0][_z + mech_Nz * (_y + mech_Ny * _x)];
+    double MechanicalField_Implicit::get_u_main_node(int _x, int _y, int _z) {
+        int x = _x - 1, y = _y - 1, z = _z - 1;
+        if (x >= 0 && x < mech_Nx && y >= 0 && y < mech_Ny && z >= 0 && z < mech_Nz)
+            return rlU[0][_z + mech_Nz * (_y + mech_Ny * _x)];
+        else
+            return 0.0;
     }
-    double MechanicalField_Implicit::get_v_main_node(size_t _x, size_t _y, size_t _z) {
-        return rlU[1][_z + mech_Nz * (_y + mech_Ny * _x)];
+    double MechanicalField_Implicit::get_v_main_node(int _x, int _y, int _z) {
+        int x = _x - 1, y = _y - 1, z = _z - 1;
+        if (x >= 0 && x < mech_Nx && y >= 0 && y < mech_Ny && z >= 0 && z < mech_Nz)
+            return rlU[1][_z + mech_Nz * (_y + mech_Ny * _x)];
+        else
+            return 0.0;
     }
-    double MechanicalField_Implicit::get_w_main_node(size_t _x, size_t _y, size_t _z) {
-        return rlU[2][_z + mech_Nz * (_y + mech_Ny * _x)];
+    double MechanicalField_Implicit::get_w_main_node(int _x, int _y, int _z) {
+        int x = _x - 1, y = _y - 1, z = _z - 1;
+        if (x >= 0 && x < mech_Nx && y >= 0 && y < mech_Ny && z >= 0 && z < mech_Nz)
+            return rlU[2][_z + mech_Nz * (_y + mech_Ny * _x)];
+        else
+            return 0.0;
     }
 }

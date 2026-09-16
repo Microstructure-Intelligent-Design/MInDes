@@ -131,9 +131,6 @@
     <ClCompile Include="src\modules\postprocess_modules\CpuMemoryUsage.cpp">
       <Filter>modules\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules\postprocess_modules\MechanicalField.cpp">
-      <Filter>modules\postprocess</Filter>
-    </ClCompile>
     <ClCompile Include="src\modules\postprocess_modules\ShowLoopInfo.cpp">
       <Filter>modules\postprocess</Filter>
     </ClCompile>
@@ -292,9 +289,6 @@
       <Filter>modules\postprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\DataStatistics.h">
-      <Filter>modules\postprocess</Filter>
-    </ClInclude>
-    <ClInclude Include="src\modules\postprocess_modules\MechanicalField.h">
       <Filter>modules\postprocess</Filter>
     </ClInclude>
     <ClInclude Include="src\modules\postprocess_modules\ShowLoopInfo.h">

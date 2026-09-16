@@ -49,7 +49,7 @@ namespace pf {
 #endif
 			// init InputFileReader
 			std::filesystem::path cwd{ std::filesystem::current_path() };
-			string selected_file_path = infile_path_selector(input_output_files_parameters::InFile_Path);
+			std::string selected_file_path = infile_path_selector(input_output_files_parameters::InFile_Path);
 			std::filesystem::current_path(cwd);
 			InputFileReader::get_instance()->init(selected_file_path, false, INT_MAX, ' ');
 			// init log and debug files
