@@ -27,7 +27,7 @@ Dr. Qi Huang  - qihuang0908@163.com (e-mail) - hq5088028 (WeChat)
 
 ## Building and Running MInDes
 
-MInDes is officially supported on Windows x86/x64 and Linux x86_64. Release builds require a configured official License V2 public key in `MInDes/MInDes/src/modules/base/license_public_key.h`.
+MInDes is officially supported on Windows x86/x64 and Linux x86_64.
 
 ### Windows
 

@@ -658,6 +658,7 @@ namespace pf {
 									interphase_gradient_lapace_calculation(x, y, z, index);
 							}
 						}
+				main_field::phase_field.init_boundary_condition();
 			}
 			void pre_calculation_phi_pair_wise() {
 				parameters::MAX_ACTIVE_PHI_NUMBER = 0;
