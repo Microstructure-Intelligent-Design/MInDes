@@ -35,6 +35,13 @@ namespace pf {
 		add_string_to_file(out.str(), input_output_files_parameters::DebugFile_Path);
 		// parallel
 		infile_reader::read_int_value("Solver.Loop.OpenMP_Thread", main_iterator::OpenMP_Thread_Counts, true);
+		const int processors = omp_get_num_procs();
+		if (main_iterator::OpenMP_Thread_Counts >= processors)
+			main_iterator::OpenMP_Thread_Counts = processors - 1;
+		if (main_iterator::OpenMP_Thread_Counts < 1)
+			main_iterator::OpenMP_Thread_Counts = 1;
+		omp_set_dynamic(0);
+		omp_set_num_threads(main_iterator::OpenMP_Thread_Counts);
 		WriteLog("> Simulation OpenMP Thread is " + std::to_string(main_iterator::OpenMP_Thread_Counts) + " \n");
 		// - mesh and time parameters
 		infile_reader::read_int_value("Solver.Loop.begin_step", main_iterator::ITE_Begin_Step, true);
